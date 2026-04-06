@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
 
 class DeviceIdInterceptor extends Interceptor {
-  DeviceIdInterceptor(this.deviceId);
+  DeviceIdInterceptor(this.getDeviceId);
 
-  final String deviceId;
+  final String Function() getDeviceId;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final deviceId = getDeviceId();
     if (deviceId.isNotEmpty) {
       options.headers['X-Device-Id'] = deviceId;
     }

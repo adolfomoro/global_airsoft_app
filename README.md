@@ -2,6 +2,31 @@
 
 A new Flutter project.
 
+## Environment Configuration (CI/CD)
+
+Network configuration is centralized in `AppConfig` and loaded via
+`--dart-define`, making it easy to swap values in pipelines without code
+changes.
+
+Available variables:
+
+- `API_BASE_URL` (default: `https://api.global-airsoft.com`)
+- `API_CONNECT_TIMEOUT_MS` (default: `10000`)
+- `API_RECEIVE_TIMEOUT_MS` (default: `10000`)
+- `API_SEND_TIMEOUT_MS` (default: `10000`)
+
+Example:
+
+```bash
+flutter run \
+	--dart-define=API_BASE_URL=https://staging-api.global-airsoft.com \
+	--dart-define=API_CONNECT_TIMEOUT_MS=15000 \
+	--dart-define=API_RECEIVE_TIMEOUT_MS=15000 \
+	--dart-define=API_SEND_TIMEOUT_MS=15000
+```
+
+In CI/CD, apply the same flags to `flutter build` commands for each environment.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

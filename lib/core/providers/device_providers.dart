@@ -2,7 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../network/interceptors/device_id_interceptor.dart';
+import '../config/app_config.dart';
+import '../network/dio_service.dart';
 import '../services/device_service.dart';
 import '../services/device_storage_service.dart';
 import '../services/preferences_service.dart';
@@ -22,15 +23,21 @@ final preferencesServiceProvider = FutureProvider<PreferencesService>((
   return PreferencesService(prefs: prefs);
 });
 
-final dioProvider = Provider<Dio>((ref) {
-  return Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-      responseType: ResponseType.json,
-    ),
+
+final appConfigProvider = Provider<AppConfig>((ref) {
+  return AppConfig.current;
+});
+
+final dioServiceProvider = Provider<DioService>((ref) {
+  final config = ref.watch(appConfigProvider);
+  return DioService(
+    config: config,
+    getDeviceId: () => ref.read(deviceIdNotifierProvider),
   );
 });
+final dioProvider = Provider<Dio>((ref) {
+  return Dio(
+  return ref.watch(dioServiceProvider).client;
 
 final deviceStorageServiceProvider = FutureProvider<DeviceStorageService>((
   ref,
@@ -61,11 +68,9 @@ Future<void> initializeDeviceService(ProviderContainer container) async {
   try {
     final deviceService = await container.read(deviceServiceProvider.future);
     final deviceIdNotifier = container.read(deviceIdNotifierProvider.notifier);
-    final dio = container.read(dioProvider);
 
     final deviceIdFromStorage = deviceService.initializeSync();
     deviceIdNotifier.setDeviceId(deviceIdFromStorage);
-    dio.interceptors.add(DeviceIdInterceptor(deviceIdFromStorage));
     deviceService
         .registerInBackground()
         .then((_) {

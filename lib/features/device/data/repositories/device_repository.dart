@@ -7,14 +7,13 @@ class DeviceRepository {
   DeviceRepository({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
-  static const String _baseUrl = 'https://api.global-airsoft.com';
 
   Future<RegisterDeviceOutputDto> registerDevice(
     RegisterDeviceInputDto input,
   ) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '$_baseUrl/device/register',
+        '/device/register',
         data: input.toJson(),
       );
 
