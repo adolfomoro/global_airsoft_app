@@ -22,11 +22,11 @@ class DeviceService {
   final DeviceStorageService _storageService;
   final String Function() _getPushNotificationToken;
 
-  late String _cachedPlatform;
-  late String _cachedDeviceType;
-  late String _cachedAppVersion;
-  late String? _cachedDeviceModel;
-  late String? _cachedDeviceId;
+  String _cachedPlatform = 'Unknown';
+  String _cachedDeviceType = 'Unknown';
+  String _cachedAppVersion = '0.0.0';
+  String? _cachedDeviceModel;
+  String? _cachedDeviceId;
   String? _storedDeviceId;
   String? _lastPlatform;
   String? _lastDeviceType;

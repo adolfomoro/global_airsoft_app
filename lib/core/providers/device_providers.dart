@@ -93,6 +93,18 @@ final fcmPushTokenServiceProvider = Provider<FcmPushTokenService>((ref) {
 Future<void> initializePushTokenMonitoring(ProviderContainer container) async {
   final tokenNotifier = container.read(pushTokenNotifierProvider.notifier);
   final tokenService = container.read(fcmPushTokenServiceProvider);
+
+  try {
+    await _pushTokenSubscription?.cancel();
+  } catch (e) {
+    assert(() {
+      debugPrint('Push token subscription cancel error: $e');
+      return true;
+    }());
+  } finally {
+    _pushTokenSubscription = null;
+  }
+
   final initialToken = await tokenService.initialize();
 
   if (initialToken.isNotEmpty) {
@@ -100,7 +112,6 @@ Future<void> initializePushTokenMonitoring(ProviderContainer container) async {
     unawaited(_syncDeviceAfterTokenChange(container));
   }
 
-  await _pushTokenSubscription?.cancel();
   _pushTokenSubscription = tokenService.tokenChanges.listen((token) {
     if (token.isEmpty) {
       return;
@@ -140,22 +151,24 @@ Future<void> initializeDeviceService(ProviderContainer container) async {
 
     final deviceIdFromStorage = deviceService.initializeSync();
     deviceIdNotifier.setDeviceId(deviceIdFromStorage);
-    deviceService
-        .registerInBackground()
-        .then((_) {
+    unawaited(
+      () async {
+        try {
+          await deviceService.registerInBackground();
           if (deviceIdFromStorage.isEmpty) {
             final newDeviceId = deviceService.getStoredDeviceId();
             if (newDeviceId != null && newDeviceId.isNotEmpty) {
               deviceIdNotifier.setDeviceId(newDeviceId);
             }
           }
-        })
-        .catchError((e) {
+        } catch (e) {
           assert(() {
             debugPrint('Device registration error: $e');
             return true;
           }());
-        });
+        }
+      }(),
+    );
   } catch (e) {
     rethrow;
   }

@@ -47,8 +47,6 @@ class LoginController extends Notifier<LoginState> {
       await ref
           .read(loginUseCaseProvider)
           .call(username: username, password: password);
-    } catch (e) {
-      rethrow;
     } finally {
       state = state.copyWith(isLoading: false, resetLoadingSource: true);
     }
@@ -63,8 +61,6 @@ class LoginController extends Notifier<LoginState> {
 
     try {
       await ref.read(loginUseCaseProvider).withGoogle();
-    } catch (e) {
-      rethrow;
     } finally {
       state = state.copyWith(isLoading: false, resetLoadingSource: true);
     }

@@ -13,12 +13,35 @@ class FcmPushTokenService {
       StreamController<String>.broadcast();
 
   StreamSubscription<String>? _refreshSubscription;
+  Future<String>? _initializationFuture;
   String _currentToken = '';
   bool _initialized = false;
 
   Stream<String> get tokenChanges => _tokenChangesController.stream;
 
   Future<String> initialize() async {
+    if (_initialized) {
+      return _currentToken;
+    }
+
+    final inFlight = _initializationFuture;
+    if (inFlight != null) {
+      return inFlight;
+    }
+
+    final initFuture = _initializeInternal();
+    _initializationFuture = initFuture;
+
+    try {
+      return await initFuture;
+    } finally {
+      if (identical(_initializationFuture, initFuture)) {
+        _initializationFuture = null;
+      }
+    }
+  }
+
+  Future<String> _initializeInternal() async {
     if (_initialized) {
       return _currentToken;
     }
@@ -33,7 +56,9 @@ class FcmPushTokenService {
           return;
         }
         _currentToken = newToken;
-        _tokenChangesController.add(newToken);
+        if (!_tokenChangesController.isClosed) {
+          _tokenChangesController.add(newToken);
+        }
       });
       _initialized = true;
     } catch (e) {

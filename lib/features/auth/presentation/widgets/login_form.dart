@@ -53,12 +53,20 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       return;
     }
 
-    await ref
-        .read(loginControllerProvider.notifier)
-        .login(
-          username: _usernameController.text.trim(),
-          password: _passwordController.text,
-        );
+    try {
+      await ref
+          .read(loginControllerProvider.notifier)
+          .login(
+            username: _usernameController.text.trim(),
+            password: _passwordController.text,
+          );
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      SnackBarHelper.showError(context, 'Falha ao efetuar login.');
+      return;
+    }
 
     if (!mounted) {
       return;
@@ -68,7 +76,15 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   }
 
   Future<void> _submitGoogle() async {
-    await ref.read(loginControllerProvider.notifier).loginWithGoogle();
+    try {
+      await ref.read(loginControllerProvider.notifier).loginWithGoogle();
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      SnackBarHelper.showError(context, 'Falha ao efetuar login com Google.');
+      return;
+    }
 
     if (!mounted) {
       return;

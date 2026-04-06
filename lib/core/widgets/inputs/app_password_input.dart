@@ -28,7 +28,7 @@ class AppPasswordInput extends StatefulWidget {
 }
 
 class _AppPasswordInputState extends State<AppPasswordInput> {
-  late bool _isPasswordVisible = false;
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
