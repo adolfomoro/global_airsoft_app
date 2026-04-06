@@ -16,7 +16,6 @@ Available variables:
 - `API_CONNECT_TIMEOUT_MS` (default: `10000`)
 - `API_RECEIVE_TIMEOUT_MS` (default: `10000`)
 - `API_SEND_TIMEOUT_MS` (default: `10000`)
-- `DEVICE_SYNC_RETRY_MS` (default: `8000`)
 - `ENABLE_NETWORK_LOGS` (default: `false`)
 
 Example:
@@ -29,11 +28,28 @@ flutter run \
 	--dart-define=API_CONNECT_TIMEOUT_MS=15000 \
 	--dart-define=API_RECEIVE_TIMEOUT_MS=15000 \
 	--dart-define=API_SEND_TIMEOUT_MS=15000 \
-	--dart-define=DEVICE_SYNC_RETRY_MS=5000 \
 	--dart-define=ENABLE_NETWORK_LOGS=true
 ```
 
 In CI/CD, apply the same flags to `flutter build` commands for each environment.
+
+## FCM (Basic)
+
+The app now initializes Firebase Messaging, fetches the FCM token, and monitors
+token refresh automatically.
+
+Behavior:
+
+- On startup, the app tries to get the current FCM token.
+- If token exists, it is linked to the device flow.
+- If token changes (`onTokenRefresh`), the device update flow is triggered.
+
+Production setup required:
+
+- Add Firebase project files for each platform (`google-services.json`,
+  `GoogleService-Info.plist`, etc.).
+- Configure Firebase app initialization for the target platforms.
+- Ensure notification permissions are handled in your product UX flows.
 
 ## Getting Started
 

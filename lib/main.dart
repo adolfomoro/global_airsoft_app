@@ -38,8 +38,14 @@ Future<void> main() async {
   // FAST initialization: device service loads synchronously
   _globalContainer = ProviderContainer();
   await initializeDeviceService(_globalContainer);
+  await initializePushTokenMonitoring(_globalContainer);
 
-  runApp(ProviderScope(child: const MyApp()));
+  runApp(
+    UncontrolledProviderScope(
+      container: _globalContainer,
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

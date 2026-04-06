@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,10 +9,14 @@ import '../config/app_config.dart';
 import '../network/dio_service.dart';
 import '../services/device_service.dart';
 import '../services/device_storage_service.dart';
+import '../services/fcm_push_token_service.dart';
 import '../services/preferences_service.dart';
 import 'device_id_notifier.dart';
+import 'push_token_notifier.dart';
 import '../../features/device/data/constants/device_api_paths.dart';
 import '../../features/device/data/repositories/device_repository.dart';
+
+StreamSubscription<String>? _pushTokenSubscription;
 
 final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
   ref,
@@ -68,17 +74,64 @@ final deviceRepositoryProvider = Provider<DeviceRepository>((ref) {
 final deviceServiceProvider = FutureProvider<DeviceService>((ref) async {
   final storageService = await ref.watch(deviceStorageServiceProvider.future);
   final deviceRepository = ref.watch(deviceRepositoryProvider);
-  final config = ref.watch(appConfigProvider);
 
   return DeviceService(
     deviceRepository: deviceRepository,
     storageService: storageService,
-    failedSyncRetryInterval: config.deviceSyncRetry,
-    getPushNotificationToken: () {
-      return 'dummy-fcm-token';
-    },
+    getPushNotificationToken: () => ref.read(pushTokenNotifierProvider),
   );
 });
+
+final fcmPushTokenServiceProvider = Provider<FcmPushTokenService>((ref) {
+  final service = FcmPushTokenService();
+  ref.onDispose(() {
+    unawaited(service.dispose());
+  });
+  return service;
+});
+
+Future<void> initializePushTokenMonitoring(ProviderContainer container) async {
+  final tokenNotifier = container.read(pushTokenNotifierProvider.notifier);
+  final tokenService = container.read(fcmPushTokenServiceProvider);
+  final initialToken = await tokenService.initialize();
+
+  if (initialToken.isNotEmpty) {
+    tokenNotifier.setToken(initialToken);
+    unawaited(_syncDeviceAfterTokenChange(container));
+  }
+
+  await _pushTokenSubscription?.cancel();
+  _pushTokenSubscription = tokenService.tokenChanges.listen((token) {
+    if (token.isEmpty) {
+      return;
+    }
+
+    final current = container.read(pushTokenNotifierProvider);
+    if (current == token) {
+      return;
+    }
+
+    tokenNotifier.setToken(token);
+    unawaited(_syncDeviceAfterTokenChange(container));
+  });
+}
+
+Future<void> _syncDeviceAfterTokenChange(ProviderContainer container) async {
+  try {
+    final deviceService = await container.read(deviceServiceProvider.future);
+    await deviceService.registerInBackground();
+
+    final newDeviceId = deviceService.getStoredDeviceId();
+    if (newDeviceId != null && newDeviceId.isNotEmpty) {
+      container.read(deviceIdNotifierProvider.notifier).setDeviceId(newDeviceId);
+    }
+  } catch (e) {
+    assert(() {
+      debugPrint('Device update after token change failed: $e');
+      return true;
+    }());
+  }
+}
 
 Future<void> initializeDeviceService(ProviderContainer container) async {
   try {

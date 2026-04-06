@@ -14,25 +14,28 @@ class DeviceService {
     required DeviceRepository deviceRepository,
     required DeviceStorageService storageService,
     required String Function() getPushNotificationToken,
-    Duration failedSyncRetryInterval = const Duration(seconds: 8),
   }) : _deviceRepository = deviceRepository,
        _storageService = storageService,
-       _getPushNotificationToken = getPushNotificationToken,
-       _failedSyncRetryInterval = failedSyncRetryInterval;
+       _getPushNotificationToken = getPushNotificationToken;
 
   final DeviceRepository _deviceRepository;
   final DeviceStorageService _storageService;
   final String Function() _getPushNotificationToken;
-  final Duration _failedSyncRetryInterval;
 
   late String _cachedPlatform;
   late String _cachedDeviceType;
   late String _cachedAppVersion;
   late String? _cachedDeviceModel;
   late String? _cachedDeviceId;
+  String? _storedDeviceId;
+  String? _lastPlatform;
+  String? _lastDeviceType;
+  String? _lastAppVersion;
+  String? _lastDeviceModel;
+  String? _lastPushToken;
   bool _infoLoaded = false;
+  bool _storageSnapshotLoaded = false;
   Future<bool>? _inFlightSync;
-  DateTime? _nextRetryAt;
 
   void _debugLog(String message) {
     assert(() {
@@ -42,8 +45,24 @@ class DeviceService {
   }
 
   String initializeSync() {
-    _cachedDeviceId = _storageService.getDeviceId();
-    return _cachedDeviceId ?? '';
+    _storedDeviceId = _storageService.getDeviceId();
+    _cachedDeviceId = _storedDeviceId;
+    _loadStorageSnapshotIfNeeded();
+    return _storedDeviceId ?? '';
+  }
+
+  void _loadStorageSnapshotIfNeeded() {
+    if (_storageSnapshotLoaded) {
+      return;
+    }
+
+    _storedDeviceId ??= _storageService.getDeviceId();
+    _lastPlatform = _storageService.getLastPlatform();
+    _lastDeviceType = _storageService.getLastDeviceType();
+    _lastAppVersion = _storageService.getLastAppVersion();
+    _lastDeviceModel = _storageService.getLastDeviceModel();
+    _lastPushToken = _storageService.getLastPushToken();
+    _storageSnapshotLoaded = true;
   }
 
   Future<void> _loadDeviceInfo() async {
@@ -81,26 +100,43 @@ class DeviceService {
   }
 
   Future<bool> ensureRegisteredBeforeRequest() async {
-    final inFlight = _inFlightSync;
-    if (inFlight != null) {
-      return inFlight;
-    }
+    _loadStorageSnapshotIfNeeded();
 
-    final hasStoredDeviceId = _storageService.getDeviceId() != null;
-    final now = DateTime.now();
-    final retryAt = _nextRetryAt;
-    if (hasStoredDeviceId && retryAt != null && now.isBefore(retryAt)) {
-      return false;
-    }
+    while (true) {
+      final inFlight = _inFlightSync;
+      if (inFlight != null) {
+        final inFlightResult = await inFlight;
+        if (!inFlightResult) {
+          return false;
+        }
 
-    final syncFuture = _ensureRegisteredInternal();
-    _inFlightSync = syncFuture;
+        if (!_needsRegisterOrUpdate()) {
+          return true;
+        }
 
-    try {
-      return await syncFuture;
-    } finally {
-      if (identical(_inFlightSync, syncFuture)) {
-        _inFlightSync = null;
+        continue;
+      }
+
+      if (!_needsRegisterOrUpdate()) {
+        return true;
+      }
+
+      final syncFuture = _ensureRegisteredInternal();
+      _inFlightSync = syncFuture;
+
+      try {
+        final syncResult = await syncFuture;
+        if (!syncResult) {
+          return false;
+        }
+
+        if (!_needsRegisterOrUpdate()) {
+          return true;
+        }
+      } finally {
+        if (identical(_inFlightSync, syncFuture)) {
+          _inFlightSync = null;
+        }
       }
     }
   }
@@ -114,19 +150,19 @@ class DeviceService {
 
     try {
       await _registerOrUpdateDevice();
-      _nextRetryAt = null;
       return true;
     } catch (e) {
-      _nextRetryAt = DateTime.now().add(_failedSyncRetryInterval);
-      _debugLog('Device sync failed, next retry at $_nextRetryAt: $e');
+      _debugLog('Device sync failed: $e');
       return false;
     }
   }
 
   /// Register device on first run or update if information changed
   Future<void> _registerOrUpdateDevice() async {
-    final storedDeviceId = _storageService.getDeviceId();
-    if (storedDeviceId == null || _hasDeviceInfoChanged()) {
+    final storedDeviceId = _storedDeviceId;
+    final pushToken = _getPushNotificationToken();
+
+    if (storedDeviceId == null || _hasDeviceInfoChanged(pushToken)) {
       // Register or update device
       final input = RegisterDeviceInputDto(
         deviceId: storedDeviceId,
@@ -134,46 +170,53 @@ class DeviceService {
         deviceType: _cachedDeviceType,
         appVersion: _cachedAppVersion,
         deviceModel: _cachedDeviceModel,
-        pushNotificationToken: _getPushNotificationToken(),
+        pushNotificationToken: pushToken,
         pushNotificationType: _getPushNotificationType(),
       );
 
       final output = await _deviceRepository.registerDevice(input);
 
-      // Update in-memory cache
-      _cachedDeviceId = output.deviceId;
-
       // Save to persistent storage
       await _storageService.saveDeviceId(output.deviceId);
 
       // Save current values as last known values for change detection
-      await _saveCurrentValuesAsLastKnown();
+      await _saveCurrentValuesAsLastKnown(pushToken);
+
+      // Keep runtime cache consistent with persisted data.
+      _storedDeviceId = output.deviceId;
+      _cachedDeviceId = output.deviceId;
 
       _debugLog('Device registered: ${output.deviceId}');
     }
   }
 
   bool _needsRegisterOrUpdate() {
-    final storedDeviceId = _storageService.getDeviceId();
-    return storedDeviceId == null || _hasDeviceInfoChanged();
+    final pushToken = _getPushNotificationToken();
+    return _storedDeviceId == null || _hasDeviceInfoChanged(pushToken);
   }
 
-  bool _hasDeviceInfoChanged() {
-    return _storageService.getLastPlatform() != _cachedPlatform ||
-        _storageService.getLastDeviceType() != _cachedDeviceType ||
-        _storageService.getLastAppVersion() != _cachedAppVersion ||
-        _storageService.getLastDeviceModel() != _cachedDeviceModel ||
-        _storageService.getLastPushToken() != _getPushNotificationToken();
+  bool _hasDeviceInfoChanged(String currentPushToken) {
+    return _lastPlatform != _cachedPlatform ||
+        _lastDeviceType != _cachedDeviceType ||
+        _lastAppVersion != _cachedAppVersion ||
+        _lastDeviceModel != _cachedDeviceModel ||
+        _lastPushToken != currentPushToken;
   }
 
-  Future<void> _saveCurrentValuesAsLastKnown() async {
+  Future<void> _saveCurrentValuesAsLastKnown(String pushToken) async {
     await Future.wait([
       _storageService.savePlatform(_cachedPlatform),
       _storageService.saveDeviceType(_cachedDeviceType),
       _storageService.saveAppVersion(_cachedAppVersion),
       _storageService.saveDeviceModel(_cachedDeviceModel),
-      _storageService.savePushToken(_getPushNotificationToken()),
+      _storageService.savePushToken(pushToken),
     ]);
+
+    _lastPlatform = _cachedPlatform;
+    _lastDeviceType = _cachedDeviceType;
+    _lastAppVersion = _cachedAppVersion;
+    _lastDeviceModel = _cachedDeviceModel;
+    _lastPushToken = pushToken;
   }
 
   PushNotificationType _getPushNotificationType() {
@@ -189,7 +232,14 @@ class DeviceService {
 
   Future<void> reregister() async {
     await _storageService.clearAll();
+    _storedDeviceId = null;
     _cachedDeviceId = null;
+    _lastPlatform = null;
+    _lastDeviceType = null;
+    _lastAppVersion = null;
+    _lastDeviceModel = null;
+    _lastPushToken = null;
+    _storageSnapshotLoaded = false;
     _infoLoaded = false;
     await registerInBackground();
   }

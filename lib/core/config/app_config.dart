@@ -6,7 +6,6 @@ class AppConfig {
     required this.connectTimeoutMs,
     required this.receiveTimeoutMs,
     required this.sendTimeoutMs,
-    required this.deviceSyncRetryMs,
     required this.enableNetworkLogs,
   });
 
@@ -35,10 +34,6 @@ class AppConfig {
       'API_SEND_TIMEOUT_MS',
       defaultValue: 10000,
     ),
-    deviceSyncRetryMs: int.fromEnvironment(
-      'DEVICE_SYNC_RETRY_MS',
-      defaultValue: 8000,
-    ),
     enableNetworkLogs: bool.fromEnvironment(
       'ENABLE_NETWORK_LOGS',
       defaultValue: false,
@@ -51,7 +46,6 @@ class AppConfig {
   final int connectTimeoutMs;
   final int receiveTimeoutMs;
   final int sendTimeoutMs;
-  final int deviceSyncRetryMs;
   final bool enableNetworkLogs;
 
   String get normalizedApiBaseUrl {
@@ -77,5 +71,4 @@ class AppConfig {
   Duration get connectTimeout => Duration(milliseconds: connectTimeoutMs);
   Duration get receiveTimeout => Duration(milliseconds: receiveTimeoutMs);
   Duration get sendTimeout => Duration(milliseconds: sendTimeoutMs);
-  Duration get deviceSyncRetry => Duration(milliseconds: deviceSyncRetryMs);
 }
