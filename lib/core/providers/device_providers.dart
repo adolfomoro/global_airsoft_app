@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +9,7 @@ import '../services/device_service.dart';
 import '../services/device_storage_service.dart';
 import '../services/preferences_service.dart';
 import 'device_id_notifier.dart';
+import '../../features/device/data/constants/device_api_paths.dart';
 import '../../features/device/data/repositories/device_repository.dart';
 
 final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
@@ -23,7 +25,6 @@ final preferencesServiceProvider = FutureProvider<PreferencesService>((
   return PreferencesService(prefs: prefs);
 });
 
-
 final appConfigProvider = Provider<AppConfig>((ref) {
   return AppConfig.current;
 });
@@ -33,11 +34,24 @@ final dioServiceProvider = Provider<DioService>((ref) {
   return DioService(
     config: config,
     getDeviceId: () => ref.read(deviceIdNotifierProvider),
+    ensureDeviceSynced: () async {
+      final deviceService = await ref.read(deviceServiceProvider.future);
+      final didSync = await deviceService.ensureRegisteredBeforeRequest();
+
+      final deviceId = deviceService.getStoredDeviceId();
+      if (deviceId != null && deviceId.isNotEmpty) {
+        ref.read(deviceIdNotifierProvider.notifier).setDeviceId(deviceId);
+      }
+
+      return didSync;
+    },
+    skipDeviceSyncPaths: const {DeviceApiPaths.registerDevice},
   );
 });
+
 final dioProvider = Provider<Dio>((ref) {
-  return Dio(
   return ref.watch(dioServiceProvider).client;
+});
 
 final deviceStorageServiceProvider = FutureProvider<DeviceStorageService>((
   ref,
@@ -54,10 +68,12 @@ final deviceRepositoryProvider = Provider<DeviceRepository>((ref) {
 final deviceServiceProvider = FutureProvider<DeviceService>((ref) async {
   final storageService = await ref.watch(deviceStorageServiceProvider.future);
   final deviceRepository = ref.watch(deviceRepositoryProvider);
+  final config = ref.watch(appConfigProvider);
 
   return DeviceService(
     deviceRepository: deviceRepository,
     storageService: storageService,
+    failedSyncRetryInterval: config.deviceSyncRetry,
     getPushNotificationToken: () {
       return 'dummy-fcm-token';
     },
@@ -82,8 +98,10 @@ Future<void> initializeDeviceService(ProviderContainer container) async {
           }
         })
         .catchError((e) {
-          // ignore: avoid_print
-          print('Device registration error: $e');
+          assert(() {
+            debugPrint('Device registration error: $e');
+            return true;
+          }());
         });
   } catch (e) {
     rethrow;

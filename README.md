@@ -10,19 +10,27 @@ changes.
 
 Available variables:
 
+- `APP_ENV` (default: `production`)
 - `API_BASE_URL` (default: `https://api.global-airsoft.com`)
+- `API_VERSION` (default: `1.0.0-alpha`)
 - `API_CONNECT_TIMEOUT_MS` (default: `10000`)
 - `API_RECEIVE_TIMEOUT_MS` (default: `10000`)
 - `API_SEND_TIMEOUT_MS` (default: `10000`)
+- `DEVICE_SYNC_RETRY_MS` (default: `8000`)
+- `ENABLE_NETWORK_LOGS` (default: `false`)
 
 Example:
 
 ```bash
 flutter run \
+	--dart-define=APP_ENV=staging \
 	--dart-define=API_BASE_URL=https://staging-api.global-airsoft.com \
+	--dart-define=API_VERSION=v1 \
 	--dart-define=API_CONNECT_TIMEOUT_MS=15000 \
 	--dart-define=API_RECEIVE_TIMEOUT_MS=15000 \
-	--dart-define=API_SEND_TIMEOUT_MS=15000
+	--dart-define=API_SEND_TIMEOUT_MS=15000 \
+	--dart-define=DEVICE_SYNC_RETRY_MS=5000 \
+	--dart-define=ENABLE_NETWORK_LOGS=true
 ```
 
 In CI/CD, apply the same flags to `flutter build` commands for each environment.

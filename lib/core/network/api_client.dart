@@ -1,14 +1,12 @@
 import 'package:dio/dio.dart';
 
 class ApiClient {
-  ApiClient({Dio? dio}) : _dio = dio ?? Dio();
+  ApiClient({required Dio dio}) : _dio = dio;
 
   final Dio _dio;
 
   Future<String> fetchHealthExample() async {
-    final response = await _dio.get<Map<String, dynamic>>(
-      'https://jsonplaceholder.typicode.com/todos/1',
-    );
+    final response = await _dio.get<Map<String, dynamic>>('/health');
 
     final data = response.data;
     if (data == null) {

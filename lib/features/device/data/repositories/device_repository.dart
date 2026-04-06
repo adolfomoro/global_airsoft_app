@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../constants/device_api_paths.dart';
 import '../../domain/models/register_device_input_dto.dart';
 import '../../domain/models/register_device_output_dto.dart';
 
@@ -13,7 +14,7 @@ class DeviceRepository {
   ) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '/device/register',
+        DeviceApiPaths.registerDevice,
         data: input.toJson(),
       );
 

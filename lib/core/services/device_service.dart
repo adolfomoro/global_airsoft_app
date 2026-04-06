@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../features/device/domain/models/push_notification_type.dart';
@@ -13,13 +14,16 @@ class DeviceService {
     required DeviceRepository deviceRepository,
     required DeviceStorageService storageService,
     required String Function() getPushNotificationToken,
+    Duration failedSyncRetryInterval = const Duration(seconds: 8),
   }) : _deviceRepository = deviceRepository,
        _storageService = storageService,
-       _getPushNotificationToken = getPushNotificationToken;
+       _getPushNotificationToken = getPushNotificationToken,
+       _failedSyncRetryInterval = failedSyncRetryInterval;
 
   final DeviceRepository _deviceRepository;
   final DeviceStorageService _storageService;
   final String Function() _getPushNotificationToken;
+  final Duration _failedSyncRetryInterval;
 
   late String _cachedPlatform;
   late String _cachedDeviceType;
@@ -27,6 +31,15 @@ class DeviceService {
   late String? _cachedDeviceModel;
   late String? _cachedDeviceId;
   bool _infoLoaded = false;
+  Future<bool>? _inFlightSync;
+  DateTime? _nextRetryAt;
+
+  void _debugLog(String message) {
+    assert(() {
+      debugPrint(message);
+      return true;
+    }());
+  }
 
   String initializeSync() {
     _cachedDeviceId = _storageService.getDeviceId();
@@ -61,22 +74,59 @@ class DeviceService {
 
   Future<void> registerInBackground() async {
     try {
-      await _loadDeviceInfo();
-      await _registerOrUpdateDevice();
+      await ensureRegisteredBeforeRequest();
     } catch (e) {
-      // ignore: avoid_print
-      print('❌ Erro ao registrar dispositivo: $e');
+      _debugLog('Device registration error: $e');
+    }
+  }
+
+  Future<bool> ensureRegisteredBeforeRequest() async {
+    final inFlight = _inFlightSync;
+    if (inFlight != null) {
+      return inFlight;
+    }
+
+    final hasStoredDeviceId = _storageService.getDeviceId() != null;
+    final now = DateTime.now();
+    final retryAt = _nextRetryAt;
+    if (hasStoredDeviceId && retryAt != null && now.isBefore(retryAt)) {
+      return false;
+    }
+
+    final syncFuture = _ensureRegisteredInternal();
+    _inFlightSync = syncFuture;
+
+    try {
+      return await syncFuture;
+    } finally {
+      if (identical(_inFlightSync, syncFuture)) {
+        _inFlightSync = null;
+      }
+    }
+  }
+
+  Future<bool> _ensureRegisteredInternal() async {
+    await _loadDeviceInfo();
+
+    if (!_needsRegisterOrUpdate()) {
+      return true;
+    }
+
+    try {
+      await _registerOrUpdateDevice();
+      _nextRetryAt = null;
+      return true;
+    } catch (e) {
+      _nextRetryAt = DateTime.now().add(_failedSyncRetryInterval);
+      _debugLog('Device sync failed, next retry at $_nextRetryAt: $e');
+      return false;
     }
   }
 
   /// Register device on first run or update if information changed
   Future<void> _registerOrUpdateDevice() async {
     final storedDeviceId = _storageService.getDeviceId();
-
-    // Check if device information has changed
-    final hasChanges = _hasDeviceInfoChanged();
-
-    if (storedDeviceId == null || hasChanges) {
+    if (storedDeviceId == null || _hasDeviceInfoChanged()) {
       // Register or update device
       final input = RegisterDeviceInputDto(
         deviceId: storedDeviceId,
@@ -99,9 +149,13 @@ class DeviceService {
       // Save current values as last known values for change detection
       await _saveCurrentValuesAsLastKnown();
 
-      // ignore: avoid_print
-      print('✅ Dispositivo registrado: ${output.deviceId}');
+      _debugLog('Device registered: ${output.deviceId}');
     }
+  }
+
+  bool _needsRegisterOrUpdate() {
+    final storedDeviceId = _storageService.getDeviceId();
+    return storedDeviceId == null || _hasDeviceInfoChanged();
   }
 
   bool _hasDeviceInfoChanged() {
