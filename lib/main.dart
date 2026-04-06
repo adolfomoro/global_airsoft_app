@@ -7,6 +7,7 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/app_screen_background.dart';
 import 'core/widgets/app_unfocus_wrapper.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'features/notifications/presentation/widgets/notification_permission_listener.dart';
 
 late ProviderContainer _globalContainer;
 
@@ -33,6 +34,7 @@ Future<void> main() async {
   _globalContainer = ProviderContainer();
   await initializeDeviceService(_globalContainer);
   await initializePushTokenMonitoring(_globalContainer);
+  await _markAppOpened();
 
   runApp(
     UncontrolledProviderScope(
@@ -40,6 +42,20 @@ Future<void> main() async {
       child: const MyApp(),
     ),
   );
+}
+
+Future<void> _markAppOpened() async {
+  try {
+    final permissionService = await _globalContainer.read(
+      notificationPermissionServiceProvider.future,
+    );
+    await permissionService.markAppOpened();
+  } catch (e) {
+    assert(() {
+      debugPrint('Error marking app opened: $e');
+      return true;
+    }());
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -52,8 +68,10 @@ class MyApp extends StatelessWidget {
       title: 'Global Airsoft App',
       theme: AppTheme.dark,
       builder: (context, child) {
-        return AppUnfocusWrapper(
-          child: AppScreenBackground(child: child ?? const SizedBox.shrink()),
+        return NotificationPermissionListener(
+          child: AppUnfocusWrapper(
+            child: AppScreenBackground(child: child ?? const SizedBox.shrink()),
+          ),
         );
       },
       home: const LoginPage(),

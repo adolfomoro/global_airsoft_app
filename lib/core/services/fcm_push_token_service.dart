@@ -19,8 +19,19 @@ class FcmPushTokenService {
 
   Stream<String> get tokenChanges => _tokenChangesController.stream;
 
+  Future<AuthorizationStatus> getAuthorizationStatus() async {
+    try {
+      await _ensureFirebaseInitialized();
+      final settings = await _messaging.getNotificationSettings();
+      return settings.authorizationStatus;
+    } catch (e) {
+      _debugLog('Failed to get notification status: $e');
+      return AuthorizationStatus.notDetermined;
+    }
+  }
+
   Future<String> initialize() async {
-    if (_initialized) {
+    if (_initialized && _currentToken.isNotEmpty) {
       return _currentToken;
     }
 
@@ -41,6 +52,22 @@ class FcmPushTokenService {
     }
   }
 
+  Future<String> initializeTokenWithoutPermission() async {
+    if (_currentToken.isNotEmpty) {
+      return _currentToken;
+    }
+
+    try {
+      await _ensureFirebaseInitialized();
+      _currentToken = (await _messaging.getToken()) ?? '';
+      _ensureRefreshSubscription();
+    } catch (e) {
+      _debugLog('Failed to get FCM token without permission: $e');
+    }
+
+    return _currentToken;
+  }
+
   Future<String> _initializeInternal() async {
     if (_initialized) {
       return _currentToken;
@@ -51,15 +78,7 @@ class FcmPushTokenService {
       await _requestPermissionsIfNeeded();
 
       _currentToken = (await _messaging.getToken()) ?? '';
-      _refreshSubscription = _messaging.onTokenRefresh.listen((newToken) {
-        if (newToken.isEmpty || newToken == _currentToken) {
-          return;
-        }
-        _currentToken = newToken;
-        if (!_tokenChangesController.isClosed) {
-          _tokenChangesController.add(newToken);
-        }
-      });
+      _ensureRefreshSubscription();
       _initialized = true;
     } catch (e) {
       _debugLog('FCM unavailable on this environment: $e');
@@ -77,11 +96,6 @@ class FcmPushTokenService {
   }
 
   Future<void> _requestPermissionsIfNeeded() async {
-    if (defaultTargetPlatform != TargetPlatform.iOS &&
-        defaultTargetPlatform != TargetPlatform.macOS) {
-      return;
-    }
-
     await _messaging.requestPermission(
       alert: true,
       announcement: false,
@@ -91,6 +105,22 @@ class FcmPushTokenService {
       provisional: false,
       sound: true,
     );
+  }
+
+  void _ensureRefreshSubscription() {
+    if (_refreshSubscription != null) {
+      return;
+    }
+
+    _refreshSubscription = _messaging.onTokenRefresh.listen((newToken) {
+      if (newToken.isEmpty || newToken == _currentToken) {
+        return;
+      }
+      _currentToken = newToken;
+      if (!_tokenChangesController.isClosed) {
+        _tokenChangesController.add(newToken);
+      }
+    });
   }
 
   String getCurrentToken() => _currentToken;

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/mock_auth_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/login_use_case.dart';
+import 'auth_state_provider.dart';
 
 enum LoginSource { traditional, google }
 
@@ -47,6 +48,7 @@ class LoginController extends Notifier<LoginState> {
       await ref
           .read(loginUseCaseProvider)
           .call(username: username, password: password);
+        await ref.read(authNotifierProvider.notifier).markLoggedIn();
     } finally {
       state = state.copyWith(isLoading: false, resetLoadingSource: true);
     }
@@ -61,6 +63,7 @@ class LoginController extends Notifier<LoginState> {
 
     try {
       await ref.read(loginUseCaseProvider).withGoogle();
+        await ref.read(authNotifierProvider.notifier).markLoggedIn();
     } finally {
       state = state.copyWith(isLoading: false, resetLoadingSource: true);
     }

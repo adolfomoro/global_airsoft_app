@@ -11,6 +11,7 @@ import '../services/device_service.dart';
 import '../services/device_storage_service.dart';
 import '../services/fcm_push_token_service.dart';
 import '../services/preferences_service.dart';
+import '../services/notification_permission_service.dart';
 import 'device_id_notifier.dart';
 import 'push_token_notifier.dart';
 import '../../features/device/data/constants/device_api_paths.dart';
@@ -23,6 +24,13 @@ final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
 ) async {
   return SharedPreferences.getInstance();
 });
+
+  final notificationPermissionServiceProvider = FutureProvider<NotificationPermissionService>((
+    ref,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    return NotificationPermissionService(prefs);
+  });
 
 final preferencesServiceProvider = FutureProvider<PreferencesService>((
   ref,
@@ -105,7 +113,7 @@ Future<void> initializePushTokenMonitoring(ProviderContainer container) async {
     _pushTokenSubscription = null;
   }
 
-  final initialToken = await tokenService.initialize();
+    final initialToken = await tokenService.initializeTokenWithoutPermission();
 
   if (initialToken.isNotEmpty) {
     tokenNotifier.setToken(initialToken);
