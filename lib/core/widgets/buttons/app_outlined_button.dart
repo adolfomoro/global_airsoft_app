@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../loading/app_loading_spinner.dart';
 import '../../theme/app_spacing.dart';
 
-/// Standard outlined button widget with loading and disabled states
-/// Touch target: Same as ElevatedButton for consistency
 class AppOutlinedButton extends StatelessWidget {
   const AppOutlinedButton({
     super.key,

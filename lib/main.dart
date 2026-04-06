@@ -8,34 +8,28 @@ import 'core/widgets/app_screen_background.dart';
 import 'core/widgets/app_unfocus_wrapper.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 
-// Global container to access initialized services anywhere
 late ProviderContainer _globalContainer;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Edge-to-edge UI setup (Android & iOS)
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  // Overlay style customization for both platforms
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
       systemNavigationBarColor: Colors.transparent,
       systemNavigationBarIconBrightness: Brightness.light,
-      // iOS specific (safe for Android to ignore)
       systemNavigationBarDividerColor: Colors.transparent,
     ),
   );
 
-  // Portrait orientation only for better mobile UX
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // FAST initialization: device service loads synchronously
   _globalContainer = ProviderContainer();
   await initializeDeviceService(_globalContainer);
   await initializePushTokenMonitoring(_globalContainer);
@@ -56,7 +50,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Global Airsoft App',
-      // Dark mode only - always
       theme: AppTheme.dark,
       builder: (context, child) {
         return AppUnfocusWrapper(

@@ -1,4 +1,3 @@
-/// Validadores de form reutilizáveis para evitar duplicação
 abstract final class FormValidators {
   static const int minUsernameLength = 3;
   static const int minPasswordLength = 6;
@@ -14,7 +13,6 @@ abstract final class FormValidators {
   static const String emailInvalidError = 'Email invalido.';
   static const String emailEmptyError = 'Informe seu email.';
 
-  /// Valida username
   static String? validateUsername(String? value) {
     final text = value?.trim() ?? '';
     if (text.isEmpty) {
@@ -26,7 +24,6 @@ abstract final class FormValidators {
     return null;
   }
 
-  /// Valida password
   static String? validatePassword(String? value) {
     final text = value ?? '';
     if (text.isEmpty) {
@@ -38,13 +35,11 @@ abstract final class FormValidators {
     return null;
   }
 
-  /// Valida email
   static String? validateEmail(String? value) {
     final text = value?.trim() ?? '';
     if (text.isEmpty) {
       return emailEmptyError;
     }
-    // Simple email validation regex
     final emailRegex = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
     );

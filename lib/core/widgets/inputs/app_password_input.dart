@@ -3,8 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'app_text_input.dart';
 
-/// High-performance password input with show/hide toggle
-/// Uses a lightweight StatefulWidget to manage visibility state only
 class AppPasswordInput extends StatefulWidget {
   const AppPasswordInput({
     super.key,
@@ -30,7 +28,6 @@ class AppPasswordInput extends StatefulWidget {
 }
 
 class _AppPasswordInputState extends State<AppPasswordInput> {
-  // Immutable state to prevent unnecessary rebuilds
   late bool _isPasswordVisible = false;
 
   @override
@@ -45,7 +42,6 @@ class _AppPasswordInputState extends State<AppPasswordInput> {
       validator: widget.validator,
       onChanged: widget.onChanged,
       prefixIcon: widget.prefixIcon,
-      // High-performance suffix icon: only toggles visibility state
       suffixIcon: _PasswordVisibilityToggle(
         isVisible: _isPasswordVisible,
         onToggle: _togglePasswordVisibility,
@@ -53,7 +49,6 @@ class _AppPasswordInputState extends State<AppPasswordInput> {
     );
   }
 
-  // Extracted to avoid closure creation on every rebuild
   void _togglePasswordVisibility() {
     setState(() {
       _isPasswordVisible = !_isPasswordVisible;
@@ -61,7 +56,6 @@ class _AppPasswordInputState extends State<AppPasswordInput> {
   }
 }
 
-/// Separated widget to prevent parent rebuilds propagating unnecessarily
 class _PasswordVisibilityToggle extends StatelessWidget {
   const _PasswordVisibilityToggle({
     required this.isVisible,

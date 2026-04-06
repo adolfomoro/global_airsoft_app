@@ -9,7 +9,6 @@ class AppScreenBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Optimized gradient with smooth color transitions
     return Stack(
       children: [
         Container(

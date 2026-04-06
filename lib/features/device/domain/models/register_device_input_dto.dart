@@ -1,6 +1,5 @@
 import 'push_notification_type.dart';
 
-/// Input DTO for device registration
 class RegisterDeviceInputDto {
   RegisterDeviceInputDto({
     this.deviceId,
@@ -20,7 +19,6 @@ class RegisterDeviceInputDto {
   final String pushNotificationToken;
   final PushNotificationType pushNotificationType;
 
-  /// Convert to JSON for HTTP request
   Map<String, dynamic> toJson() {
     return {
       if (deviceId != null) 'deviceId': deviceId,

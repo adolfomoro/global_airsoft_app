@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Spinner reutilizável com diferentes tamanhos e cores
 class AppLoadingSpinner extends StatelessWidget {
   const AppLoadingSpinner({
     super.key,

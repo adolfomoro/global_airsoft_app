@@ -12,8 +12,6 @@ class LoginPage extends StatelessWidget {
       extendBody: true,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        // iOS: account for notch, home indicator
-        // Android: account for status bar
         minimum: const EdgeInsets.symmetric(horizontal: 16),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -60,7 +58,6 @@ class _LoginContent extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Main title with military accent
         RichText(
           textAlign: TextAlign.center,
           text: TextSpan(

@@ -34,7 +34,6 @@ class LoginController extends Notifier<LoginState> {
     required String username,
     required String password,
   }) async {
-    // Guard clause: prevent multiple submissions
     if (state.isLoading) {
       return;
     }
@@ -48,12 +47,9 @@ class LoginController extends Notifier<LoginState> {
       await ref
           .read(loginUseCaseProvider)
           .call(username: username, password: password);
-      // TODO: Handle success (e.g., store token, navigate)
     } catch (e) {
-      // TODO: Handle error (show snackbar, etc)
       rethrow;
     } finally {
-      // Always reset loading state, even if error occurs
       state = state.copyWith(isLoading: false, resetLoadingSource: true);
     }
   }
@@ -67,12 +63,9 @@ class LoginController extends Notifier<LoginState> {
 
     try {
       await ref.read(loginUseCaseProvider).withGoogle();
-      // TODO: Handle success (e.g., store token, navigate)
     } catch (e) {
-      // TODO: Handle error (show snackbar, etc)
       rethrow;
     } finally {
-      // Always reset loading state, even if error occurs
       state = state.copyWith(isLoading: false, resetLoadingSource: true);
     }
   }

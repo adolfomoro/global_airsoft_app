@@ -1,4 +1,3 @@
-/// Output DTO for device registration
 class RegisterDeviceOutputDto {
   RegisterDeviceOutputDto({required this.deviceId});
 

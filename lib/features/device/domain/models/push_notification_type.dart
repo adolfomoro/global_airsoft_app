@@ -1,4 +1,3 @@
-/// Push notification platform type
 enum PushNotificationType {
   unknown(0),
   fcm(1),

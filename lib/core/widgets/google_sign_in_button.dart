@@ -4,8 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_colors.dart';
 
-/// Google Sign-In button with tactical styling
-/// Height: 52dp - meets both iOS (44dp) and Android (48dp) touch target requirements
 class GoogleSignInButton extends StatelessWidget {
   const GoogleSignInButton({
     super.key,

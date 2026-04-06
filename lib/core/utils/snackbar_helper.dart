@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Helper para SnackBars consistentes
 abstract final class SnackBarHelper {
   static const Duration defaultDuration = Duration(milliseconds: 3000);
 

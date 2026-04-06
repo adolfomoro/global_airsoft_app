@@ -22,9 +22,7 @@ class PreferencesService {
     await Future.wait(keys.map((key) => _prefs.remove(key)));
   }
 
-  /// Check if key exists
   bool contains(String key) => _prefs.containsKey(key);
 
-  /// Clear all preferences
   Future<void> clearAll() => _prefs.clear();
 }

@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import '../loading/app_loading_spinner.dart';
 import '../../theme/app_spacing.dart';
 
-/// Standard button widget with loading and disabled states
-/// Touch target: 52dp minimum (iOS: 44dp, Android: 48dp minimum)
-/// This height ensures accessibility on both platforms
 class AppElevatedButton extends StatelessWidget {
   const AppElevatedButton({
     super.key,

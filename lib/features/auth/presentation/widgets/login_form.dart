@@ -83,7 +83,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    // Use selectors to prevent unnecessary rebuilds
     final isLoading = ref.watch(
       loginControllerProvider.select((state) => state.isLoading),
     );

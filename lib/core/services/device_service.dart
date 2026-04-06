@@ -157,13 +157,11 @@ class DeviceService {
     }
   }
 
-  /// Register device on first run or update if information changed
   Future<void> _registerOrUpdateDevice() async {
     final storedDeviceId = _storedDeviceId;
     final pushToken = _getPushNotificationToken();
 
     if (storedDeviceId == null || _hasDeviceInfoChanged(pushToken)) {
-      // Register or update device
       final input = RegisterDeviceInputDto(
         deviceId: storedDeviceId,
         platform: _cachedPlatform,
@@ -176,13 +174,10 @@ class DeviceService {
 
       final output = await _deviceRepository.registerDevice(input);
 
-      // Save to persistent storage
       await _storageService.saveDeviceId(output.deviceId);
 
-      // Save current values as last known values for change detection
       await _saveCurrentValuesAsLastKnown(pushToken);
 
-      // Keep runtime cache consistent with persisted data.
       _storedDeviceId = output.deviceId;
       _cachedDeviceId = output.deviceId;
 
