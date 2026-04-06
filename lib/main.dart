@@ -7,7 +7,9 @@ import 'core/theme/app_theme.dart';
 import 'core/widgets/app_screen_background.dart';
 import 'core/widgets/app_unfocus_wrapper.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'features/notifications/presentation/providers/push_notification_runtime_provider.dart';
 import 'features/notifications/presentation/widgets/notification_permission_listener.dart';
+import 'features/notifications/presentation/widgets/push_notification_tap_listener.dart';
 
 late ProviderContainer _globalContainer;
 
@@ -32,6 +34,7 @@ Future<void> main() async {
   ]);
 
   _globalContainer = ProviderContainer();
+  await initializePushNotificationRuntime(_globalContainer);
   await initializeDeviceService(_globalContainer);
   await initializePushTokenMonitoring(_globalContainer);
   await _markAppOpened();
@@ -68,9 +71,13 @@ class MyApp extends StatelessWidget {
       title: 'Global Airsoft App',
       theme: AppTheme.dark,
       builder: (context, child) {
-        return NotificationPermissionListener(
-          child: AppUnfocusWrapper(
-            child: AppScreenBackground(child: child ?? const SizedBox.shrink()),
+        return PushNotificationTapListener(
+          child: NotificationPermissionListener(
+            child: AppUnfocusWrapper(
+              child: AppScreenBackground(
+                child: child ?? const SizedBox.shrink(),
+              ),
+            ),
           ),
         );
       },

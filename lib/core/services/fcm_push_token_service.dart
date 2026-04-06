@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -96,6 +97,10 @@ class FcmPushTokenService {
   }
 
   Future<void> _requestPermissionsIfNeeded() async {
+    if (!io.Platform.isAndroid && !io.Platform.isIOS) {
+      return;
+    }
+
     await _messaging.requestPermission(
       alert: true,
       announcement: false,
