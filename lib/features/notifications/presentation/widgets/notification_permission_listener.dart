@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/providers/device_providers.dart';
-import '../../../../core/services/fcm_push_token_service.dart';
 import '../dialogs/request_notification_permission_dialog.dart';
 import '../providers/notification_permission_provider.dart';
 
 class NotificationPermissionListener extends ConsumerStatefulWidget {
   const NotificationPermissionListener({
     required this.child,
+    required this.navigatorKey,
     super.key,
   });
 
   final Widget child;
+  final GlobalKey<NavigatorState> navigatorKey;
 
   @override
   ConsumerState<NotificationPermissionListener> createState() =>
@@ -33,9 +35,10 @@ class _NotificationPermissionListenerState
           if (action == NotificationPermissionAction.none || _isDialogOpen) {
             return;
           }
-          if (context.mounted) {
-            await _handleAction(context, action);
+          if (!mounted) {
+            return;
           }
+          await _handleAction(action);
         });
       },
     );
@@ -43,30 +46,36 @@ class _NotificationPermissionListenerState
     return widget.child;
   }
 
-  Future<void> _handleAction(
-    BuildContext context,
-    NotificationPermissionAction action,
-  ) async {
+  Future<void> _handleAction(NotificationPermissionAction action) async {
     _isDialogOpen = true;
     try {
       if (action == NotificationPermissionAction.showOpenSettings) {
-        await _showOpenSettingsDialog(context);
+        await _showOpenSettingsDialog();
       } else {
-        await _showPermissionDialog(context);
+        await _showPermissionDialog();
       }
     } finally {
       _isDialogOpen = false;
     }
   }
 
-  Future<void> _showPermissionDialog(BuildContext context) async {
+  Future<void> _showPermissionDialog() async {
     final permissionService = await ref.read(
       notificationPermissionServiceProvider.future,
     );
     await permissionService.markPromptShown();
 
+    if (!mounted) {
+      return;
+    }
+
+    final navigatorState = widget.navigatorKey.currentState;
+    if (navigatorState == null || !navigatorState.mounted) {
+      return;
+    }
+
     final didAllow = await showDialog<bool>(
-      context: context,
+      context: navigatorState.context,
       barrierDismissible: false,
       builder: (context) {
         return RequestNotificationPermissionDialog(
@@ -93,25 +102,39 @@ class _NotificationPermissionListenerState
         await permissionService.markPermissionGranted();
       }
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erro ao habilitar notificações'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+      if (!mounted) {
+        return;
       }
+      final navigatorState = widget.navigatorKey.currentState;
+      if (navigatorState == null || !navigatorState.mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(navigatorState.context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro ao habilitar notificações'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
-  Future<void> _showOpenSettingsDialog(BuildContext context) async {
+  Future<void> _showOpenSettingsDialog() async {
     final permissionService = await ref.read(
       notificationPermissionServiceProvider.future,
     );
     await permissionService.markPromptShown();
 
+    if (!mounted) {
+      return;
+    }
+
+    final navigatorState = widget.navigatorKey.currentState;
+    if (navigatorState == null || !navigatorState.mounted) {
+      return;
+    }
+
     final openSettings = await showDialog<bool>(
-      context: context,
+      context: navigatorState.context,
       barrierDismissible: false,
       builder: (dialogContext) {
         return AlertDialog(

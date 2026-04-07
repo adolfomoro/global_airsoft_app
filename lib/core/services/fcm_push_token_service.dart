@@ -6,10 +6,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
 class FcmPushTokenService {
-  FcmPushTokenService({FirebaseMessaging? messaging})
-    : _messaging = messaging ?? FirebaseMessaging.instance;
+  FcmPushTokenService({FirebaseMessaging? messaging}) : _messaging = messaging;
 
-  final FirebaseMessaging _messaging;
+  FirebaseMessaging? _messaging;
   final StreamController<String> _tokenChangesController =
       StreamController<String>.broadcast();
 
@@ -18,12 +17,16 @@ class FcmPushTokenService {
   String _currentToken = '';
   bool _initialized = false;
 
+  FirebaseMessaging get _messagingClient {
+    return _messaging ??= FirebaseMessaging.instance;
+  }
+
   Stream<String> get tokenChanges => _tokenChangesController.stream;
 
   Future<AuthorizationStatus> getAuthorizationStatus() async {
     try {
       await _ensureFirebaseInitialized();
-      final settings = await _messaging.getNotificationSettings();
+      final settings = await _messagingClient.getNotificationSettings();
       return settings.authorizationStatus;
     } catch (e) {
       _debugLog('Failed to get notification status: $e');
@@ -60,7 +63,7 @@ class FcmPushTokenService {
 
     try {
       await _ensureFirebaseInitialized();
-      _currentToken = (await _messaging.getToken()) ?? '';
+      _currentToken = (await _messagingClient.getToken()) ?? '';
       _ensureRefreshSubscription();
     } catch (e) {
       _debugLog('Failed to get FCM token without permission: $e');
@@ -78,7 +81,7 @@ class FcmPushTokenService {
       await _ensureFirebaseInitialized();
       await _requestPermissionsIfNeeded();
 
-      _currentToken = (await _messaging.getToken()) ?? '';
+      _currentToken = (await _messagingClient.getToken()) ?? '';
       _ensureRefreshSubscription();
       _initialized = true;
     } catch (e) {
@@ -101,7 +104,7 @@ class FcmPushTokenService {
       return;
     }
 
-    await _messaging.requestPermission(
+    await _messagingClient.requestPermission(
       alert: true,
       announcement: false,
       badge: true,
@@ -117,7 +120,7 @@ class FcmPushTokenService {
       return;
     }
 
-    _refreshSubscription = _messaging.onTokenRefresh.listen((newToken) {
+    _refreshSubscription = _messagingClient.onTokenRefresh.listen((newToken) {
       if (newToken.isEmpty || newToken == _currentToken) {
         return;
       }

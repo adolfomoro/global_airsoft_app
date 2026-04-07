@@ -28,12 +28,12 @@ class PushNotificationRuntimeService {
     FirebaseMessaging? messaging,
     FlutterLocalNotificationsPlugin? localNotifications,
     PushNotificationPayloadTranslator? translator,
-  }) : _messaging = messaging ?? FirebaseMessaging.instance,
+  }) : _messaging = messaging,
        _localNotifications =
            localNotifications ?? FlutterLocalNotificationsPlugin(),
        _translator = translator ?? const PushNotificationPayloadTranslator();
 
-  final FirebaseMessaging _messaging;
+  FirebaseMessaging? _messaging;
   final FlutterLocalNotificationsPlugin _localNotifications;
   final PushNotificationPayloadTranslator _translator;
 
@@ -42,6 +42,10 @@ class PushNotificationRuntimeService {
 
   Future<void>? _initializeFuture;
   bool _initialized = false;
+
+  FirebaseMessaging get _messagingClient {
+    return _messaging ??= FirebaseMessaging.instance;
+  }
 
   Stream<PushNotificationTapEvent> get tapEvents => _tapEventsController.stream;
 
@@ -91,7 +95,9 @@ class PushNotificationRuntimeService {
   }
 
   Future<void> _configureLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings();
 
     await _localNotifications.initialize(
@@ -121,7 +127,7 @@ class PushNotificationRuntimeService {
 
   Future<void> _configureForegroundHandling() async {
     if (io.Platform.isIOS) {
-      await _messaging.setForegroundNotificationPresentationOptions(
+      await _messagingClient.setForegroundNotificationPresentationOptions(
         alert: true,
         badge: true,
         sound: true,
@@ -135,7 +141,7 @@ class PushNotificationRuntimeService {
         parsed.messageId.hashCode,
         parsed.title,
         parsed.body,
-        const NotificationDetails(
+        NotificationDetails(
           android: AndroidNotificationDetails(
             _androidChannel.id,
             _androidChannel.name,
@@ -163,7 +169,7 @@ class PushNotificationRuntimeService {
       );
     });
 
-    final initialMessage = await _messaging.getInitialMessage();
+    final initialMessage = await _messagingClient.getInitialMessage();
     if (initialMessage == null) {
       return;
     }

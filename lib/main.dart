@@ -12,6 +12,7 @@ import 'features/notifications/presentation/widgets/notification_permission_list
 import 'features/notifications/presentation/widgets/push_notification_tap_listener.dart';
 
 late ProviderContainer _globalContainer;
+final GlobalKey<NavigatorState> _appNavigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,12 +68,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _appNavigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Global Airsoft App',
       theme: AppTheme.dark,
       builder: (context, child) {
         return PushNotificationTapListener(
           child: NotificationPermissionListener(
+            navigatorKey: _appNavigatorKey,
             child: AppUnfocusWrapper(
               child: AppScreenBackground(
                 child: child ?? const SizedBox.shrink(),

@@ -10,18 +10,12 @@ class AppConfig {
   });
 
   static const AppConfig current = AppConfig(
-    appEnv: String.fromEnvironment(
-      'APP_ENV',
-      defaultValue: 'production',
-    ),
+    appEnv: String.fromEnvironment('APP_ENV', defaultValue: 'production'),
     apiBaseUrl: String.fromEnvironment(
       'API_BASE_URL',
       defaultValue: 'https://api.global-airsoft.com',
     ),
-    apiVersion: String.fromEnvironment(
-      'API_VERSION',
-      defaultValue: '1.0.0-alpha',
-    ),
+    apiVersion: String.fromEnvironment('API_VERSION', defaultValue: 'v1'),
     connectTimeoutMs: int.fromEnvironment(
       'API_CONNECT_TIMEOUT_MS',
       defaultValue: 10000,

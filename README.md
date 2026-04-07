@@ -12,7 +12,7 @@ Available variables:
 
 - `APP_ENV` (default: `production`)
 - `API_BASE_URL` (default: `https://api.global-airsoft.com`)
-- `API_VERSION` (default: `1.0.0-alpha`)
+- `API_VERSION` (default: `v1`)
 - `API_CONNECT_TIMEOUT_MS` (default: `10000`)
 - `API_RECEIVE_TIMEOUT_MS` (default: `10000`)
 - `API_SEND_TIMEOUT_MS` (default: `10000`)

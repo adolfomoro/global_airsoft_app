@@ -6,14 +6,15 @@ class AuthState {
   final bool isLoggedIn;
 
   AuthState copyWith({bool? isLoggedIn}) {
-    return AuthState(
-      isLoggedIn: isLoggedIn ?? this.isLoggedIn,
-    );
+    return AuthState(isLoggedIn: isLoggedIn ?? this.isLoggedIn);
   }
 }
 
-class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(const AuthState(isLoggedIn: false));
+class AuthNotifier extends Notifier<AuthState> {
+  @override
+  AuthState build() {
+    return const AuthState(isLoggedIn: false);
+  }
 
   Future<void> markLoggedIn() async {
     state = state.copyWith(isLoggedIn: true);
@@ -24,6 +25,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 }
 
-final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>(
-  (ref) => AuthNotifier(),
+final authNotifierProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
 );

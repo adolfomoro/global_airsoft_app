@@ -25,12 +25,11 @@ final sharedPreferencesProvider = FutureProvider<SharedPreferences>((
   return SharedPreferences.getInstance();
 });
 
-  final notificationPermissionServiceProvider = FutureProvider<NotificationPermissionService>((
-    ref,
-  ) async {
-    final prefs = await SharedPreferences.getInstance();
-    return NotificationPermissionService(prefs);
-  });
+final notificationPermissionServiceProvider =
+    FutureProvider<NotificationPermissionService>((ref) async {
+      final prefs = await ref.watch(sharedPreferencesProvider.future);
+      return NotificationPermissionService(prefs);
+    });
 
 final preferencesServiceProvider = FutureProvider<PreferencesService>((
   ref,
@@ -41,6 +40,11 @@ final preferencesServiceProvider = FutureProvider<PreferencesService>((
 
 final appConfigProvider = Provider<AppConfig>((ref) {
   return AppConfig.current;
+});
+
+final deviceRegistrationDioProvider = Provider<Dio>((ref) {
+  final config = ref.watch(appConfigProvider);
+  return DioService.createConfiguredDio(config);
 });
 
 final dioServiceProvider = Provider<DioService>((ref) {
@@ -75,7 +79,7 @@ final deviceStorageServiceProvider = FutureProvider<DeviceStorageService>((
 });
 
 final deviceRepositoryProvider = Provider<DeviceRepository>((ref) {
-  final dio = ref.watch(dioProvider);
+  final dio = ref.watch(deviceRegistrationDioProvider);
   return DeviceRepository(dio: dio);
 });
 
@@ -113,7 +117,7 @@ Future<void> initializePushTokenMonitoring(ProviderContainer container) async {
     _pushTokenSubscription = null;
   }
 
-    final initialToken = await tokenService.initializeTokenWithoutPermission();
+  final initialToken = await tokenService.initializeTokenWithoutPermission();
 
   if (initialToken.isNotEmpty) {
     tokenNotifier.setToken(initialToken);
@@ -142,7 +146,9 @@ Future<void> _syncDeviceAfterTokenChange(ProviderContainer container) async {
 
     final newDeviceId = deviceService.getStoredDeviceId();
     if (newDeviceId != null && newDeviceId.isNotEmpty) {
-      container.read(deviceIdNotifierProvider.notifier).setDeviceId(newDeviceId);
+      container
+          .read(deviceIdNotifierProvider.notifier)
+          .setDeviceId(newDeviceId);
     }
   } catch (e) {
     assert(() {
@@ -159,24 +165,22 @@ Future<void> initializeDeviceService(ProviderContainer container) async {
 
     final deviceIdFromStorage = deviceService.initializeSync();
     deviceIdNotifier.setDeviceId(deviceIdFromStorage);
-    unawaited(
-      () async {
-        try {
-          await deviceService.registerInBackground();
-          if (deviceIdFromStorage.isEmpty) {
-            final newDeviceId = deviceService.getStoredDeviceId();
-            if (newDeviceId != null && newDeviceId.isNotEmpty) {
-              deviceIdNotifier.setDeviceId(newDeviceId);
-            }
+    unawaited(() async {
+      try {
+        await deviceService.registerInBackground();
+        if (deviceIdFromStorage.isEmpty) {
+          final newDeviceId = deviceService.getStoredDeviceId();
+          if (newDeviceId != null && newDeviceId.isNotEmpty) {
+            deviceIdNotifier.setDeviceId(newDeviceId);
           }
-        } catch (e) {
-          assert(() {
-            debugPrint('Device registration error: $e');
-            return true;
-          }());
         }
-      }(),
-    );
+      } catch (e) {
+        assert(() {
+          debugPrint('Device registration error: $e');
+          return true;
+        }());
+      }
+    }());
   } catch (e) {
     rethrow;
   }

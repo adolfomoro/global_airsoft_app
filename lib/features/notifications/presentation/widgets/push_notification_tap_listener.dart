@@ -1,15 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/models/push_notification_tap_event.dart';
 import '../providers/push_notification_runtime_provider.dart';
 
-typedef PushNotificationTapHandler = FutureOr<void> Function(
-  PushNotificationTapEvent event,
-);
+typedef PushNotificationTapHandler =
+    FutureOr<void> Function(PushNotificationTapEvent event);
 
 class PushNotificationTapListener extends ConsumerStatefulWidget {
   const PushNotificationTapListener({
