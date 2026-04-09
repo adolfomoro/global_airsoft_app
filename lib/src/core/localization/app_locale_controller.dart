@@ -1,19 +1,20 @@
 import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_dependency_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 
-final class AppLocaleController extends StateNotifier<Locale> {
-  AppLocaleController({
-    required AppLocaleService localeService,
-    required Locale initialUiLocale,
-  }) : _localeService = localeService,
-       super(initialUiLocale);
-
-  final AppLocaleService _localeService;
+final class AppLocaleController extends Notifier<Locale> {
+  late final AppLocaleService _localeService;
   String? _pendingServerLocaleTag;
+
+  @override
+  Locale build() {
+    _localeService = ref.watch(appLocaleServiceProvider);
+    return ref.watch(initialAppLocaleProvider);
+  }
 
   String get currentLanguageTag => AppLocalizations.toLanguageTag(state);
 

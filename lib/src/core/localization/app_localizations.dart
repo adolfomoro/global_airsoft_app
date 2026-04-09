@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -269,7 +270,11 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
         final Object? decoded = json.decode(jsonString);
         return _toStringMap(decoded);
       } catch (error) {
-        _localeValuesCache.remove(assetCode);
+        final Future<Map<String, String>>? pendingLoad =
+            _localeValuesCache.remove(assetCode);
+        if (pendingLoad != null) {
+          unawaited(pendingLoad);
+        }
         assert(() {
           debugPrint('Localization load failed for $assetCode: $error');
           return true;

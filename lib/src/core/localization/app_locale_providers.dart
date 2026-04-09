@@ -1,33 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_controller.dart';
-import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
-import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_dependency_providers.dart';
 
-final Provider<AppLocaleService> appLocaleServiceProvider =
-    Provider<AppLocaleService>(
-      (Ref ref) => throw UnimplementedError('AppLocaleService not set.'),
-    );
+export 'package:global_airsoft_app/src/core/localization/app_locale_dependency_providers.dart';
 
-final Provider<Locale> initialAppLocaleProvider = Provider<Locale>(
-  (Ref ref) => AppLocalizations.fallbackLocale,
-);
-
-final Provider<String> initialOsLanguageTagProvider = Provider<String>(
-  (Ref ref) => AppLocalizations.toLanguageTag(AppLocalizations.fallbackLocale),
-);
-
-final StateNotifierProvider<AppLocaleController, Locale>
-appLocaleControllerProvider =
-    StateNotifierProvider<AppLocaleController, Locale>((Ref ref) {
-      final AppLocaleService service = ref.watch(appLocaleServiceProvider);
-      final Locale initialUiLocale = ref.watch(initialAppLocaleProvider);
-
-      return AppLocaleController(
-        localeService: service,
-        initialUiLocale: initialUiLocale,
-      );
-    });
+final NotifierProvider<AppLocaleController, Locale> appLocaleControllerProvider =
+    NotifierProvider<AppLocaleController, Locale>(AppLocaleController.new);
 
 final Provider<bool> hasPendingServerLocaleChangeProvider = Provider<bool>((
   Ref ref,

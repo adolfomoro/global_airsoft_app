@@ -31,7 +31,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: <Override>[
+        overrides: [
           themePreferenceServiceProvider.overrideWithValue(service),
           initialThemePreferenceProvider.overrideWithValue(
             AppThemePreference.dark,

@@ -2,31 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/theme/theme_preference.dart';
 import 'package:global_airsoft_app/src/app/theme/theme_preference_controller.dart';
-import 'package:global_airsoft_app/src/app/theme/theme_preference_service.dart';
 
-final Provider<ThemePreferenceService> themePreferenceServiceProvider =
-    Provider<ThemePreferenceService>(
-      (Ref ref) => throw UnimplementedError('ThemePreferenceService not set.'),
-    );
+export 'package:global_airsoft_app/src/app/theme/theme_dependency_providers.dart';
 
-final Provider<AppThemePreference> initialThemePreferenceProvider =
-    Provider<AppThemePreference>((Ref ref) => AppThemePreference.dark);
-
-final StateNotifierProvider<ThemePreferenceController, ThemeMode>
+final NotifierProvider<ThemePreferenceController, ThemeMode>
 themePreferenceControllerProvider =
-    StateNotifierProvider<ThemePreferenceController, ThemeMode>((Ref ref) {
-      final ThemePreferenceService service = ref.watch(
-        themePreferenceServiceProvider,
-      );
-      final AppThemePreference initialPreference = ref.watch(
-        initialThemePreferenceProvider,
-      );
-
-      return ThemePreferenceController(
-        service: service,
-        initialPreference: initialPreference,
-      );
-    });
+    NotifierProvider<ThemePreferenceController, ThemeMode>(
+      ThemePreferenceController.new,
+    );
 
 final Provider<AppThemePreference> selectedThemePreferenceProvider =
     Provider<AppThemePreference>((Ref ref) {

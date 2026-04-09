@@ -26,7 +26,7 @@ Future<void> main() async {
       return BootstrapPayload(
         initialBrightness: initialThemePreference.brightness,
         app: ProviderScope(
-          overrides: <Override>[
+          overrides: [
             themePreferenceServiceProvider.overrideWithValue(
               themePreferenceService,
             ),
