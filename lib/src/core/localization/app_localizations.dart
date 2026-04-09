@@ -140,19 +140,24 @@ class AppLocalizations {
       }
     }
 
-    final List<Locale> sameLanguageCandidates = supportedLocales
-        .where((Locale supported) {
-          return supported.languageCode.toLowerCase() == languageCode;
-        })
-        .toList(growable: false);
+    Locale? firstSameLanguage;
+    for (final Locale supported in supportedLocales) {
+      if (supported.languageCode.toLowerCase() == languageCode) {
+        firstSameLanguage ??= supported;
+      }
+    }
 
-    if (sameLanguageCandidates.isEmpty) {
+    if (firstSameLanguage == null) {
       return null;
     }
 
     final String? localeCountry = locale.countryCode?.toUpperCase();
     if (localeCountry != null && localeCountry.isNotEmpty) {
-      for (final Locale candidate in sameLanguageCandidates) {
+      for (final Locale candidate in supportedLocales) {
+        if (candidate.languageCode.toLowerCase() != languageCode) {
+          continue;
+        }
+
         final String? candidateCountry = candidate.countryCode?.toUpperCase();
         if (candidateCountry == localeCountry) {
           return candidate;
@@ -160,7 +165,7 @@ class AppLocalizations {
       }
     }
 
-    return sameLanguageCandidates.first;
+    return firstSameLanguage;
   }
 
   static Locale? _localeFromLanguageTag(String tag) {
@@ -198,6 +203,9 @@ class AppLocalizations {
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const AppLocalizationsDelegate();
+
+  static final Map<String, Future<Map<String, String>>> _localeValuesCache =
+      <String, Future<Map<String, String>>>{};
 
   @override
   bool isSupported(Locale locale) {
@@ -252,19 +260,23 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
 
   Future<Map<String, String>> _loadValuesForLocale(Locale locale) async {
     final String assetCode = AppLocalizations._assetCodeFromLocale(locale);
-    try {
-      final String jsonString = await rootBundle.loadString(
-        'assets/i18n/$assetCode.json',
-      );
-      final Object? decoded = json.decode(jsonString);
-      return _toStringMap(decoded);
-    } catch (error) {
-      assert(() {
-        debugPrint('Localization load failed for $assetCode: $error');
-        return true;
-      }());
-      return <String, String>{};
-    }
+
+    return _localeValuesCache.putIfAbsent(assetCode, () async {
+      try {
+        final String jsonString = await rootBundle.loadString(
+          'assets/i18n/$assetCode.json',
+        );
+        final Object? decoded = json.decode(jsonString);
+        return _toStringMap(decoded);
+      } catch (error) {
+        _localeValuesCache.remove(assetCode);
+        assert(() {
+          debugPrint('Localization load failed for $assetCode: $error');
+          return true;
+        }());
+        return <String, String>{};
+      }
+    });
   }
 }
 
