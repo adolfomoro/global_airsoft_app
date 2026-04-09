@@ -65,21 +65,5 @@ Toda implementacao deve priorizar:
 - Todo codigo tecnico deve estar em ingles (nomes de variaveis, funcoes, classes, arquivos, constantes, providers e contratos).
 - Essa regra de ingles permanece obrigatoria ate a implementacao formal do sistema de traducao de UI (i18n/l10n).
 
-### 10. Estabilidade e Warnings Zero
-- O aplicativo deve manter baseline de estabilidade maxima, sem instabilidades conhecidas, crashes previsiveis ou comportamentos nao deterministas aceitos.
-- Warnings do analyzer/linter devem ser tratados como bloqueadores de entrega e corrigidos antes de concluir qualquer tarefa.
-- Nao considerar tarefa pronta enquanto houver warnings ou risco conhecido de instabilidade em fluxo critico.
-
-### 11. Ciclo de Vida de Qualquer Implementacao (Obrigatorio)
-- Toda feature, modulo, servico, provider, controller, stream, listener, integracao de plataforma e recurso compartilhado deve possuir ciclo de vida explicitamente definido: criacao, uso, atualizacao, descarte e recuperacao em falha.
-- Nenhum componente pode depender de ordem implicita, efeito colateral oculto ou inicializacao acidental para funcionar.
-- Qualquer acesso a APIs de plataforma, bindings, plugins, canais nativos, storage local, preferencias, servicos de sistema ou dependencias que exijam contexto Flutter deve ocorrer somente apos a inicializacao explicita do binding apropriado.
-- Em apps Flutter, `WidgetsFlutterBinding.ensureInitialized()` deve ser executado no inicio do `main()` antes de qualquer operacao assincrona critica de startup que dependa de plataforma.
-- Nao assumir inicializacao implicita por efeito colateral de `runApp()` quando houver pre-carregamento de dependencias no startup.
-- Toda alocacao de recurso que exige limpeza (subscriptions, streams, controllers, timers, handles nativos, caches, conexoes e observers) deve possuir estrategia de descarte/cleanup deterministica e testavel.
-- Fluxos de reentrada, retomada de app, hot restart/rebuild, reconexao de rede e mudanca de estado de plataforma devem manter comportamento previsivel, sem duplicidade de listeners, vazamento de memoria ou estado invalido.
-- A ordem de bootstrap deve ser deterministicamente valida e testavel: inicializar binding, carregar dependencias criticas, validar estado inicial, aplicar fallback seguro, e somente entao iniciar a UI.
-- Erros em qualquer fase do ciclo de vida (inicializacao, execucao, atualizacao, descarte) devem ser tratados explicitamente com fallback seguro e sem falhas silenciosas.
-
 ## Instrucao Permanente para Agentes
-Sempre considerar este documento e [AGENTS.txt](AGENTS.txt) como regras principais antes de propor, gerar ou alterar codigo neste projeto.
+Sempre considerar este documento e [AI_PROJECT_GUARDRAILS.txt](AI_PROJECT_GUARDRAILS.txt) como regras principais antes de propor, gerar ou alterar codigo neste projeto.

@@ -18,13 +18,17 @@ final class AbpErrorPayload {
     required this.code,
     required this.message,
     required this.details,
+    required this.data,
     required this.validationErrors,
+    required this.additionalData,
   });
 
   final String? code;
   final String message;
   final String? details;
+  final Object? data;
   final List<AbpValidationError> validationErrors;
+  final Map<String, dynamic> additionalData;
 
   factory AbpErrorPayload.fromJson(Map<String, dynamic> json) {
     final Object? rawValidationErrors = json['validationErrors'];
@@ -40,12 +44,20 @@ final class AbpErrorPayload {
     }
 
     final String message = (json['message'] as String?)?.trim() ?? 'API error';
+    final Map<String, dynamic> additionalData = Map<String, dynamic>.from(json)
+      ..remove('code')
+      ..remove('message')
+      ..remove('details')
+      ..remove('data')
+      ..remove('validationErrors');
 
     return AbpErrorPayload(
       code: json['code'] as String?,
       message: message,
       details: json['details'] as String?,
+      data: json['data'],
       validationErrors: validationErrors,
+      additionalData: additionalData,
     );
   }
 }

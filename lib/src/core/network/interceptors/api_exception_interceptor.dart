@@ -12,9 +12,10 @@ final class ApiExceptionInterceptor extends Interceptor {
     final bool isAbpFormatted = _isAbpFormatted(response);
     if (isAbpFormatted) {
       final Object? data = response?.data;
-      if (data is Map<String, dynamic>) {
+      final Map<String, dynamic>? normalized = _normalizeJsonMap(data);
+      if (normalized != null) {
         try {
-          final AbpErrorResponse parsed = AbpErrorResponse.fromJson(data);
+          final AbpErrorResponse parsed = AbpErrorResponse.fromJson(normalized);
           final AbpApiException exception = AbpApiException.fromAbpPayload(
             payload: parsed.error,
             statusCode: response?.statusCode,
@@ -53,5 +54,24 @@ final class ApiExceptionInterceptor extends Interceptor {
     }
 
     return false;
+  }
+
+  Map<String, dynamic>? _normalizeJsonMap(Object? value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+
+    if (value is Map) {
+      final Map<String, dynamic> normalized = <String, dynamic>{};
+      for (final MapEntry<Object?, Object?> entry in value.entries) {
+        final Object? key = entry.key;
+        if (key is String) {
+          normalized[key] = entry.value;
+        }
+      }
+      return normalized;
+    }
+
+    return null;
   }
 }

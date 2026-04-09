@@ -34,7 +34,19 @@ Future<void> bootstrap({required AppBuilder builder}) async {
             return true;
           };
 
-      final BootstrapPayload payload = await builder();
+      final BootstrapPayload payload;
+      try {
+        payload = await builder();
+      } catch (error, stackTrace) {
+        AppLogger.instance.error(
+          'Startup builder failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        runApp(const _StartupFallbackApp());
+        return;
+      }
+
       _configureSystemUi(payload.initialBrightness);
       runApp(payload.app);
     },
@@ -51,4 +63,26 @@ Future<void> bootstrap({required AppBuilder builder}) async {
 void _configureSystemUi(Brightness brightness) {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(AppTheme.overlayStyleFor(brightness));
+}
+
+class _StartupFallbackApp extends StatelessWidget {
+  const _StartupFallbackApp();
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'App startup failed. Please restart the application.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

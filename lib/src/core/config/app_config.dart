@@ -16,6 +16,9 @@ extension AppEnvironmentX on AppEnvironment {
 }
 
 final class AppConfig {
+  static const int _defaultTimeoutMs = 15000;
+  static const int _minimumTimeoutMs = 1000;
+
   const AppConfig({
     required this.environment,
     required this.enableDebugLogs,
@@ -58,15 +61,20 @@ final class AppConfig {
 
     const int connectTimeoutFromDefines = int.fromEnvironment(
       'API_CONNECT_TIMEOUT_MS',
-      defaultValue: 15000,
+      defaultValue: _defaultTimeoutMs,
     );
     const int receiveTimeoutFromDefines = int.fromEnvironment(
       'API_RECEIVE_TIMEOUT_MS',
-      defaultValue: 15000,
+      defaultValue: _defaultTimeoutMs,
     );
     const int sendTimeoutFromDefines = int.fromEnvironment(
       'API_SEND_TIMEOUT_MS',
-      defaultValue: 15000,
+      defaultValue: _defaultTimeoutMs,
+    );
+
+    final String resolvedBaseUrl = _resolveBaseUrl(
+      candidate: baseUrlFromDefines,
+      fallback: _defaultBaseUrlFor(environment),
     );
 
     return AppConfig(
@@ -75,12 +83,10 @@ final class AppConfig {
         'APP_DEBUG_LOGS',
         defaultValue: false,
       ),
-      apiBaseUrl: baseUrlFromDefines.trim().isNotEmpty
-          ? baseUrlFromDefines.trim()
-          : _defaultBaseUrlFor(environment),
-      connectTimeoutMs: connectTimeoutFromDefines,
-      receiveTimeoutMs: receiveTimeoutFromDefines,
-      sendTimeoutMs: sendTimeoutFromDefines,
+      apiBaseUrl: resolvedBaseUrl,
+      connectTimeoutMs: _sanitizeTimeout(connectTimeoutFromDefines),
+      receiveTimeoutMs: _sanitizeTimeout(receiveTimeoutFromDefines),
+      sendTimeoutMs: _sanitizeTimeout(sendTimeoutFromDefines),
     );
   }
 
@@ -95,5 +101,35 @@ final class AppConfig {
       case AppEnvironment.prod:
         return 'https://api.example.com';
     }
+  }
+
+  static String _resolveBaseUrl({
+    required String candidate,
+    required String fallback,
+  }) {
+    final String normalizedCandidate = _normalizeBaseUrl(candidate);
+    if (normalizedCandidate.isEmpty) {
+      return _normalizeBaseUrl(fallback);
+    }
+
+    final Uri? parsed = Uri.tryParse(normalizedCandidate);
+    if (parsed == null ||
+        parsed.host.isEmpty ||
+        (parsed.scheme != 'http' && parsed.scheme != 'https')) {
+      return _normalizeBaseUrl(fallback);
+    }
+
+    return normalizedCandidate;
+  }
+
+  static String _normalizeBaseUrl(String value) {
+    return value.trim().replaceFirst(RegExp(r'/+$'), '');
+  }
+
+  static int _sanitizeTimeout(int value) {
+    if (value < _minimumTimeoutMs) {
+      return _defaultTimeoutMs;
+    }
+    return value;
   }
 }
