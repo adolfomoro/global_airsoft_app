@@ -4,6 +4,9 @@ import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/app/theme/theme_preference.dart';
 import 'package:global_airsoft_app/src/app/theme/theme_providers.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/providers/home_providers.dart';
 
 class HomePage extends ConsumerWidget {
@@ -16,16 +19,27 @@ class HomePage extends ConsumerWidget {
       selectedThemePreferenceProvider,
     );
     final ThemeData theme = Theme.of(context);
+    final AppLocalizations l10n = context.l10n;
     final ColorScheme colorScheme = theme.colorScheme;
     final bool isDark = theme.brightness == Brightness.dark;
+    final bool hasPendingServerLocaleChange = ref.watch(
+      hasPendingServerLocaleChangeProvider,
+    );
+    final String selectedThemeLabel = l10n.tr(
+      selectedThemePreference == AppThemePreference.dark
+          ? AppLocaleKeys.themeDarkLabel
+          : AppLocaleKeys.themeLightLabel,
+    );
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Global Airsoft App'),
+        title: Text(l10n.tr(AppLocaleKeys.appTitle)),
         actions: <Widget>[
           IconButton(
-            tooltip: isDark ? 'Switch to light theme' : 'Switch to dark theme',
+            tooltip: isDark
+                ? l10n.tr(AppLocaleKeys.switchToLight)
+                : l10n.tr(AppLocaleKeys.switchToDark),
             onPressed: () {
               ref.read(themePreferenceControllerProvider.notifier).toggle();
             },
@@ -59,13 +73,13 @@ class HomePage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
                         Text(
-                          'Airsoft-ready UI foundation',
+                          l10n.tr(AppLocaleKeys.homeTitle),
                           style: theme.textTheme.headlineSmall,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: AppDimensions.spacingSm),
                         Text(
-                          'Theme, color system and startup UI baseline are configured for production.',
+                          l10n.tr(AppLocaleKeys.homeSubtitle),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -84,7 +98,9 @@ class HomePage extends ConsumerWidget {
                             ),
                           ),
                           child: Text(
-                            environmentLabel,
+                            l10n
+                                .tr(AppLocaleKeys.environmentLabel)
+                                .replaceAll('{environment}', environmentLabel),
                             textAlign: TextAlign.center,
                             style: theme.textTheme.labelLarge?.copyWith(
                               color: colorScheme.onSecondaryContainer,
@@ -93,7 +109,19 @@ class HomePage extends ConsumerWidget {
                         ),
                         const SizedBox(height: AppDimensions.spacingXl),
                         Text(
-                          'Theme: ${selectedThemePreference.uiLabel}',
+                          l10n
+                              .tr(AppLocaleKeys.themeLabel)
+                              .replaceAll('{theme}', selectedThemeLabel),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppDimensions.spacingMd),
+                        Text(
+                          hasPendingServerLocaleChange
+                              ? l10n.tr(AppLocaleKeys.serverLanguagePending)
+                              : l10n.tr(AppLocaleKeys.noPendingLanguage),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -109,7 +137,31 @@ class HomePage extends ConsumerWidget {
                                 .toggle();
                           },
                           child: Text(
-                            isDark ? 'Use Light Theme' : 'Use Dark Theme',
+                            isDark
+                                ? l10n.tr(AppLocaleKeys.useLightTheme)
+                                : l10n.tr(AppLocaleKeys.useDarkTheme),
+                          ),
+                        ),
+                        const SizedBox(height: AppDimensions.spacingMd),
+                        OutlinedButton(
+                          onPressed: () async {
+                            final bool changed = await ref
+                                .read(appLocaleControllerProvider.notifier)
+                                .forceApplyServerLocaleIfPending();
+
+                            if (!context.mounted) {
+                              return;
+                            }
+
+                            final String message = changed
+                                ? l10n.tr(AppLocaleKeys.languageApplied)
+                                : l10n.tr(AppLocaleKeys.noPendingLanguage);
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text(message)));
+                          },
+                          child: Text(
+                            l10n.tr(AppLocaleKeys.forceApplyServerLanguage),
                           ),
                         ),
                       ],

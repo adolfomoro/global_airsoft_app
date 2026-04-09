@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/api_exception_interceptor.dart';
+import 'package:global_airsoft_app/src/core/network/interceptors/language_sync_interceptor.dart';
 
 final class AppDioService {
   AppDioService._({required Dio dio}) : _dio = dio;
@@ -13,6 +14,8 @@ final class AppDioService {
   static AppDioService create({
     required AppConfig config,
     required AppLogger logger,
+    required String Function() getDeviceLanguage,
+    required Future<void> Function(String? contentLanguage) onContentLanguage,
   }) {
     final BaseOptions options = BaseOptions(
       baseUrl: config.apiBaseUrl,
@@ -25,6 +28,13 @@ final class AppDioService {
     );
 
     final Dio dio = Dio(options);
+
+    dio.interceptors.add(
+      LanguageSyncInterceptor(
+        getDeviceLanguage: getDeviceLanguage,
+        onContentLanguage: onContentLanguage,
+      ),
+    );
 
     dio.interceptors.add(ApiExceptionInterceptor());
 

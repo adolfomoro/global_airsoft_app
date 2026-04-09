@@ -5,6 +5,8 @@ import 'package:global_airsoft_app/src/app/app.dart';
 import 'package:global_airsoft_app/src/app/theme/theme_preference.dart';
 import 'package:global_airsoft_app/src/app/theme/theme_preference_service.dart';
 import 'package:global_airsoft_app/src/app/theme/theme_providers.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
 import 'package:global_airsoft_app/src/core/storage/key_value_store.dart';
 
 final class _InMemoryStore implements KeyValueStore {
@@ -23,9 +25,9 @@ final class _InMemoryStore implements KeyValueStore {
 
 void main() {
   testWidgets('renders startup shell', (WidgetTester tester) async {
-    final ThemePreferenceService service = ThemePreferenceService(
-      store: _InMemoryStore(),
-    );
+    final _InMemoryStore store = _InMemoryStore();
+    final ThemePreferenceService service = ThemePreferenceService(store: store);
+    final AppLocaleService localeService = AppLocaleService(store: store);
 
     await tester.pumpWidget(
       ProviderScope(
@@ -34,6 +36,7 @@ void main() {
           initialThemePreferenceProvider.overrideWithValue(
             AppThemePreference.dark,
           ),
+          appLocaleServiceProvider.overrideWithValue(localeService),
         ],
         child: const App(),
       ),

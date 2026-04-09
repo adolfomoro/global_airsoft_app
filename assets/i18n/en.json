@@ -1,0 +1,17 @@
+{
+    "app.title": "Global Airsoft App",
+    "home.title": "Airsoft-ready UI foundation",
+    "home.subtitle": "Theme, color system and startup UI baseline are configured for production.",
+    "home.environmentLabel": "Environment: {environment}",
+    "home.themeLabel": "Theme: {theme}",
+    "home.useLightTheme": "Use Light Theme",
+    "home.useDarkTheme": "Use Dark Theme",
+    "home.switchToLight": "Switch to light theme",
+    "home.switchToDark": "Switch to dark theme",
+    "home.themeDarkLabel": "Dark",
+    "home.themeLightLabel": "Light",
+    "home.forceApplyServerLanguage": "Apply server language now",
+    "home.serverLanguagePending": "A server language change is pending.",
+    "home.languageApplied": "Language updated from server.",
+    "home.noPendingLanguage": "No pending server language change."
+}

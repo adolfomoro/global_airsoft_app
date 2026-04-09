@@ -30,15 +30,6 @@ extension AppThemePreferenceX on AppThemePreference {
     }
   }
 
-  String get uiLabel {
-    switch (this) {
-      case AppThemePreference.dark:
-        return 'Dark';
-      case AppThemePreference.light:
-        return 'Light';
-    }
-  }
-
   static AppThemePreference fromStorageValue(String? rawValue) {
     switch (rawValue) {
       case 'light':
