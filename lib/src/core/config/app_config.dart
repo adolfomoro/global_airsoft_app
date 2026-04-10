@@ -26,6 +26,11 @@ final class AppConfig {
     required this.connectTimeoutMs,
     required this.receiveTimeoutMs,
     required this.sendTimeoutMs,
+    required this.datadogEnabled,
+    required this.datadogClientToken,
+    required this.datadogRumApplicationId,
+    required this.datadogServiceName,
+    required this.datadogSite,
   });
 
   final AppEnvironment environment;
@@ -34,6 +39,11 @@ final class AppConfig {
   final int connectTimeoutMs;
   final int receiveTimeoutMs;
   final int sendTimeoutMs;
+  final bool datadogEnabled;
+  final String datadogClientToken;
+  final String datadogRumApplicationId;
+  final String datadogServiceName;
+  final String datadogSite;
 
   factory AppConfig.fromDartDefines() {
     final String envRaw = const String.fromEnvironment(
@@ -77,6 +87,29 @@ final class AppConfig {
       fallback: _defaultBaseUrlFor(environment),
     );
 
+    const String datadogClientToken = String.fromEnvironment(
+      'DATADOG_CLIENT_TOKEN',
+      defaultValue: '',
+    );
+    const String datadogRumApplicationId = String.fromEnvironment(
+      'DATADOG_RUM_APPLICATION_ID',
+      defaultValue: '',
+    );
+    const String datadogServiceName = String.fromEnvironment(
+      'DATADOG_SERVICE_NAME',
+      defaultValue: 'global_airsoft_app',
+    );
+    final String datadogSite = _normalizeDatadogSite(
+      const String.fromEnvironment(
+        'DATADOG_SITE',
+        defaultValue: 'us1',
+      ),
+    );
+    final bool datadogEnabled = const bool.fromEnvironment(
+      'DATADOG_ENABLED',
+      defaultValue: false,
+    ) || environment == AppEnvironment.staging || environment == AppEnvironment.prod;
+
     return AppConfig(
       environment: environment,
       enableDebugLogs: const bool.fromEnvironment(
@@ -87,6 +120,11 @@ final class AppConfig {
       connectTimeoutMs: _sanitizeTimeout(connectTimeoutFromDefines),
       receiveTimeoutMs: _sanitizeTimeout(receiveTimeoutFromDefines),
       sendTimeoutMs: _sanitizeTimeout(sendTimeoutFromDefines),
+      datadogEnabled: datadogEnabled,
+      datadogClientToken: datadogClientToken,
+      datadogRumApplicationId: datadogRumApplicationId,
+      datadogServiceName: datadogServiceName,
+      datadogSite: datadogSite,
     );
   }
 
@@ -124,6 +162,17 @@ final class AppConfig {
 
   static String _normalizeBaseUrl(String value) {
     return value.trim().replaceFirst(RegExp(r'/+$'), '');
+  }
+
+  static String _normalizeDatadogSite(String value) {
+    final String normalized = value.trim().toLowerCase();
+    switch (normalized) {
+      case 'us3':
+        return 'us3';
+      case 'us1':
+      default:
+        return 'us1';
+    }
   }
 
   static int _sanitizeTimeout(int value) {

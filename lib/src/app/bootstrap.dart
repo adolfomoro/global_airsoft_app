@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:global_airsoft_app/src/app/theme/app_theme.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
+import 'package:global_airsoft_app/src/core/monitoring/app_telemetry.dart';
 
 typedef AppBuilder = Future<BootstrapPayload> Function();
 
@@ -22,6 +23,7 @@ Future<void> bootstrap({required AppBuilder builder}) async {
 
       FlutterError.onError = (FlutterErrorDetails details) {
         AppLogger.instance.flutterError(details);
+        AppTelemetry.instance.reportFlutterError(details);
       };
 
       PlatformDispatcher.instance.onError =
@@ -31,6 +33,7 @@ Future<void> bootstrap({required AppBuilder builder}) async {
               error: error,
               stackTrace: stackTrace,
             );
+            AppTelemetry.instance.reportPlatformError(error, stackTrace);
             return true;
           };
 
