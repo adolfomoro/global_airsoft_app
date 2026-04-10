@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 
 final class AppTextField extends StatefulWidget {
   const AppTextField({
@@ -44,7 +43,26 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Widget? effectiveSuffixIcon = widget.obscureText
+        ? IconButton(
+            tooltip: _obscureText ? 'Show password' : 'Hide password',
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            icon: Icon(
+              _obscureText
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+            ),
+            onPressed: () {
+              setState(() {
+                _obscureText = !_obscureText;
+              });
+            },
+          )
+        : widget.suffixIcon;
 
     return TextFormField(
       controller: widget.controller,
@@ -53,54 +71,24 @@ class _AppTextFieldState extends State<AppTextField> {
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
       validator: widget.validator,
-      style: TextStyle(color: colorScheme.onSurface),
+      cursorColor: colorScheme.primary,
+      textAlignVertical: TextAlignVertical.center,
+      style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
       decoration: InputDecoration(
         labelText: widget.labelText,
         hintText: widget.hintText,
         errorText: widget.errorText,
         prefixIcon: widget.prefixIcon,
-        prefixIconColor: colorScheme.onSurfaceVariant,
-        labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-        hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
-        filled: true,
-        fillColor: AppColors.backgroundMid,
-        suffixIcon: widget.obscureText
-            ? IconButton(
-                icon: Icon(
-                  _obscureText ? Icons.visibility_off : Icons.visibility,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-              )
-            : widget.suffixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6.0),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+        suffixIcon: effectiveSuffixIcon,
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 48,
+          minHeight: 48,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6.0),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6.0),
-          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6.0),
-          borderSide: BorderSide(color: colorScheme.error, width: 1.5),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6.0),
-          borderSide: BorderSide(color: colorScheme.error, width: 1.8),
+        suffixIconConstraints: const BoxConstraints(
+          minWidth: 48,
+          minHeight: 48,
         ),
         errorStyle: TextStyle(color: colorScheme.error),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
       ),
     );
   }

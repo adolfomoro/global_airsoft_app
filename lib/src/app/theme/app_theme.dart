@@ -108,8 +108,23 @@ final class AppTheme {
         filled: true,
         fillColor: AppColors.backgroundMid,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.spacingLg,
-          vertical: AppDimensions.spacingLg,
+          horizontal: AppDimensions.spacingXl,
+          vertical: 16,
+        ),
+        isDense: false,
+        floatingLabelBehavior: FloatingLabelBehavior.auto,
+        labelStyle: const TextStyle(color: AppColors.onSurfaceDim),
+        floatingLabelStyle: const TextStyle(color: AppColors.secondaryLight),
+        hintStyle: const TextStyle(color: AppColors.onSurfaceDim),
+        prefixIconColor: AppColors.secondaryLight,
+        suffixIconColor: AppColors.onSurfaceDim,
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 48,
+          minHeight: 48,
+        ),
+        suffixIconConstraints: const BoxConstraints(
+          minWidth: 48,
+          minHeight: 48,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
@@ -121,7 +136,15 @@ final class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+          borderSide: BorderSide(color: colorScheme.error, width: 1.1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+          borderSide: BorderSide(color: colorScheme.error, width: 1.2),
         ),
       ),
       snackBarTheme: SnackBarThemeData(

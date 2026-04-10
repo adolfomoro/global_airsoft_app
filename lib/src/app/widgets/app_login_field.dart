@@ -16,8 +16,7 @@ final class AppLoginField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppTextField(
-      labelText: 'Username or Email',
-      hintText: 'Enter your login',
+      labelText: 'Email or username',
       controller: controller,
       onChanged: onChanged,
       errorText: errorText,

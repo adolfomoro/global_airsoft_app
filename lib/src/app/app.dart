@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/core/widgets/app_unfocus_wrapper.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/theme/app_theme.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
@@ -40,6 +41,9 @@ class _AppState extends ConsumerState<App> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      builder: (BuildContext context, Widget? child) {
+        return AppUnfocusWrapper(child: child ?? const SizedBox.shrink());
+      },
       onGenerateTitle: (BuildContext context) {
         return context.l10n.tr(AppLocaleKeys.appTitle);
       },

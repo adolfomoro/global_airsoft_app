@@ -165,19 +165,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
               const SizedBox(height: 16),
               AppGoogleSignInButton(onPressed: _isLoading ? null : () {}),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    "Don't have an account? ",
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  TextButton(
-                    onPressed: _isLoading ? null : () {},
-                    child: const Text('Sign Up'),
-                  ),
-                ],
+              const SizedBox(height: 38),
+              AppButton(
+                label: 'Sign Up',
+                variant: AppButtonVariant.secondary,
+                onPressed: _isLoading ? null : () {},
               ),
             ],
           ),

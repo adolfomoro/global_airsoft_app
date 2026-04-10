@@ -19,7 +19,6 @@ final class AppPasswordField extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppTextField(
       labelText: 'Password',
-      hintText: 'Enter your password',
       controller: controller,
       onChanged: onChanged,
       errorText: errorText,
