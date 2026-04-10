@@ -7,7 +7,7 @@ final class ApiExceptionInterceptor extends Interceptor {
   static const String _abpErrorHeaderExpectedValue = 'true';
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
+  void onError(DioException err, ErrorInterceptorHandler _) {
     final Response<dynamic>? response = err.response;
     final bool isAbpFormatted = _isAbpFormatted(response);
     if (isAbpFormatted) {
@@ -21,8 +21,7 @@ final class ApiExceptionInterceptor extends Interceptor {
             statusCode: response?.statusCode,
             cause: err,
           );
-          handler.reject(err.copyWith(error: exception));
-          return;
+          throw exception;
         } on FormatException {
           // Fall through and map to generic API exception.
         }
@@ -30,7 +29,7 @@ final class ApiExceptionInterceptor extends Interceptor {
     }
 
     final ApiException fallbackException = ApiException.fromDioException(err);
-    handler.reject(err.copyWith(error: fallbackException));
+    throw fallbackException;
   }
 
   bool _isAbpFormatted(Response<dynamic>? response) {

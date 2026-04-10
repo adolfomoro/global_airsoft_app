@@ -1,18 +1,40 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/theme/app_theme.dart';
 import 'package:global_airsoft_app/src/app/theme/theme_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/pages/login_page.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/pages/home_page.dart';
 
-class App extends ConsumerWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> {
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initializeDeviceRegistration());
+  }
+
+  Future<void> _initializeDeviceRegistration() async {
+    final service = ref.read(deviceRegistrationServiceProvider);
+    await service.initialize();
+    await service.registerInBackground();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.listen<ThemeMode>(themePreferenceControllerProvider, (
       ThemeMode? previous,
       ThemeMode next,
@@ -27,6 +49,9 @@ class App extends ConsumerWidget {
 
     final ThemeMode themeMode = ref.watch(themePreferenceControllerProvider);
     final Locale locale = ref.watch(appLocaleControllerProvider);
+    final AsyncValue<bool> isAuthenticatedAsync = ref.watch(
+      isAuthenticatedProvider,
+    );
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -39,7 +64,17 @@ class App extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      home: const HomePage(),
+      home: isAuthenticatedAsync.when(
+        data: (bool isAuthenticated) {
+          return isAuthenticated ? const HomePage() : const LoginPage();
+        },
+        loading: () {
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
+        },
+        error: (Object error, StackTrace stackTrace) {
+          return const LoginPage();
+        },
+      ),
     );
   }
 }

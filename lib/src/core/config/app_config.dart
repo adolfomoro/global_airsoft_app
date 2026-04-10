@@ -23,6 +23,7 @@ final class AppConfig {
     required this.environment,
     required this.enableDebugLogs,
     required this.apiBaseUrl,
+    required this.apiVersion,
     required this.connectTimeoutMs,
     required this.receiveTimeoutMs,
     required this.sendTimeoutMs,
@@ -36,6 +37,7 @@ final class AppConfig {
   final AppEnvironment environment;
   final bool enableDebugLogs;
   final String apiBaseUrl;
+  final String apiVersion;
   final int connectTimeoutMs;
   final int receiveTimeoutMs;
   final int sendTimeoutMs;
@@ -86,6 +88,9 @@ final class AppConfig {
       candidate: baseUrlFromDefines,
       fallback: _defaultBaseUrlFor(environment),
     );
+    final String apiVersion = _normalizeApiVersion(
+      const String.fromEnvironment('API_VERSION', defaultValue: 'v1'),
+    );
 
     const String datadogClientToken = String.fromEnvironment(
       'DATADOG_CLIENT_TOKEN',
@@ -100,15 +105,12 @@ final class AppConfig {
       defaultValue: 'global_airsoft_app',
     );
     final String datadogSite = _normalizeDatadogSite(
-      const String.fromEnvironment(
-        'DATADOG_SITE',
-        defaultValue: 'us1',
-      ),
+      const String.fromEnvironment('DATADOG_SITE', defaultValue: 'us1'),
     );
-    final bool datadogEnabled = const bool.fromEnvironment(
-      'DATADOG_ENABLED',
-      defaultValue: false,
-    ) || environment == AppEnvironment.staging || environment == AppEnvironment.prod;
+    final bool datadogEnabled =
+        const bool.fromEnvironment('DATADOG_ENABLED', defaultValue: false) ||
+        environment == AppEnvironment.staging ||
+        environment == AppEnvironment.prod;
 
     return AppConfig(
       environment: environment,
@@ -117,6 +119,7 @@ final class AppConfig {
         defaultValue: false,
       ),
       apiBaseUrl: resolvedBaseUrl,
+      apiVersion: apiVersion,
       connectTimeoutMs: _sanitizeTimeout(connectTimeoutFromDefines),
       receiveTimeoutMs: _sanitizeTimeout(receiveTimeoutFromDefines),
       sendTimeoutMs: _sanitizeTimeout(sendTimeoutFromDefines),
@@ -162,6 +165,18 @@ final class AppConfig {
 
   static String _normalizeBaseUrl(String value) {
     return value.trim().replaceFirst(RegExp(r'/+$'), '');
+  }
+
+  static String _normalizeApiVersion(String value) {
+    final String normalized = value.trim().toLowerCase().replaceAll(
+      RegExp(r'^/+|/+$'),
+      '',
+    );
+    if (normalized.isEmpty) {
+      return 'v1';
+    }
+
+    return normalized;
   }
 
   static String _normalizeDatadogSite(String value) {
