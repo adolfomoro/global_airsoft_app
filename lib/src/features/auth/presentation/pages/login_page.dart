@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
-import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_google_sign_in_button.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_login_field.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
+import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/models/user_login_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -14,6 +18,9 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
+  static const BackendValidationErrorMapper _validationErrorMapper =
+      BackendValidationErrorMapper();
+
   late TextEditingController _loginController;
   late TextEditingController _passwordController;
   String? _loginError;
@@ -76,13 +83,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     } on AuthenticationException catch (error) {
       if (mounted) {
+        final ValidationMappingResult mappedErrors = _validationErrorMapper.map(
+          exception: error.failure,
+          targetFields: const <String>{
+            UserLoginInputDto.loginField,
+            UserLoginInputDto.passwordField,
+          },
+          memberAliases: const <String, String>{
+            UserLoginInputDto.loginField: UserLoginInputDto.loginField,
+            UserLoginInputDto.passwordField: UserLoginInputDto.passwordField,
+          },
+        );
+
+        final String? mappedLoginError =
+            mappedErrors.fieldErrors[UserLoginInputDto.loginField];
+        final String? mappedPasswordError =
+            mappedErrors.fieldErrors[UserLoginInputDto.passwordField];
         setState(() {
-          _loginError = error.message;
+          _loginError = mappedLoginError;
+          _passwordError = mappedPasswordError;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.message), backgroundColor: Colors.red),
-        );
+        if (error.toString().isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error.toString()),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (error) {
       if (mounted) {
@@ -119,38 +148,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              AppTextField(
-                labelText: 'Username or Email',
-                hintText: 'Enter your login',
+              AppLoginField(
                 controller: _loginController,
-                prefixIcon: const Icon(Icons.person),
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
+                errorText: _loginError,
               ),
-              if (_loginError != null) ...<Widget>[
-                const SizedBox(height: 8),
-                Text(
-                  _loginError!,
-                  style: TextStyle(color: Colors.red.shade600, fontSize: 12),
-                ),
-              ],
               const SizedBox(height: 16),
-              AppTextField(
-                labelText: 'Password',
-                hintText: 'Enter your password',
+              AppPasswordField(
                 controller: _passwordController,
-                obscureText: true,
-                prefixIcon: const Icon(Icons.lock),
-                keyboardType: TextInputType.visiblePassword,
-                textInputAction: TextInputAction.done,
+                errorText: _passwordError,
               ),
-              if (_passwordError != null) ...<Widget>[
-                const SizedBox(height: 8),
-                Text(
-                  _passwordError!,
-                  style: TextStyle(color: Colors.red.shade600, fontSize: 12),
-                ),
-              ],
               const SizedBox(height: 24),
               AppButton(
                 label: 'Sign In',
@@ -158,12 +164,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 isLoading: _isLoading,
               ),
               const SizedBox(height: 16),
-              AppButton(
-                label: 'Sign In with Google',
-                onPressed: _isLoading ? null : () {},
-                variant: AppButtonVariant.secondary,
-                icon: Icons.g_translate,
-              ),
+              AppGoogleSignInButton(onPressed: _isLoading ? null : () {}),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

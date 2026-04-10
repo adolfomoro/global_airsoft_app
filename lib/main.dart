@@ -1,10 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/bootstrap.dart';
-import 'package:global_airsoft_app/src/app/theme/theme_preference.dart';
-import 'package:global_airsoft_app/src/app/theme/theme_preference_service.dart';
-import 'package:global_airsoft_app/src/app/theme/theme_providers.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
@@ -23,10 +21,6 @@ Future<void> main() async {
           SecureStorageServiceImpl.create();
       final SharedPrefsKeyValueStore keyValueStore =
           await SharedPrefsKeyValueStore.create();
-      final ThemePreferenceService themePreferenceService =
-          ThemePreferenceService(store: keyValueStore);
-      final AppThemePreference initialThemePreference = themePreferenceService
-          .readPreference();
       final AppLocaleService appLocaleService = AppLocaleService(
         store: keyValueStore,
       );
@@ -34,7 +28,7 @@ Future<void> main() async {
           .initializeFromDevice();
 
       return BootstrapPayload(
-        initialBrightness: initialThemePreference.brightness,
+        initialBrightness: Brightness.dark,
         app: ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(appConfig),
@@ -42,12 +36,6 @@ Future<void> main() async {
               secureStorageService,
             ),
             sharedPrefsKeyValueStoreProvider.overrideWithValue(keyValueStore),
-            themePreferenceServiceProvider.overrideWithValue(
-              themePreferenceService,
-            ),
-            initialThemePreferenceProvider.overrideWithValue(
-              initialThemePreference,
-            ),
             appLocaleServiceProvider.overrideWithValue(appLocaleService),
             initialAppLocaleProvider.overrideWithValue(
               localeBootstrapData.initialUiLocale,

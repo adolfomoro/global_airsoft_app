@@ -27,7 +27,11 @@ final class AuthRepository {
         }
       }
 
-      throw AuthenticationException(message: 'Invalid login response format');
+      throw AuthenticationException(
+        failure: const UnknownApiException(
+          message: 'Invalid login response format',
+        ),
+      );
     } on AbpApiException catch (error) {
       throw AuthenticationException.fromAbpException(error);
     } on ApiException catch (error) {

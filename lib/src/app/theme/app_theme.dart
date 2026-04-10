@@ -6,37 +6,6 @@ import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 final class AppTheme {
   AppTheme._();
 
-  static final ColorScheme _lightColorScheme = const ColorScheme(
-    brightness: Brightness.light,
-    primary: AppColors.primary,
-    onPrimary: AppColors.onPrimary,
-    primaryContainer: AppColors.primaryContainer,
-    onPrimaryContainer: AppColors.onBackground,
-    secondary: AppColors.secondary,
-    onSecondary: AppColors.onSecondary,
-    secondaryContainer: AppColors.secondaryLight,
-    onSecondaryContainer: AppColors.background,
-    tertiary: AppColors.accentGreenDark,
-    onTertiary: AppColors.onBackground,
-    tertiaryContainer: AppColors.surfaceVariant,
-    onTertiaryContainer: AppColors.onSurface,
-    error: AppColors.error,
-    onError: AppColors.onBackground,
-    errorContainer: AppColors.errorContainer,
-    onErrorContainer: AppColors.onBackground,
-    surface: AppColors.surface,
-    onSurface: AppColors.onSurface,
-    onSurfaceVariant: AppColors.onSurfaceDim,
-    outline: AppColors.outline,
-    outlineVariant: AppColors.outlineVariant,
-    shadow: AppColors.accentBlack,
-    scrim: AppColors.accentBlack,
-    inverseSurface: AppColors.onBackground,
-    onInverseSurface: AppColors.background,
-    inversePrimary: AppColors.primary,
-    surfaceTint: AppColors.primary,
-  );
-
   static final ColorScheme _darkColorScheme = const ColorScheme(
     brightness: Brightness.dark,
     primary: AppColors.secondaryLight,
@@ -68,8 +37,6 @@ final class AppTheme {
     surfaceTint: AppColors.primary,
   );
 
-  static ThemeData get light => _buildTheme(_lightColorScheme);
-
   static ThemeData get dark => _buildTheme(_darkColorScheme);
 
   static SystemUiOverlayStyle overlayStyleFor(Brightness brightness) {
@@ -87,8 +54,6 @@ final class AppTheme {
   }
 
   static ThemeData _buildTheme(ColorScheme colorScheme) {
-    final bool isDark = colorScheme.brightness == Brightness.dark;
-
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
@@ -103,7 +68,7 @@ final class AppTheme {
         systemOverlayStyle: overlayStyleFor(colorScheme.brightness),
       ),
       cardTheme: CardThemeData(
-        color: isDark ? AppColors.backgroundMid : AppColors.surface,
+        color: AppColors.backgroundMid,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
@@ -141,7 +106,7 @@ final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? AppColors.backgroundMid : AppColors.surface,
+        fillColor: AppColors.backgroundMid,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.spacingLg,
           vertical: AppDimensions.spacingLg,
@@ -161,7 +126,7 @@ final class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isDark ? AppColors.surfaceVariant : AppColors.surface,
+        backgroundColor: AppColors.surfaceVariant,
         contentTextStyle: const TextStyle(color: AppColors.onBackground),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,

@@ -57,6 +57,225 @@ class ApiException implements Exception {
   String toString() {
     return 'ApiException(message: $message, statusCode: $statusCode, code: $code)';
   }
+
+  ApiException toTypedException() {
+    if (statusCode == 400 && validationErrors.isNotEmpty) {
+      return ValidationApiException.fromApiException(this);
+    }
+
+    switch (statusCode) {
+      case 401:
+        return UnauthorizedApiException.fromApiException(this);
+      case 403:
+        return ForbiddenApiException.fromApiException(this);
+      case 404:
+        return NotFoundApiException.fromApiException(this);
+      case 409:
+        return ConflictApiException.fromApiException(this);
+      case 501:
+        return NotImplementedApiException.fromApiException(this);
+      default:
+        if (statusCode != null && statusCode! >= 500) {
+          return ServerApiException.fromApiException(this);
+        }
+        if (validationErrors.isNotEmpty) {
+          return ValidationApiException.fromApiException(this);
+        }
+        return this;
+    }
+  }
+}
+
+class ValidationApiException extends ApiException {
+  const ValidationApiException({
+    required super.message,
+    super.statusCode,
+    super.code,
+    super.details,
+    super.data,
+    required super.validationErrors,
+    super.cause,
+  });
+
+  factory ValidationApiException.fromApiException(ApiException error) {
+    return ValidationApiException(
+      message: error.message,
+      statusCode: error.statusCode,
+      code: error.code,
+      details: error.details,
+      data: error.data,
+      validationErrors: error.validationErrors,
+      cause: error.cause,
+    );
+  }
+}
+
+class UnauthorizedApiException extends ApiException {
+  const UnauthorizedApiException({
+    required super.message,
+    super.statusCode,
+    super.code,
+    super.details,
+    super.data,
+    super.validationErrors,
+    super.cause,
+  });
+
+  factory UnauthorizedApiException.fromApiException(ApiException error) {
+    return UnauthorizedApiException(
+      message: error.message,
+      statusCode: error.statusCode,
+      code: error.code,
+      details: error.details,
+      data: error.data,
+      validationErrors: error.validationErrors,
+      cause: error.cause,
+    );
+  }
+}
+
+class ForbiddenApiException extends ApiException {
+  const ForbiddenApiException({
+    required super.message,
+    super.statusCode,
+    super.code,
+    super.details,
+    super.data,
+    super.validationErrors,
+    super.cause,
+  });
+
+  factory ForbiddenApiException.fromApiException(ApiException error) {
+    return ForbiddenApiException(
+      message: error.message,
+      statusCode: error.statusCode,
+      code: error.code,
+      details: error.details,
+      data: error.data,
+      validationErrors: error.validationErrors,
+      cause: error.cause,
+    );
+  }
+}
+
+class NotFoundApiException extends ApiException {
+  const NotFoundApiException({
+    required super.message,
+    super.statusCode,
+    super.code,
+    super.details,
+    super.data,
+    super.validationErrors,
+    super.cause,
+  });
+
+  factory NotFoundApiException.fromApiException(ApiException error) {
+    return NotFoundApiException(
+      message: error.message,
+      statusCode: error.statusCode,
+      code: error.code,
+      details: error.details,
+      data: error.data,
+      validationErrors: error.validationErrors,
+      cause: error.cause,
+    );
+  }
+}
+
+class ConflictApiException extends ApiException {
+  const ConflictApiException({
+    required super.message,
+    super.statusCode,
+    super.code,
+    super.details,
+    super.data,
+    super.validationErrors,
+    super.cause,
+  });
+
+  factory ConflictApiException.fromApiException(ApiException error) {
+    return ConflictApiException(
+      message: error.message,
+      statusCode: error.statusCode,
+      code: error.code,
+      details: error.details,
+      data: error.data,
+      validationErrors: error.validationErrors,
+      cause: error.cause,
+    );
+  }
+}
+
+class NotImplementedApiException extends ApiException {
+  const NotImplementedApiException({
+    required super.message,
+    super.statusCode,
+    super.code,
+    super.details,
+    super.data,
+    super.validationErrors,
+    super.cause,
+  });
+
+  factory NotImplementedApiException.fromApiException(ApiException error) {
+    return NotImplementedApiException(
+      message: error.message,
+      statusCode: error.statusCode,
+      code: error.code,
+      details: error.details,
+      data: error.data,
+      validationErrors: error.validationErrors,
+      cause: error.cause,
+    );
+  }
+}
+
+class ServerApiException extends ApiException {
+  const ServerApiException({
+    required super.message,
+    super.statusCode,
+    super.code,
+    super.details,
+    super.data,
+    super.validationErrors,
+    super.cause,
+  });
+
+  factory ServerApiException.fromApiException(ApiException error) {
+    return ServerApiException(
+      message: error.message,
+      statusCode: error.statusCode,
+      code: error.code,
+      details: error.details,
+      data: error.data,
+      validationErrors: error.validationErrors,
+      cause: error.cause,
+    );
+  }
+}
+
+class UnknownApiException extends ApiException {
+  const UnknownApiException({
+    required super.message,
+    super.statusCode,
+    super.code,
+    super.details,
+    super.data,
+    super.validationErrors,
+    super.cause,
+  });
+
+  factory UnknownApiException.fromApiException(ApiException error) {
+    return UnknownApiException(
+      message: error.message,
+      statusCode: error.statusCode,
+      code: error.code,
+      details: error.details,
+      data: error.data,
+      validationErrors: error.validationErrors,
+      cause: error.cause,
+    );
+  }
 }
 
 final class _ExtractedMessage {

@@ -21,7 +21,7 @@ final class ApiExceptionInterceptor extends Interceptor {
             statusCode: response?.statusCode,
             cause: err,
           );
-          throw exception;
+          throw exception.toTypedException();
         } on FormatException {
           // Fall through and map to generic API exception.
         }
@@ -29,7 +29,7 @@ final class ApiExceptionInterceptor extends Interceptor {
     }
 
     final ApiException fallbackException = ApiException.fromDioException(err);
-    throw fallbackException;
+    throw fallbackException.toTypedException();
   }
 
   bool _isAbpFormatted(Response<dynamic>? response) {

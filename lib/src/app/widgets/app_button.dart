@@ -23,6 +23,7 @@ final class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
 
     final Color backgroundColor;
     final Color foregroundColor;
@@ -31,22 +32,22 @@ final class AppButton extends StatelessWidget {
 
     switch (variant) {
       case AppButtonVariant.primary:
-        backgroundColor = theme.primaryColor;
-        foregroundColor = Colors.white;
-        disabledBackgroundColor = Colors.grey.shade300;
-        disabledForegroundColor = Colors.grey;
+        backgroundColor = colorScheme.primary;
+        foregroundColor = colorScheme.onPrimary;
+        disabledBackgroundColor = colorScheme.surfaceContainerHighest;
+        disabledForegroundColor = colorScheme.onSurfaceVariant;
 
       case AppButtonVariant.secondary:
         backgroundColor = Colors.transparent;
-        foregroundColor = theme.primaryColor;
+        foregroundColor = colorScheme.onSurface;
         disabledBackgroundColor = Colors.transparent;
-        disabledForegroundColor = Colors.grey;
+        disabledForegroundColor = colorScheme.onSurfaceVariant;
 
       case AppButtonVariant.tertiary:
-        backgroundColor = theme.scaffoldBackgroundColor;
-        foregroundColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
-        disabledBackgroundColor = Colors.grey.shade200;
-        disabledForegroundColor = Colors.grey;
+        backgroundColor = colorScheme.surface;
+        foregroundColor = colorScheme.onSurface;
+        disabledBackgroundColor = colorScheme.surfaceContainerHighest;
+        disabledForegroundColor = colorScheme.onSurfaceVariant;
     }
 
     final bool isDisabled = onPressed == null || isLoading;
@@ -64,9 +65,13 @@ final class AppButton extends StatelessWidget {
               ? disabledForegroundColor
               : foregroundColor,
           side: variant == AppButtonVariant.secondary
-              ? BorderSide(color: isDisabled ? Colors.grey : foregroundColor)
+              ? BorderSide(
+                  color: isDisabled
+                      ? colorScheme.outlineVariant
+                      : colorScheme.outline,
+                )
               : null,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         ),
         child: isLoading
             ? SizedBox(

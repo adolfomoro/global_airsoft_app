@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/theme/app_theme.dart';
-import 'package:global_airsoft_app/src/app/theme/theme_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
@@ -35,19 +33,6 @@ class _AppState extends ConsumerState<App> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<ThemeMode>(themePreferenceControllerProvider, (
-      ThemeMode? previous,
-      ThemeMode next,
-    ) {
-      final Brightness brightness = next == ThemeMode.light
-          ? Brightness.light
-          : Brightness.dark;
-      SystemChrome.setSystemUIOverlayStyle(
-        AppTheme.overlayStyleFor(brightness),
-      );
-    });
-
-    final ThemeMode themeMode = ref.watch(themePreferenceControllerProvider);
     final Locale locale = ref.watch(appLocaleControllerProvider);
     final AsyncValue<bool> isAuthenticatedAsync = ref.watch(
       isAuthenticatedProvider,
@@ -61,9 +46,9 @@ class _AppState extends ConsumerState<App> {
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      theme: AppTheme.light,
+      theme: AppTheme.dark,
       darkTheme: AppTheme.dark,
-      themeMode: themeMode,
+      themeMode: ThemeMode.dark,
       home: isAuthenticatedAsync.when(
         data: (bool isAuthenticated) {
           return isAuthenticated ? const HomePage() : const LoginPage();
