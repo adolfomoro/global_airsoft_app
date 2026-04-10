@@ -9,7 +9,9 @@ import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
 import 'package:global_airsoft_app/src/core/monitoring/app_telemetry.dart';
-import 'package:global_airsoft_app/src/core/storage/shared_prefs_key_value_store.dart';
+import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
+import 'package:global_airsoft_app/src/core/storage/secure_storage_service_impl.dart';
+import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 
 Future<void> main() async {
   final AppConfig appConfig = AppConfig.fromDartDefines();
@@ -17,6 +19,8 @@ Future<void> main() async {
 
   await bootstrap(
     builder: () async {
+      final SecureStorageService secureStorageService =
+          SecureStorageServiceImpl.create();
       final SharedPrefsKeyValueStore keyValueStore =
           await SharedPrefsKeyValueStore.create();
       final ThemePreferenceService themePreferenceService =
@@ -34,6 +38,10 @@ Future<void> main() async {
         app: ProviderScope(
           overrides: [
             appConfigProvider.overrideWithValue(appConfig),
+            secureStorageServiceProvider.overrideWithValue(
+              secureStorageService,
+            ),
+            sharedPrefsKeyValueStoreProvider.overrideWithValue(keyValueStore),
             themePreferenceServiceProvider.overrideWithValue(
               themePreferenceService,
             ),
