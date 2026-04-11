@@ -35,9 +35,7 @@ class _AppState extends ConsumerState<App> {
   @override
   Widget build(BuildContext context) {
     final Locale locale = ref.watch(appLocaleControllerProvider);
-    final AsyncValue<bool> isAuthenticatedAsync = ref.watch(
-      isAuthenticatedProvider,
-    );
+    final bool isAuthenticated = ref.watch(isAuthenticatedProvider);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -53,19 +51,7 @@ class _AppState extends ConsumerState<App> {
       theme: AppTheme.dark,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
-      home: isAuthenticatedAsync.when(
-        data: (bool isAuthenticated) {
-          return isAuthenticated ? const HomePage() : const LoginPage();
-        },
-        loading: () {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        },
-        error: (Object error, StackTrace stackTrace) {
-          return const LoginPage();
-        },
-      ),
+      home: isAuthenticated ? const HomePage() : const LoginPage(),
     );
   }
 }

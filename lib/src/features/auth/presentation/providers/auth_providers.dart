@@ -35,9 +35,6 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
   );
 });
 
-final FutureProvider<bool> isAuthenticatedProvider = FutureProvider<bool>((
-  Ref ref,
-) async {
-  final AuthService authService = ref.watch(authServiceProvider);
-  return authService.isAuthenticated();
-});
+final Provider<bool> isAuthenticatedProvider = Provider<bool>(
+  (Ref ref) => false,
+);

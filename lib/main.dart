@@ -11,6 +11,8 @@ import 'package:global_airsoft_app/src/core/monitoring/app_telemetry.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service_impl.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 Future<void> main() async {
   final AppConfig appConfig = AppConfig.fromDartDefines();
@@ -29,6 +31,11 @@ Future<void> main() async {
           .initializeFromDevice();
       final AppLocalizationService appLocalizationService =
           AppLocalizationService(locale: localeBootstrapData.initialUiLocale);
+      final AuthStorageService authStorageService = AuthStorageService(
+        secureStorage: secureStorageService,
+      );
+      final String? jwtToken = await authStorageService.getJwtToken();
+      final bool isAuthenticated = jwtToken != null && jwtToken.isNotEmpty;
 
       return BootstrapPayload(
         initialBrightness: Brightness.dark,
@@ -49,6 +56,8 @@ Future<void> main() async {
             appLocalizationServiceProvider.overrideWithValue(
               appLocalizationService,
             ),
+            authStorageServiceProvider.overrideWithValue(authStorageService),
+            isAuthenticatedProvider.overrideWithValue(isAuthenticated),
           ],
           child: const App(),
         ),
