@@ -16,13 +16,8 @@ final class AuthService {
   final AuthStorageService _authStorageService;
   final AppLogger _logger;
 
-  String? _cachedJwtToken;
-
-  String? getCachedJwtToken() => _cachedJwtToken;
-
   Future<bool> isAuthenticated() async {
     final String? token = await _authStorageService.getJwtToken();
-    _cachedJwtToken = token;
     return token != null && token.isNotEmpty;
   }
 
@@ -37,14 +32,11 @@ final class AuthService {
     await _authStorageService.saveJwtToken(output.jwtToken);
     await _authStorageService.saveRefreshToken(output.refreshToken);
 
-    _cachedJwtToken = output.jwtToken;
-
     _logger.info('User logged in successfully');
   }
 
   Future<void> logout() async {
     await _authStorageService.clearTokens();
-    _cachedJwtToken = null;
     _logger.info('User logged out');
   }
 }

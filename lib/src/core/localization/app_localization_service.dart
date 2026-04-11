@@ -5,13 +5,9 @@ final class AppLocalizationService {
   static const AppLocalizationsDelegate _delegate = AppLocalizationsDelegate();
 
   AppLocalizationService({required Locale locale})
-    : _locale = locale,
-      _localizationsFuture = _delegate.load(locale);
+    : _localizationsFuture = _delegate.load(locale);
 
-  final Locale _locale;
   final Future<AppLocalizations> _localizationsFuture;
-
-  Locale get locale => _locale;
 
   Future<String> tr(String key) {
     return _localizationsFuture.then((AppLocalizations l10n) => l10n.tr(key));

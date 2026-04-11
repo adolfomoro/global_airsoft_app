@@ -13,6 +13,7 @@ final class DeviceRegistrationService {
   static const String _unknownPlatform = 'Unknown';
   static const String _unknownDeviceType = 'Unknown';
   static const String _initialAppVersion = '0.0.0';
+  static const int _maxSyncAttempts = 3;
 
   DeviceRegistrationService({
     required DeviceRepository deviceRepository,
@@ -124,7 +125,7 @@ final class DeviceRegistrationService {
   Future<bool> ensureRegisteredBeforeRequest() async {
     await initialize();
 
-    while (true) {
+    for (int attempt = 0; attempt < _maxSyncAttempts; attempt++) {
       final Future<bool>? inFlight = _inFlightSync;
       if (inFlight != null) {
         final bool inFlightResult = await inFlight;
@@ -161,6 +162,9 @@ final class DeviceRegistrationService {
         }
       }
     }
+
+    _logger.info('Device sync did not stabilize after max attempts.');
+    return false;
   }
 
   Future<bool> _ensureRegisteredInternal() async {
