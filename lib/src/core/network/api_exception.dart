@@ -78,10 +78,7 @@ class ApiException implements Exception {
         if (statusCode != null && statusCode! >= 500) {
           return ServerApiException.fromApiException(this);
         }
-        if (validationErrors.isNotEmpty) {
-          return ValidationApiException.fromApiException(this);
-        }
-        return this;
+        return UnknownApiException.fromApiException(this);
     }
   }
 }
