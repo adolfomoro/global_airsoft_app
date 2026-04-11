@@ -6,7 +6,7 @@ import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/password_validation_rules_output_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/password_validation_rules_output_dto.dart';
 
 const int _maxPasswordRulesFetchAttempts = 3;
 
@@ -31,9 +31,11 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
 ) {
   final authRepository = ref.watch(authRepositoryProvider);
   final authStorageService = ref.watch(authStorageServiceProvider);
+  final sharedPrefs = ref.watch(sharedPrefsKeyValueStoreProvider);
   return AuthService(
     authRepository: authRepository,
     authStorageService: authStorageService,
+    sharedPrefs: sharedPrefs,
     logger: AppLogger.instance,
   );
 });

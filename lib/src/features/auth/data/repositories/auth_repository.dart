@@ -6,12 +6,12 @@ import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/network/http_status_code_extensions.dart';
 import 'package:global_airsoft_app/src/features/auth/data/constants/auth_api_paths.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/create_user_input_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/create_user_output_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/password_validation_rules_output_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/request_password_recovery_input_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/user_login_input_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/user_login_output_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_output_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/password_validation_rules_output_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_output_dto.dart';
 
 final class AuthRepository {
   const AuthRepository({

@@ -14,8 +14,8 @@ import 'package:global_airsoft_app/src/core/validation/backend_validation_error_
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/create_user_input_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/password_validation_rules_output_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/password_validation_rules_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/auth_validation_patterns.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_validation_rules_card.dart';

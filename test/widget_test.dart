@@ -18,6 +18,11 @@ final class _InMemoryStore implements KeyValueStore {
   Future<void> setString(String key, String value) async {
     _data[key] = value;
   }
+
+  @override
+  Future<void> remove(String key) async {
+    _data.remove(key);
+  }
 }
 
 void main() {

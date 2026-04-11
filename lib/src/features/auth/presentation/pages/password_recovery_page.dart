@@ -9,7 +9,7 @@ import 'package:global_airsoft_app/src/core/validation/backend_validation_error_
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/models/request_password_recovery_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/auth_validation_patterns.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/pages/password_recovery_success_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';

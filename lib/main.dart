@@ -14,6 +14,7 @@ import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart'
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service_impl.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/models/auth_tokens.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 Future<void> main() async {
@@ -41,8 +42,8 @@ Future<void> main() async {
         secureStorage: secureStorageService,
       );
       await notificationPermissionService.markAppOpened();
-      final String? jwtToken = await authStorageService.getJwtToken();
-      final bool isAuthenticated = jwtToken != null && jwtToken.isNotEmpty;
+      final AuthTokens? tokens = await authStorageService.getTokens();
+      final bool isAuthenticated = tokens != null && tokens.jwtToken.isNotEmpty;
 
       return BootstrapPayload(
         initialBrightness: Brightness.dark,
