@@ -13,7 +13,7 @@ class HomePage extends ConsumerWidget {
     Future<void> handleLogout() async {
       await authService.logout();
       if (context.mounted) {
-        ref.invalidate(isAuthenticatedProvider);
+        ref.read(isAuthenticatedProvider.notifier).setUnauthenticated();
       }
     }
 

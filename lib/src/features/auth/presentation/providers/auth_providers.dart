@@ -35,6 +35,24 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
   );
 });
 
-final Provider<bool> isAuthenticatedProvider = Provider<bool>(
+final Provider<bool> initialIsAuthenticatedProvider = Provider<bool>(
   (Ref ref) => false,
 );
+
+final NotifierProvider<AuthSessionNotifier, bool> isAuthenticatedProvider =
+    NotifierProvider<AuthSessionNotifier, bool>(AuthSessionNotifier.new);
+
+final class AuthSessionNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    return ref.watch(initialIsAuthenticatedProvider);
+  }
+
+  void setAuthenticated() {
+    state = true;
+  }
+
+  void setUnauthenticated() {
+    state = false;
+  }
+}

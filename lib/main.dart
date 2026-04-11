@@ -57,7 +57,7 @@ Future<void> main() async {
               appLocalizationService,
             ),
             authStorageServiceProvider.overrideWithValue(authStorageService),
-            isAuthenticatedProvider.overrideWithValue(isAuthenticated),
+            initialIsAuthenticatedProvider.overrideWithValue(isAuthenticated),
           ],
           child: const App(),
         ),

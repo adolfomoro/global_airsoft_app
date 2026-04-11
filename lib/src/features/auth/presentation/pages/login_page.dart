@@ -95,7 +95,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       await authService.login(_loginController.text, _passwordController.text);
 
       if (mounted) {
-        ref.invalidate(isAuthenticatedProvider);
+        ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
       }
     } on AuthenticationException catch (error) {
       if (mounted) {

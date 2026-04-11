@@ -32,55 +32,6 @@ final class DeviceStorageService {
     final String payload = jsonEncode(snapshot.toJson());
     return _secureStorage.setString(_storageKey, payload);
   }
-
-  Future<String?> getDeviceId() async => (await loadSnapshot()).deviceId;
-
-  Future<void> saveDeviceId(String deviceId) async {
-    final DeviceStorageSnapshot current = await loadSnapshot();
-    await saveSnapshot(current.copyWith(deviceId: deviceId));
-  }
-
-  Future<String?> getLastPlatform() async =>
-      (await loadSnapshot()).lastPlatform;
-
-  Future<void> savePlatform(String platform) async {
-    final DeviceStorageSnapshot current = await loadSnapshot();
-    await saveSnapshot(current.copyWith(lastPlatform: platform));
-  }
-
-  Future<String?> getLastDeviceType() async =>
-      (await loadSnapshot()).lastDeviceType;
-
-  Future<void> saveDeviceType(String deviceType) async {
-    final DeviceStorageSnapshot current = await loadSnapshot();
-    await saveSnapshot(current.copyWith(lastDeviceType: deviceType));
-  }
-
-  Future<String?> getLastAppVersion() async =>
-      (await loadSnapshot()).lastAppVersion;
-
-  Future<void> saveAppVersion(String appVersion) async {
-    final DeviceStorageSnapshot current = await loadSnapshot();
-    await saveSnapshot(current.copyWith(lastAppVersion: appVersion));
-  }
-
-  Future<String?> getLastDeviceModel() async =>
-      (await loadSnapshot()).lastDeviceModel;
-
-  Future<void> saveDeviceModel(String? deviceModel) async {
-    final DeviceStorageSnapshot current = await loadSnapshot();
-    await saveSnapshot(current.copyWith(lastDeviceModel: deviceModel));
-  }
-
-  Future<String?> getLastPushToken() async =>
-      (await loadSnapshot()).lastPushToken;
-
-  Future<void> savePushToken(String pushToken) async {
-    final DeviceStorageSnapshot current = await loadSnapshot();
-    await saveSnapshot(current.copyWith(lastPushToken: pushToken));
-  }
-
-  Future<void> clearAll() => _secureStorage.remove(_storageKey);
 }
 
 final class DeviceStorageSnapshot {
@@ -142,24 +93,6 @@ final class DeviceStorageSnapshot {
     }
 
     return result;
-  }
-
-  DeviceStorageSnapshot copyWith({
-    String? deviceId,
-    String? lastPlatform,
-    String? lastDeviceType,
-    String? lastAppVersion,
-    String? lastDeviceModel,
-    String? lastPushToken,
-  }) {
-    return DeviceStorageSnapshot(
-      deviceId: deviceId ?? this.deviceId,
-      lastPlatform: lastPlatform ?? this.lastPlatform,
-      lastDeviceType: lastDeviceType ?? this.lastDeviceType,
-      lastAppVersion: lastAppVersion ?? this.lastAppVersion,
-      lastDeviceModel: lastDeviceModel ?? this.lastDeviceModel,
-      lastPushToken: lastPushToken ?? this.lastPushToken,
-    );
   }
 
   static String? _readNullableString(Object? value) {

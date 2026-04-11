@@ -4,6 +4,7 @@ import 'package:global_airsoft_app/src/app/app.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
 import 'package:global_airsoft_app/src/core/storage/key_value_store.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 final class _InMemoryStore implements KeyValueStore {
   final Map<String, String> _data = <String, String>{};
@@ -20,18 +21,24 @@ final class _InMemoryStore implements KeyValueStore {
 }
 
 void main() {
-  testWidgets('renders startup shell', (WidgetTester tester) async {
+  testWidgets('renders login page when not authenticated', (
+    WidgetTester tester,
+  ) async {
     final _InMemoryStore store = _InMemoryStore();
     final AppLocaleService localeService = AppLocaleService(store: store);
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [appLocaleServiceProvider.overrideWithValue(localeService)],
+        overrides: [
+          appLocaleServiceProvider.overrideWithValue(localeService),
+          initialIsAuthenticatedProvider.overrideWithValue(false),
+        ],
         child: const App(),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Global Airsoft App'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
+    expect(find.text('Sign In'), findsWidgets);
   });
 }

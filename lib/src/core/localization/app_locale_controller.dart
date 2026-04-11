@@ -59,11 +59,7 @@ final class AppLocaleController extends Notifier<Locale> {
       await _localeService.saveUiLocale(
         AppLocalizations.resolveFromLanguageTag(normalized),
       );
-      if (currentUiTag == normalized) {
-        _pendingServerLocaleTag = null;
-      } else {
-        _pendingServerLocaleTag = normalized;
-      }
+      _pendingServerLocaleTag = normalized;
     } catch (error, stackTrace) {
       AppLogger.instance.error(
         'Failed to persist server content-language locale',
