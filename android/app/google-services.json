@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "716569230649",
+    "project_id": "globalairsoft-f6e24",
+    "storage_bucket": "globalairsoft-f6e24.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716569230649:android:354a3c36efdd4aca217ce8",
+        "android_client_info": {
+          "package_name": "com.globalairsoft.global_airsoft_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcVNrm6zPnCVQWHpzLCQwEChlP8KUOdEw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

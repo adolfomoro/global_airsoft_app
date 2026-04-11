@@ -8,6 +8,8 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_providers.da
 import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/monitoring/app_telemetry.dart';
+import 'package:global_airsoft_app/src/core/notifications/notification_permission_service.dart';
+import 'package:global_airsoft_app/src/core/notifications/push_notification_service.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service_impl.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
@@ -20,6 +22,8 @@ Future<void> main() async {
 
   await bootstrap(
     builder: () async {
+      PushNotificationService.registerBackgroundHandler();
+
       final SecureStorageService secureStorageService =
           SecureStorageServiceImpl.create();
       final SharedPrefsKeyValueStore keyValueStore =
@@ -31,9 +35,12 @@ Future<void> main() async {
           .initializeFromDevice();
       final AppLocalizationService appLocalizationService =
           AppLocalizationService(locale: localeBootstrapData.initialUiLocale);
+      final NotificationPermissionService notificationPermissionService =
+          NotificationPermissionService(store: keyValueStore);
       final AuthStorageService authStorageService = AuthStorageService(
         secureStorage: secureStorageService,
       );
+      await notificationPermissionService.markAppOpened();
       final String? jwtToken = await authStorageService.getJwtToken();
       final bool isAuthenticated = jwtToken != null && jwtToken.isNotEmpty;
 
