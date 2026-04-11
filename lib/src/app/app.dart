@@ -58,7 +58,9 @@ class _AppState extends ConsumerState<App> {
           return isAuthenticated ? const HomePage() : const LoginPage();
         },
         loading: () {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         },
         error: (Object error, StackTrace stackTrace) {
           return const LoginPage();

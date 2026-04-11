@@ -35,6 +35,14 @@ final class AppTextField extends StatefulWidget {
 }
 
 class _AppTextFieldState extends State<AppTextField> {
+  static const BoxConstraints _iconConstraints = BoxConstraints(
+    minWidth: 48,
+    minHeight: 48,
+  );
+
+  static const EdgeInsets _zeroPadding = EdgeInsets.zero;
+  static const VisualDensity _compactDensity = VisualDensity.compact;
+
   late bool _obscureText;
 
   @override
@@ -50,9 +58,9 @@ class _AppTextFieldState extends State<AppTextField> {
     final Widget? effectiveSuffixIcon = widget.obscureText
         ? IconButton(
             tooltip: _obscureText ? 'Show password' : 'Hide password',
-            padding: EdgeInsets.zero,
-            visualDensity: VisualDensity.compact,
-            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            padding: _zeroPadding,
+            visualDensity: _compactDensity,
+            constraints: _iconConstraints,
             icon: Icon(
               _obscureText
                   ? Icons.visibility_off_outlined
@@ -82,14 +90,8 @@ class _AppTextFieldState extends State<AppTextField> {
         errorText: widget.errorText,
         prefixIcon: widget.prefixIcon,
         suffixIcon: effectiveSuffixIcon,
-        prefixIconConstraints: const BoxConstraints(
-          minWidth: 48,
-          minHeight: 48,
-        ),
-        suffixIconConstraints: const BoxConstraints(
-          minWidth: 48,
-          minHeight: 48,
-        ),
+        prefixIconConstraints: _iconConstraints,
+        suffixIconConstraints: _iconConstraints,
         errorStyle: TextStyle(color: colorScheme.error),
       ),
     );

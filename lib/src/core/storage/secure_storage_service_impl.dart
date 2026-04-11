@@ -22,22 +22,16 @@ final class SecureStorageServiceImpl implements SecureStorageService {
   }
 
   @override
-  Future<String?> getString(String key) async {
-    return await _storage.read(key: key);
+  Future<String?> getString(String key) => _storage.read(key: key);
+
+  @override
+  Future<void> setString(String key, String value) {
+    return _storage.write(key: key, value: value);
   }
 
   @override
-  Future<void> setString(String key, String value) async {
-    await _storage.write(key: key, value: value);
-  }
+  Future<void> remove(String key) => _storage.delete(key: key);
 
   @override
-  Future<void> remove(String key) async {
-    await _storage.delete(key: key);
-  }
-
-  @override
-  Future<void> clear() async {
-    await _storage.deleteAll();
-  }
+  Future<void> clear() => _storage.deleteAll();
 }

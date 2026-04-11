@@ -17,9 +17,10 @@ class AppLocalizations {
   final Map<String, String> _englishValues;
 
   static const Locale fallbackLocale = Locale('en');
+  static final String _fallbackLanguageTag = _buildLanguageTag(fallbackLocale);
 
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
+    fallbackLocale,
     Locale('pt', 'BR'),
   ];
 
@@ -48,8 +49,7 @@ class AppLocalizations {
     }
 
     final bool isEnglishLocale =
-        AppLocalizations.toLanguageTag(locale) ==
-        AppLocalizations.toLanguageTag(fallbackLocale);
+        AppLocalizations.toLanguageTag(locale) == _fallbackLanguageTag;
 
     if (!isEnglishLocale) {
       final String? englishValue = _englishValues[key];
@@ -67,9 +67,11 @@ class AppLocalizations {
   }) {
     String value = tr(key);
 
-    args.forEach((String argKey, Object? argValue) {
+    for (final MapEntry<String, Object?> entry in args.entries) {
+      final String argKey = entry.key;
+      final Object? argValue = entry.value;
       value = value.replaceAll('{$argKey}', argValue?.toString() ?? '');
-    });
+    }
 
     return value;
   }
@@ -240,7 +242,7 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
 
     final bool isEnglishLocale =
         AppLocalizations.toLanguageTag(resolved) ==
-        AppLocalizations.toLanguageTag(AppLocalizations.fallbackLocale);
+        AppLocalizations._fallbackLanguageTag;
 
     final Map<String, String> englishValues = isEnglishLocale
         ? resolvedValues
@@ -264,11 +266,13 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
     }
 
     final Map<String, String> map = <String, String>{};
-    decoded.forEach((String key, dynamic value) {
+    for (final MapEntry<String, dynamic> entry in decoded.entries) {
+      final String key = entry.key;
+      final dynamic value = entry.value;
       if (value is String) {
         map[key] = value;
       }
-    });
+    }
     return map;
   }
 

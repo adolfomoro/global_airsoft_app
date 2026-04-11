@@ -4,6 +4,8 @@ import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 final class BackendValidationErrorMapper {
   const BackendValidationErrorMapper();
 
+  static final RegExp _arrayIndexPattern = RegExp(r'\[\d+\]');
+
   ValidationMappingResult map({
     required ApiException exception,
     required Set<String> targetFields,
@@ -61,7 +63,7 @@ final class BackendValidationErrorMapper {
   String _normalizeMember(String member) {
     final String cleaned = member
         .trim()
-        .replaceAll(RegExp(r'\[\d+\]'), '')
+        .replaceAll(_arrayIndexPattern, '')
         .replaceAll('/', '.')
         .replaceAll('\\', '.');
 

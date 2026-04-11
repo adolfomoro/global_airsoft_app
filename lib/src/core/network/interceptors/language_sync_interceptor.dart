@@ -46,8 +46,7 @@ final class LanguageSyncInterceptor extends Interceptor {
       return null;
     }
 
-    final String? contentLanguage =
-        headers.value('contentlanguage') ?? headers.value('content-language');
-    return contentLanguage;
+    return headers.value('contentlanguage') ??
+        headers.value('content-language');
   }
 }

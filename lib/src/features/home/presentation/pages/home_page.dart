@@ -8,19 +8,20 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final authService = ref.read(authServiceProvider);
+
+    Future<void> handleLogout() async {
+      await authService.logout();
+      if (context.mounted) {
+        ref.invalidate(isAuthenticatedProvider);
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
         actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authServiceProvider).logout();
-              if (context.mounted) {
-                ref.invalidate(isAuthenticatedProvider);
-              }
-            },
-          ),
+          IconButton(icon: const Icon(Icons.logout), onPressed: handleLogout),
         ],
       ),
       body: Center(
@@ -31,15 +32,7 @@ class HomePage extends ConsumerWidget {
             const SizedBox(height: 32),
             SizedBox(
               width: 200,
-              child: AppButton(
-                label: 'Logout',
-                onPressed: () async {
-                  await ref.read(authServiceProvider).logout();
-                  if (context.mounted) {
-                    ref.invalidate(isAuthenticatedProvider);
-                  }
-                },
-              ),
+              child: AppButton(label: 'Logout', onPressed: handleLogout),
             ),
           ],
         ),

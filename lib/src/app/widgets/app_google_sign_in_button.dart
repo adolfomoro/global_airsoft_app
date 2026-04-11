@@ -3,6 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 
 final class AppGoogleSignInButton extends StatelessWidget {
+  static const BorderRadius _borderRadius = BorderRadius.all(
+    Radius.circular(6),
+  );
+
   const AppGoogleSignInButton({
     super.key,
     required this.onPressed,
@@ -31,7 +35,7 @@ final class AppGoogleSignInButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           backgroundColor: const Color(0xFF131314),
           side: BorderSide(color: borderColor),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          shape: const RoundedRectangleBorder(borderRadius: _borderRadius),
         ),
         child: isLoading
             ? SizedBox(

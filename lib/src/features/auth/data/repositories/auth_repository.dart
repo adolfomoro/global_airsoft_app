@@ -18,6 +18,10 @@ final class AuthRepository {
   final AppDioService _dioService;
   final AppLocalizationService _localizationService;
 
+  Future<String> _loginFailedMessage() {
+    return _localizationService.tr(AppLocaleKeys.authLoginFailed);
+  }
+
   Future<UserLoginOutputDto> login(UserLoginInputDto input) async {
     try {
       final Response<dynamic> response = await _dioService.post<dynamic>(
@@ -33,25 +37,19 @@ final class AuthRepository {
         }
       }
 
-      final String localizedFailureMessage = await _localizationService.tr(
-        AppLocaleKeys.authLoginFailed,
-      );
+      final String localizedFailureMessage = await _loginFailedMessage();
       throw AuthenticationException(
         failure: UnknownApiException(message: localizedFailureMessage),
         messageOverride: localizedFailureMessage,
       );
     } on AbpApiException catch (error) {
-      final String localizedFailureMessage = await _localizationService.tr(
-        AppLocaleKeys.authLoginFailed,
-      );
+      final String localizedFailureMessage = await _loginFailedMessage();
       throw AuthenticationException.fromAbpException(
         error,
         messageOverride: localizedFailureMessage,
       );
     } on ApiException catch (error) {
-      final String localizedFailureMessage = await _localizationService.tr(
-        AppLocaleKeys.authLoginFailed,
-      );
+      final String localizedFailureMessage = await _loginFailedMessage();
       throw AuthenticationException.fromApiException(
         error,
         messageOverride: localizedFailureMessage,

@@ -17,7 +17,7 @@ final class SharedPrefsKeyValueStore implements KeyValueStore {
   }
 
   @override
-  Future<void> setString(String key, String value) async {
-    await _prefs.setString(key, value);
+  Future<void> setString(String key, String value) {
+    return _prefs.setString(key, value).then((_) {});
   }
 }

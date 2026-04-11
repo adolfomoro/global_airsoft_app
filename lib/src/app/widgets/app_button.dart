@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 enum AppButtonVariant { primary, secondary, tertiary }
 
 final class AppButton extends StatelessWidget {
+  static const BorderRadius _borderRadius = BorderRadius.all(
+    Radius.circular(6),
+  );
+
   const AppButton({
     super.key,
     required this.label,
@@ -71,7 +75,7 @@ final class AppButton extends StatelessWidget {
                       : colorScheme.outline,
                 )
               : null,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          shape: const RoundedRectangleBorder(borderRadius: _borderRadius),
         ),
         child: isLoading
             ? SizedBox(

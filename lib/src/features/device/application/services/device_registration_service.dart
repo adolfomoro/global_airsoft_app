@@ -10,6 +10,10 @@ import 'package:global_airsoft_app/src/features/device/domain/models/register_de
 import 'package:package_info_plus/package_info_plus.dart';
 
 final class DeviceRegistrationService {
+  static const String _unknownPlatform = 'Unknown';
+  static const String _unknownDeviceType = 'Unknown';
+  static const String _initialAppVersion = '0.0.0';
+
   DeviceRegistrationService({
     required DeviceRepository deviceRepository,
     required DeviceStorageService storageService,
@@ -25,9 +29,9 @@ final class DeviceRegistrationService {
   final String Function() _getPushNotificationToken;
   final AppLogger _logger;
 
-  String _cachedPlatform = 'Unknown';
-  String _cachedDeviceType = 'Unknown';
-  String _cachedAppVersion = '0.0.0';
+  String _cachedPlatform = _unknownPlatform;
+  String _cachedDeviceType = _unknownDeviceType;
+  String _cachedAppVersion = _initialAppVersion;
   String? _cachedDeviceModel;
   String? _cachedDeviceId;
   String? _storedDeviceId;
@@ -39,6 +43,8 @@ final class DeviceRegistrationService {
   bool _infoLoaded = false;
   Future<bool>? _inFlightSync;
   Future<void>? _initializeFuture;
+  late final PushNotificationType _pushNotificationType =
+      _resolvePushNotificationType();
 
   Future<void> initialize() async {
     final Future<void>? existing = _initializeFuture;
@@ -72,10 +78,7 @@ final class DeviceRegistrationService {
   }
 
   String? _normalizeStored(String? value) {
-    if (value == null || value.isEmpty) {
-      return null;
-    }
-    return value;
+    return (value == null || value.isEmpty) ? null : value;
   }
 
   Future<void> _loadDeviceInfo() async {
@@ -98,8 +101,8 @@ final class DeviceRegistrationService {
       _cachedDeviceType = iosInfo.utsname.machine;
       _cachedDeviceModel = iosInfo.model;
     } else {
-      _cachedPlatform = 'Unknown';
-      _cachedDeviceType = 'Unknown';
+      _cachedPlatform = _unknownPlatform;
+      _cachedDeviceType = _unknownDeviceType;
       _cachedDeviceModel = null;
     }
 
@@ -192,7 +195,7 @@ final class DeviceRegistrationService {
         appVersion: _cachedAppVersion,
         deviceModel: _cachedDeviceModel,
         pushNotificationToken: pushToken,
-        pushNotificationType: _getPushNotificationType(),
+        pushNotificationType: _pushNotificationType,
       );
 
       final output = await _deviceRepository.registerDevice(input);
@@ -242,7 +245,7 @@ final class DeviceRegistrationService {
     _lastPushToken = pushToken;
   }
 
-  PushNotificationType _getPushNotificationType() {
+  PushNotificationType _resolvePushNotificationType() {
     if (io.Platform.isAndroid) {
       return PushNotificationType.fcm;
     }
@@ -252,7 +255,5 @@ final class DeviceRegistrationService {
     return PushNotificationType.unknown;
   }
 
-  String? getStoredDeviceId() {
-    return _cachedDeviceId;
-  }
+  String? getStoredDeviceId() => _cachedDeviceId;
 }

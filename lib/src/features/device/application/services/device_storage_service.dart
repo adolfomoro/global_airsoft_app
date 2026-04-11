@@ -33,69 +33,54 @@ final class DeviceStorageService {
     return _secureStorage.setString(_storageKey, payload);
   }
 
-  Future<String?> getDeviceId() async {
-    final DeviceStorageSnapshot snapshot = await loadSnapshot();
-    return snapshot.deviceId;
-  }
+  Future<String?> getDeviceId() async => (await loadSnapshot()).deviceId;
 
   Future<void> saveDeviceId(String deviceId) async {
     final DeviceStorageSnapshot current = await loadSnapshot();
     await saveSnapshot(current.copyWith(deviceId: deviceId));
   }
 
-  Future<String?> getLastPlatform() async {
-    final DeviceStorageSnapshot snapshot = await loadSnapshot();
-    return snapshot.lastPlatform;
-  }
+  Future<String?> getLastPlatform() async =>
+      (await loadSnapshot()).lastPlatform;
 
   Future<void> savePlatform(String platform) async {
     final DeviceStorageSnapshot current = await loadSnapshot();
     await saveSnapshot(current.copyWith(lastPlatform: platform));
   }
 
-  Future<String?> getLastDeviceType() async {
-    final DeviceStorageSnapshot snapshot = await loadSnapshot();
-    return snapshot.lastDeviceType;
-  }
+  Future<String?> getLastDeviceType() async =>
+      (await loadSnapshot()).lastDeviceType;
 
   Future<void> saveDeviceType(String deviceType) async {
     final DeviceStorageSnapshot current = await loadSnapshot();
     await saveSnapshot(current.copyWith(lastDeviceType: deviceType));
   }
 
-  Future<String?> getLastAppVersion() async {
-    final DeviceStorageSnapshot snapshot = await loadSnapshot();
-    return snapshot.lastAppVersion;
-  }
+  Future<String?> getLastAppVersion() async =>
+      (await loadSnapshot()).lastAppVersion;
 
   Future<void> saveAppVersion(String appVersion) async {
     final DeviceStorageSnapshot current = await loadSnapshot();
     await saveSnapshot(current.copyWith(lastAppVersion: appVersion));
   }
 
-  Future<String?> getLastDeviceModel() async {
-    final DeviceStorageSnapshot snapshot = await loadSnapshot();
-    return snapshot.lastDeviceModel;
-  }
+  Future<String?> getLastDeviceModel() async =>
+      (await loadSnapshot()).lastDeviceModel;
 
   Future<void> saveDeviceModel(String? deviceModel) async {
     final DeviceStorageSnapshot current = await loadSnapshot();
     await saveSnapshot(current.copyWith(lastDeviceModel: deviceModel));
   }
 
-  Future<String?> getLastPushToken() async {
-    final DeviceStorageSnapshot snapshot = await loadSnapshot();
-    return snapshot.lastPushToken;
-  }
+  Future<String?> getLastPushToken() async =>
+      (await loadSnapshot()).lastPushToken;
 
   Future<void> savePushToken(String pushToken) async {
     final DeviceStorageSnapshot current = await loadSnapshot();
     await saveSnapshot(current.copyWith(lastPushToken: pushToken));
   }
 
-  Future<void> clearAll() async {
-    await _secureStorage.remove(_storageKey);
-  }
+  Future<void> clearAll() => _secureStorage.remove(_storageKey);
 }
 
 final class DeviceStorageSnapshot {
@@ -137,18 +122,24 @@ final class DeviceStorageSnapshot {
   Map<String, String> toJson() {
     final Map<String, String> result = <String, String>{};
 
-    void putIfNotEmpty(String key, String? value) {
-      if (value != null && value.isNotEmpty) {
-        result[key] = value;
-      }
+    if (deviceId != null && deviceId!.isNotEmpty) {
+      result['deviceId'] = deviceId!;
     }
-
-    putIfNotEmpty('deviceId', deviceId);
-    putIfNotEmpty('lastPlatform', lastPlatform);
-    putIfNotEmpty('lastDeviceType', lastDeviceType);
-    putIfNotEmpty('lastAppVersion', lastAppVersion);
-    putIfNotEmpty('lastDeviceModel', lastDeviceModel);
-    putIfNotEmpty('lastPushToken', lastPushToken);
+    if (lastPlatform != null && lastPlatform!.isNotEmpty) {
+      result['lastPlatform'] = lastPlatform!;
+    }
+    if (lastDeviceType != null && lastDeviceType!.isNotEmpty) {
+      result['lastDeviceType'] = lastDeviceType!;
+    }
+    if (lastAppVersion != null && lastAppVersion!.isNotEmpty) {
+      result['lastAppVersion'] = lastAppVersion!;
+    }
+    if (lastDeviceModel != null && lastDeviceModel!.isNotEmpty) {
+      result['lastDeviceModel'] = lastDeviceModel!;
+    }
+    if (lastPushToken != null && lastPushToken!.isNotEmpty) {
+      result['lastPushToken'] = lastPushToken!;
+    }
 
     return result;
   }

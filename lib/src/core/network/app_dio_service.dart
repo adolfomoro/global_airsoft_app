@@ -12,6 +12,9 @@ import 'package:global_airsoft_app/src/core/network/interceptors/language_sync_i
 final class AppDioService {
   AppDioService._({required Dio dio}) : _dio = dio;
 
+  static final RegExp _trailingSlashes = RegExp(r'/+$');
+  static final RegExp _edgeSlashes = RegExp(r'^/+|/+$');
+
   final Dio _dio;
 
   Dio get client => _dio;
@@ -93,11 +96,8 @@ final class AppDioService {
 
     adapter.createHttpClient = () {
       final HttpClient client = HttpClient();
-      client.badCertificateCallback = (
-        X509Certificate cert,
-        String host,
-        int port,
-      ) {
+      client
+          .badCertificateCallback = (X509Certificate cert, String host, int port) {
         logger.info(
           'TLS certificate validation disabled for DEV environment: $host:$port',
         );
@@ -108,12 +108,14 @@ final class AppDioService {
   }
 
   static String _buildVersionedBaseUrl(AppConfig config) {
-    final String normalizedBaseUrl = config.apiBaseUrl
-        .trim()
-        .replaceFirst(RegExp(r'/+$'), '');
-    final String normalizedVersion = config.apiVersion
-        .trim()
-        .replaceAll(RegExp(r'^/+|/+$'), '');
+    final String normalizedBaseUrl = config.apiBaseUrl.trim().replaceFirst(
+      _trailingSlashes,
+      '',
+    );
+    final String normalizedVersion = config.apiVersion.trim().replaceAll(
+      _edgeSlashes,
+      '',
+    );
 
     if (normalizedVersion.isEmpty) {
       return normalizedBaseUrl;

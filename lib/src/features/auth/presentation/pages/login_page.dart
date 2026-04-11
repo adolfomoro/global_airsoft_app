@@ -32,6 +32,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   static const ValidationRuleSet _passwordValidationRules = ValidationRuleSet(
     <ValidationRule>[RequiredValidationRule()],
   );
+  static void _noopAction() {}
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController _loginController;
@@ -54,7 +55,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  void _handleLoginChanged(String value) {
+  void _handleLoginChanged(String _) {
     if (_loginError == null) {
       return;
     }
@@ -64,7 +65,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
   }
 
-  void _handlePasswordChanged(String value) {
+  void _handlePasswordChanged(String _) {
     if (_passwordError == null) {
       return;
     }
@@ -194,12 +195,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   isLoading: _isLoading,
                 ),
                 const SizedBox(height: 16),
-                AppGoogleSignInButton(onPressed: _isLoading ? null : () {}),
+                AppGoogleSignInButton(
+                  onPressed: _isLoading ? null : _noopAction,
+                ),
                 const SizedBox(height: 28),
                 AppButton(
                   label: 'Sign Up',
                   variant: AppButtonVariant.secondary,
-                  onPressed: _isLoading ? null : () {},
+                  onPressed: _isLoading ? null : _noopAction,
                 ),
               ],
             ),
