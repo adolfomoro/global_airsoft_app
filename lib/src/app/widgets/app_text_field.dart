@@ -4,6 +4,7 @@ final class AppTextField extends StatefulWidget {
   const AppTextField({
     super.key,
     required this.labelText,
+    this.isRequired = false,
     this.hintText,
     this.controller,
     this.onChanged,
@@ -17,6 +18,7 @@ final class AppTextField extends StatefulWidget {
   });
 
   final String labelText;
+  final bool isRequired;
   final String? hintText;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
@@ -75,7 +77,7 @@ class _AppTextFieldState extends State<AppTextField> {
       textAlignVertical: TextAlignVertical.center,
       style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
       decoration: InputDecoration(
-        labelText: widget.labelText,
+        label: _buildLabel(context),
         hintText: widget.hintText,
         errorText: widget.errorText,
         prefixIcon: widget.prefixIcon,
@@ -89,6 +91,36 @@ class _AppTextFieldState extends State<AppTextField> {
           minHeight: 48,
         ),
         errorStyle: TextStyle(color: colorScheme.error),
+      ),
+    );
+  }
+
+  Widget _buildLabel(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TextStyle? labelStyle =
+        theme.inputDecorationTheme.labelStyle ?? theme.textTheme.bodyMedium;
+    final Color hintColor =
+        theme.inputDecorationTheme.hintStyle?.color ??
+        labelStyle?.color ??
+        theme.colorScheme.onSurfaceVariant;
+
+    if (!widget.isRequired) {
+      return Text(widget.labelText, style: labelStyle);
+    }
+
+    return Text.rich(
+      TextSpan(
+        text: widget.labelText,
+        style: labelStyle,
+        children: <InlineSpan>[
+          TextSpan(
+            text: ' *',
+            style: labelStyle?.copyWith(
+              color: hintColor,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

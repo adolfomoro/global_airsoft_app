@@ -4,7 +4,10 @@ import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_google_sign_in_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_login_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
+import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/models/user_login_input_dto.dart';
@@ -20,7 +23,17 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
+  static const ValidationRuleSet _loginValidationRules =
+      ValidationRuleSet(<ValidationRule>[
+        RequiredValidationRule(),
+        MinLengthValidationRule(3),
+        MaxLengthValidationRule(256),
+      ]);
+  static const ValidationRuleSet _passwordValidationRules = ValidationRuleSet(
+    <ValidationRule>[RequiredValidationRule()],
+  );
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController _loginController;
   late TextEditingController _passwordController;
   String? _loginError;
@@ -41,34 +54,36 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  String? _validateLogin(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Login is required';
+  void _handleLoginChanged(String value) {
+    if (_loginError == null) {
+      return;
     }
-    if (value.length < 3) {
-      return 'Login must be at least 3 characters';
-    }
-    if (value.length > 256) {
-      return 'Login cannot exceed 256 characters';
-    }
-    return null;
+
+    setState(() {
+      _loginError = null;
+    });
   }
 
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Password is required';
+  void _handlePasswordChanged(String value) {
+    if (_passwordError == null) {
+      return;
     }
-    return null;
+
+    setState(() {
+      _passwordError = null;
+    });
   }
 
   Future<void> _handleLogin() async {
+    FocusScope.of(context).unfocus();
+
     setState(() {
-      _loginError = _validateLogin(_loginController.text);
-      _passwordError = _validatePassword(_passwordController.text);
-      _isLoading = false;
+      _loginError = null;
+      _passwordError = null;
     });
 
-    if (_loginError != null || _passwordError != null) {
+    final FormState? formState = _formKey.currentState;
+    if (!(formState?.validate() ?? false)) {
       return;
     }
 
@@ -104,24 +119,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           _passwordError = mappedPasswordError;
         });
 
-        if (error.toString().isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error.toString()),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (error) {
-      if (mounted) {
-        const String message = 'Login failed. Please try again.';
-        setState(() {
-          _loginError = message;
-        });
-
+        final String fallbackMessage = context.l10n.tr(
+          AppLocaleKeys.authLoginFailed,
+        );
+        final String message = error.message ?? fallbackMessage;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(message), backgroundColor: Colors.red),
+          SnackBar(content: Text(message), backgroundColor: Colors.red),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.tr(AppLocaleKeys.authLoginFailed)),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -136,42 +148,61 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const SizedBox(height: 48),
-              Text(
-                'Sign In',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              AppLoginField(
-                controller: _loginController,
-                errorText: _loginError,
-              ),
-              const SizedBox(height: 16),
-              AppPasswordField(
-                controller: _passwordController,
-                errorText: _passwordError,
-              ),
-              const SizedBox(height: 24),
-              AppButton(
-                label: 'Sign In',
-                onPressed: _isLoading ? null : _handleLogin,
-                isLoading: _isLoading,
-              ),
-              const SizedBox(height: 16),
-              AppGoogleSignInButton(onPressed: _isLoading ? null : () {}),
-              const SizedBox(height: 38),
-              AppButton(
-                label: 'Sign Up',
-                variant: AppButtonVariant.secondary,
-                onPressed: _isLoading ? null : () {},
-              ),
-            ],
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const SizedBox(height: 48),
+                Text(
+                  'Sign In',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                AppLoginField(
+                  controller: _loginController,
+                  errorText: _loginError,
+                  onChanged: _handleLoginChanged,
+                  isRequired: _loginValidationRules.hasRequiredRule,
+                  validator: _loginValidationRules.asValidator(
+                    (ValidationFailure failure) => context.l10n.trArgs(
+                      failure.messageKey,
+                      args: failure.arguments,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                AppPasswordField(
+                  controller: _passwordController,
+                  errorText: _passwordError,
+                  onChanged: _handlePasswordChanged,
+                  isRequired: _passwordValidationRules.hasRequiredRule,
+                  validator: _passwordValidationRules.asValidator(
+                    (ValidationFailure failure) => context.l10n.trArgs(
+                      failure.messageKey,
+                      args: failure.arguments,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                AppButton(
+                  label: 'Sign In',
+                  onPressed: _isLoading ? null : _handleLogin,
+                  isLoading: _isLoading,
+                ),
+                const SizedBox(height: 16),
+                AppGoogleSignInButton(onPressed: _isLoading ? null : () {}),
+                const SizedBox(height: 28),
+                AppButton(
+                  label: 'Sign Up',
+                  variant: AppButtonVariant.secondary,
+                  onPressed: _isLoading ? null : () {},
+                ),
+              ],
+            ),
           ),
         ),
       ),

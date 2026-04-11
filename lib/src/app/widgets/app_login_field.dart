@@ -7,19 +7,25 @@ final class AppLoginField extends StatelessWidget {
     required this.controller,
     this.onChanged,
     this.errorText,
+    this.validator,
+    this.isRequired = false,
   });
 
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;
   final String? errorText;
+  final String? Function(String?)? validator;
+  final bool isRequired;
 
   @override
   Widget build(BuildContext context) {
     return AppTextField(
       labelText: 'Email or username',
+      isRequired: isRequired,
       controller: controller,
       onChanged: onChanged,
       errorText: errorText,
+      validator: validator,
       prefixIcon: const Icon(Icons.person_outline),
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,

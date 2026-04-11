@@ -1,6 +1,5 @@
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
-import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/models/user_login_input_dto.dart';
 
@@ -28,31 +27,19 @@ final class AuthService {
   }
 
   Future<void> login(String login, String password) async {
-    try {
-      final UserLoginInputDto input = UserLoginInputDto(
-        login: login,
-        password: password,
-      );
+    final UserLoginInputDto input = UserLoginInputDto(
+      login: login,
+      password: password,
+    );
 
-      final output = await _authRepository.login(input);
+    final output = await _authRepository.login(input);
 
-      await _authStorageService.saveJwtToken(output.jwtToken);
-      await _authStorageService.saveRefreshToken(output.refreshToken);
+    await _authStorageService.saveJwtToken(output.jwtToken);
+    await _authStorageService.saveRefreshToken(output.refreshToken);
 
-      _cachedJwtToken = output.jwtToken;
+    _cachedJwtToken = output.jwtToken;
 
-      _logger.info('User logged in successfully');
-    } on AuthenticationException catch (error) {
-      _logger.error('Login failed: ${error.message}', error: error);
-      rethrow;
-    } catch (error, stackTrace) {
-      _logger.error(
-        'Unexpected login error',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      rethrow;
-    }
+    _logger.info('User logged in successfully');
   }
 
   Future<void> logout() async {

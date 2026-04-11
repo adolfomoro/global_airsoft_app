@@ -6,6 +6,7 @@ import 'package:global_airsoft_app/src/app/bootstrap.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/monitoring/app_telemetry.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service_impl.dart';
@@ -26,6 +27,8 @@ Future<void> main() async {
       );
       final AppLocaleBootstrapData localeBootstrapData = await appLocaleService
           .initializeFromDevice();
+      final AppLocalizationService appLocalizationService =
+          AppLocalizationService(locale: localeBootstrapData.initialUiLocale);
 
       return BootstrapPayload(
         initialBrightness: Brightness.dark,
@@ -42,6 +45,9 @@ Future<void> main() async {
             ),
             initialOsLanguageTagProvider.overrideWithValue(
               localeBootstrapData.osLanguageTag,
+            ),
+            appLocalizationServiceProvider.overrideWithValue(
+              appLocalizationService,
             ),
           ],
           child: const App(),

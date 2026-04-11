@@ -1,5 +1,10 @@
 {
     "app.title": "Global Airsoft App",
+    "auth.loginFailed": "Falha no login. Tente novamente.",
+    "validation.required": "Este campo e obrigatorio.",
+    "validation.minLength": "Use pelo menos {min} caracteres.",
+    "validation.maxLength": "Use no maximo {max} caracteres.",
+    "validation.pattern": "O formato e invalido.",
     "home.title": "Base de UI pronta para Airsoft",
     "home.subtitle": "Tema, sistema de cores e baseline inicial de UI foram configurados para producao.",
     "home.environmentLabel": "Ambiente: {environment}",

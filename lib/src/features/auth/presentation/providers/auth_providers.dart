@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
@@ -15,7 +16,11 @@ final Provider<AuthStorageService> authStorageServiceProvider =
 final Provider<AuthRepository> authRepositoryProvider =
     Provider<AuthRepository>((Ref ref) {
       final appDioService = ref.watch(appDioServiceProvider);
-      return AuthRepository(dioService: appDioService);
+      final localizationService = ref.watch(appLocalizationServiceProvider);
+      return AuthRepository(
+        dioService: appDioService,
+        localizationService: localizationService,
+      );
     });
 
 final Provider<AuthService> authServiceProvider = Provider<AuthService>((

@@ -1,5 +1,10 @@
 abstract final class AppLocaleKeys {
   static const String appTitle = 'app.title';
+  static const String authLoginFailed = 'auth.loginFailed';
+  static const String validationRequired = 'validation.required';
+  static const String validationMinLength = 'validation.minLength';
+  static const String validationMaxLength = 'validation.maxLength';
+  static const String validationPattern = 'validation.pattern';
   static const String homeTitle = 'home.title';
   static const String homeSubtitle = 'home.subtitle';
   static const String environmentLabel = 'home.environmentLabel';

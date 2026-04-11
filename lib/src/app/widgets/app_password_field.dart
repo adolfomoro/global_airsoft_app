@@ -7,21 +7,27 @@ final class AppPasswordField extends StatelessWidget {
     required this.controller,
     this.onChanged,
     this.errorText,
+    this.validator,
+    this.isRequired = false,
     this.textInputAction = TextInputAction.done,
   });
 
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;
   final String? errorText;
+  final String? Function(String?)? validator;
+  final bool isRequired;
   final TextInputAction textInputAction;
 
   @override
   Widget build(BuildContext context) {
     return AppTextField(
       labelText: 'Password',
+      isRequired: isRequired,
       controller: controller,
       onChanged: onChanged,
       errorText: errorText,
+      validator: validator,
       obscureText: true,
       prefixIcon: const Icon(Icons.lock_outline),
       keyboardType: TextInputType.visiblePassword,

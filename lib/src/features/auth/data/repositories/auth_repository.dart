@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/constants/auth_api_paths.dart';
@@ -7,10 +9,14 @@ import 'package:global_airsoft_app/src/features/auth/domain/models/user_login_in
 import 'package:global_airsoft_app/src/features/auth/domain/models/user_login_output_dto.dart';
 
 final class AuthRepository {
-  const AuthRepository({required AppDioService dioService})
-    : _dioService = dioService;
+  const AuthRepository({
+    required AppDioService dioService,
+    required AppLocalizationService localizationService,
+  }) : _dioService = dioService,
+       _localizationService = localizationService;
 
   final AppDioService _dioService;
+  final AppLocalizationService _localizationService;
 
   Future<UserLoginOutputDto> login(UserLoginInputDto input) async {
     try {
@@ -27,15 +33,29 @@ final class AuthRepository {
         }
       }
 
+      final String localizedFailureMessage = await _localizationService.tr(
+        AppLocaleKeys.authLoginFailed,
+      );
       throw AuthenticationException(
-        failure: const UnknownApiException(
-          message: 'Invalid login response format',
-        ),
+        failure: UnknownApiException(message: localizedFailureMessage),
+        messageOverride: localizedFailureMessage,
       );
     } on AbpApiException catch (error) {
-      throw AuthenticationException.fromAbpException(error);
+      final String localizedFailureMessage = await _localizationService.tr(
+        AppLocaleKeys.authLoginFailed,
+      );
+      throw AuthenticationException.fromAbpException(
+        error,
+        messageOverride: localizedFailureMessage,
+      );
     } on ApiException catch (error) {
-      throw AuthenticationException.fromApiException(error);
+      final String localizedFailureMessage = await _localizationService.tr(
+        AppLocaleKeys.authLoginFailed,
+      );
+      throw AuthenticationException.fromApiException(
+        error,
+        messageOverride: localizedFailureMessage,
+      );
     }
   }
 }

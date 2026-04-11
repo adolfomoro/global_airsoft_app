@@ -61,6 +61,19 @@ class AppLocalizations {
     return key;
   }
 
+  String trArgs(
+    String key, {
+    Map<String, Object?> args = const <String, Object?>{},
+  }) {
+    String value = tr(key);
+
+    args.forEach((String argKey, Object? argValue) {
+      value = value.replaceAll('{$argKey}', argValue?.toString() ?? '');
+    });
+
+    return value;
+  }
+
   static Locale resolveFromPreferred(List<Locale>? preferredLocales) {
     if (preferredLocales == null || preferredLocales.isEmpty) {
       return fallbackLocale;
@@ -270,8 +283,8 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
         final Object? decoded = json.decode(jsonString);
         return _toStringMap(decoded);
       } catch (error) {
-        final Future<Map<String, String>>? pendingLoad =
-            _localeValuesCache.remove(assetCode);
+        final Future<Map<String, String>>? pendingLoad = _localeValuesCache
+            .remove(assetCode);
         if (pendingLoad != null) {
           unawaited(pendingLoad);
         }
