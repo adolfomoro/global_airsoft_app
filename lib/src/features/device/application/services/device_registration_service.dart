@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:io' as io;
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_storage_service.dart';
 import 'package:global_airsoft_app/src/features/device/data/repositories/device_repository.dart';
+import 'package:global_airsoft_app/src/features/device/data/repositories/device_repository/dto/register_device_input_dto.dart';
 import 'package:global_airsoft_app/src/features/device/domain/models/push_notification_type.dart';
-import 'package:global_airsoft_app/src/features/device/domain/models/register_device_input_dto.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 final class DeviceRegistrationService {

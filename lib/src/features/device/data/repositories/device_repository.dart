@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/features/device/data/constants/device_api_paths.dart';
 import 'package:global_airsoft_app/src/features/device/data/exceptions/device_registration_exception.dart';
-import 'package:global_airsoft_app/src/features/device/domain/models/register_device_input_dto.dart';
-import 'package:global_airsoft_app/src/features/device/domain/models/register_device_output_dto.dart';
+import 'package:global_airsoft_app/src/features/device/data/repositories/device_repository/dto/register_device_input_dto.dart';
+import 'package:global_airsoft_app/src/features/device/data/repositories/device_repository/dto/register_device_output_dto.dart';
 
 final class DeviceRepository {
   DeviceRepository({required Dio dio}) : _dio = dio;
