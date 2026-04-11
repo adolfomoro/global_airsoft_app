@@ -66,11 +66,11 @@ class _AppTextFieldState extends State<AppTextField> {
     final ColorScheme colorScheme = theme.colorScheme;
     final Widget? effectiveSuffixIcon = widget.obscureText
         ? IconButton(
-        tooltip: context.l10n.tr(
-          _obscureText
-            ? AppLocaleKeys.commonShowPassword
-            : AppLocaleKeys.commonHidePassword,
-        ),
+            tooltip: context.l10n.tr(
+              _obscureText
+                  ? AppLocaleKeys.commonShowPassword
+                  : AppLocaleKeys.commonHidePassword,
+            ),
             padding: _zeroPadding,
             visualDensity: _compactDensity,
             constraints: _iconConstraints,

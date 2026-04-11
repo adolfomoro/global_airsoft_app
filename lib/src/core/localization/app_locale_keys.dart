@@ -14,12 +14,12 @@ abstract final class AppLocaleKeys {
   static const String authLoginTitle = 'auth.loginTitle';
   static const String authLoginSubtitle = 'auth.loginSubtitle';
   static const String authLoginContinueWith = 'auth.loginContinueWith';
-    static const String authLoginIdentifierLabel = 'auth.loginIdentifierLabel';
+  static const String authLoginIdentifierLabel = 'auth.loginIdentifierLabel';
   static const String authLoginNoAccount = 'auth.loginNoAccount';
   static const String authLoginSignUpAction = 'auth.loginSignUpAction';
   static const String authForgotPasswordAction = 'auth.forgotPasswordAction';
   static const String authSignInAction = 'auth.signInAction';
-    static const String authSignInWithGoogle = 'auth.signInWithGoogle';
+  static const String authSignInWithGoogle = 'auth.signInWithGoogle';
   static const String authPasswordRecoveryTitle = 'auth.passwordRecoveryTitle';
   static const String authPasswordRecoveryHeading =
       'auth.passwordRecoveryHeading';
