@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 
 final class AppLoginField extends StatelessWidget {
   const AppLoginField({
@@ -20,7 +22,7 @@ final class AppLoginField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppTextField(
-      labelText: 'Email or username',
+      labelText: context.l10n.tr(AppLocaleKeys.authLoginIdentifierLabel),
       isRequired: isRequired,
       controller: controller,
       onChanged: onChanged,

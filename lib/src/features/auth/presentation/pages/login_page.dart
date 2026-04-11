@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
@@ -5,12 +7,15 @@ import 'package:global_airsoft_app/src/app/widgets/app_google_sign_in_button.dar
 import 'package:global_airsoft_app/src/app/widgets/app_login_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/models/user_login_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/pages/password_recovery_page.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -46,6 +51,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.initState();
     _loginController = TextEditingController();
     _passwordController = TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      unawaited(_warmUpPasswordRulesInBackground());
+    });
+  }
+
+  Future<void> _warmUpPasswordRulesInBackground() async {
+    await ref
+        .read(passwordValidationRulesProvider.notifier)
+        .fetchInBackground();
   }
 
   @override
@@ -75,6 +93,52 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
   }
 
+  String _resolveValidationMessage(ValidationFailure failure) {
+    final String selectedKey = switch (failure.messageKey) {
+      AppLocaleKeys.validationMinLength => _pluralizedValidationKey(
+        baseKey: AppLocaleKeys.validationMinLength,
+        value: failure.arguments['min'],
+      ),
+      AppLocaleKeys.validationMaxLength => _pluralizedValidationKey(
+        baseKey: AppLocaleKeys.validationMaxLength,
+        value: failure.arguments['max'],
+      ),
+      AppLocaleKeys.validationPasswordMinimumLength => _pluralizedValidationKey(
+        baseKey: AppLocaleKeys.validationPasswordMinimumLength,
+        value: failure.arguments['min'],
+      ),
+      AppLocaleKeys.validationPasswordUniqueCharacters =>
+        _pluralizedValidationKey(
+          baseKey: AppLocaleKeys.validationPasswordUniqueCharacters,
+          value: failure.arguments['min'],
+        ),
+      _ => failure.messageKey,
+    };
+
+    return context.l10n.trArgs(selectedKey, args: failure.arguments);
+  }
+
+  String _pluralizedValidationKey({
+    required String baseKey,
+    required Object? value,
+  }) {
+    final int? numericValue;
+    if (value is int) {
+      numericValue = value;
+    } else if (value is num) {
+      numericValue = value.toInt();
+    } else if (value is String) {
+      numericValue = int.tryParse(value);
+    } else {
+      numericValue = null;
+    }
+
+    return AppLocaleKeys.withPluralSuffix(
+      baseKey: baseKey,
+      isSingular: numericValue == 1,
+    );
+  }
+
   Future<void> _handleLogin() async {
     FocusScope.of(context).unfocus();
 
@@ -93,9 +157,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     try {
       final AuthService authService = ref.read(authServiceProvider);
       await authService.login(_loginController.text, _passwordController.text);
+      await ref
+          .read(appLocaleControllerProvider.notifier)
+          .forceApplyServerLocaleIfPending();
 
       if (mounted) {
         ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).popUntil((Route<void> route) => route.isFirst);
       }
     } on AuthenticationException catch (error) {
       if (mounted) {
@@ -146,65 +217,205 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const SizedBox(height: 48),
-                Text(
-                  'Sign In',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                AppLoginField(
-                  controller: _loginController,
-                  errorText: _loginError,
-                  onChanged: _handleLoginChanged,
-                  isRequired: _loginValidationRules.hasRequiredRule,
-                  validator: _loginValidationRules.asValidator(
-                    (ValidationFailure failure) => context.l10n.trArgs(
-                      failure.messageKey,
-                      args: failure.arguments,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const SizedBox(height: 20),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        width: 58,
+                        height: 58,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.track_changes_rounded,
+                              color: colorScheme.primary,
+                              size: 30,
+                            ),
+                            Positioned(
+                              bottom: 6,
+                              right: 6,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'GA',
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        color: colorScheme.onPrimary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        context.l10n.tr(AppLocaleKeys.appTitle),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 480),
+                        child: Text(
+                          context.l10n.tr(AppLocaleKeys.authLoginSubtitle),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          AppLoginField(
+                            controller: _loginController,
+                            errorText: _loginError,
+                            onChanged: _handleLoginChanged,
+                            isRequired: _loginValidationRules.hasRequiredRule,
+                            validator: _loginValidationRules.asValidator(
+                              _resolveValidationMessage,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          AppPasswordField(
+                            labelText: context.l10n.tr(
+                              AppLocaleKeys.authPasswordLabel,
+                            ),
+                            controller: _passwordController,
+                            errorText: _passwordError,
+                            onChanged: _handlePasswordChanged,
+                            isRequired:
+                                _passwordValidationRules.hasRequiredRule,
+                            validator: _passwordValidationRules.asValidator(
+                              _resolveValidationMessage,
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (BuildContext context) {
+                                            return const PasswordRecoveryPage();
+                                          },
+                                        ),
+                                      );
+                                    },
+                              child: Text(
+                                context.l10n.tr(
+                                  AppLocaleKeys.authForgotPasswordAction,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          AppButton(
+                            label: context.l10n.tr(
+                              AppLocaleKeys.authSignInAction,
+                            ),
+                            onPressed: _isLoading ? null : _handleLogin,
+                            isLoading: _isLoading,
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Divider(
+                                  color: colorScheme.outlineVariant,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                child: Text(
+                                  context.l10n.tr(
+                                    AppLocaleKeys.authLoginContinueWith,
+                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                              Expanded(
+                                child: Divider(
+                                  color: colorScheme.outlineVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          AppGoogleSignInButton(
+                            onPressed: _isLoading ? null : _noopAction,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                AppPasswordField(
-                  controller: _passwordController,
-                  errorText: _passwordError,
-                  onChanged: _handlePasswordChanged,
-                  isRequired: _passwordValidationRules.hasRequiredRule,
-                  validator: _passwordValidationRules.asValidator(
-                    (ValidationFailure failure) => context.l10n.trArgs(
-                      failure.messageKey,
-                      args: failure.arguments,
-                    ),
+                  const SizedBox(height: 18),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        context.l10n.tr(AppLocaleKeys.authLoginNoAccount),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      TextButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (BuildContext context) {
+                                      return const SignUpPage();
+                                    },
+                                  ),
+                                );
+                              },
+                        child: Text(
+                          context.l10n.tr(AppLocaleKeys.authLoginSignUpAction),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                AppButton(
-                  label: 'Sign In',
-                  onPressed: _isLoading ? null : _handleLogin,
-                  isLoading: _isLoading,
-                ),
-                const SizedBox(height: 16),
-                AppGoogleSignInButton(
-                  onPressed: _isLoading ? null : _noopAction,
-                ),
-                const SizedBox(height: 28),
-                AppButton(
-                  label: 'Sign Up',
-                  variant: AppButtonVariant.secondary,
-                  onPressed: _isLoading ? null : _noopAction,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

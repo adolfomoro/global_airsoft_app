@@ -5,6 +5,8 @@ final class AppPasswordField extends StatelessWidget {
   const AppPasswordField({
     super.key,
     required this.controller,
+    this.focusNode,
+    this.labelText = 'Password',
     this.onChanged,
     this.errorText,
     this.validator,
@@ -13,6 +15,8 @@ final class AppPasswordField extends StatelessWidget {
   });
 
   final TextEditingController controller;
+  final FocusNode? focusNode;
+  final String labelText;
   final ValueChanged<String>? onChanged;
   final String? errorText;
   final String? Function(String?)? validator;
@@ -22,9 +26,10 @@ final class AppPasswordField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppTextField(
-      labelText: 'Password',
+      labelText: labelText,
       isRequired: isRequired,
       controller: controller,
+      focusNode: focusNode,
       onChanged: onChanged,
       errorText: errorText,
       validator: validator,

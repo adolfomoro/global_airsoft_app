@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class HomePage extends ConsumerWidget {
@@ -18,8 +21,8 @@ class HomePage extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
+      appBar: AppAdaptiveAppBar(
+        title: Text(context.l10n.tr(AppLocaleKeys.homeTitle)),
         actions: <Widget>[
           IconButton(icon: const Icon(Icons.logout), onPressed: handleLogout),
         ],
@@ -28,11 +31,17 @@ class HomePage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('main', style: Theme.of(context).textTheme.headlineMedium),
+            Text(
+              context.l10n.tr(AppLocaleKeys.homeMainLabel),
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
             const SizedBox(height: 32),
             SizedBox(
               width: 200,
-              child: AppButton(label: 'Logout', onPressed: handleLogout),
+              child: AppButton(
+                label: context.l10n.tr(AppLocaleKeys.homeLogoutAction),
+                onPressed: handleLogout,
+              ),
             ),
           ],
         ),

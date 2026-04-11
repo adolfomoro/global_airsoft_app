@@ -5,12 +5,16 @@ class AppUnfocusWrapper extends StatelessWidget {
 
   final Widget child;
 
-  void _handlePointerDown(PointerDownEvent event) {
+  void _handleTap() {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Listener(onPointerDown: _handlePointerDown, child: child);
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: _handleTap,
+      child: child,
+    );
   }
 }

@@ -16,8 +16,8 @@ extension AppEnvironmentX on AppEnvironment {
 }
 
 final class AppConfig {
-  static const int _defaultTimeoutMs = 15000;
-  static const int _minimumTimeoutMs = 1000;
+  static const int _defaultTimeoutMs = 25000;
+  static const int _minimumTimeoutMs = 5000;
   static final RegExp _trailingSlashesRegex = RegExp(r'/+$');
   static final RegExp _edgeSlashesRegex = RegExp(r'^/+|/+$');
 

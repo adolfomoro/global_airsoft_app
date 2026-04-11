@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 
 final class AppGoogleSignInButton extends StatelessWidget {
   static const BorderRadius _borderRadius = BorderRadius.all(
@@ -57,7 +59,7 @@ final class AppGoogleSignInButton extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Sign In with Google',
+                    context.l10n.tr(AppLocaleKeys.authSignInWithGoogle),
                     style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.w600,

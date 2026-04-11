@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/validation/validation.dart';
 
 final class AppTextField extends StatefulWidget {
   const AppTextField({
@@ -7,6 +10,7 @@ final class AppTextField extends StatefulWidget {
     this.isRequired = false,
     this.hintText,
     this.controller,
+    this.focusNode,
     this.onChanged,
     this.errorText,
     this.obscureText = false,
@@ -21,6 +25,7 @@ final class AppTextField extends StatefulWidget {
   final bool isRequired;
   final String? hintText;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final ValueChanged<String>? onChanged;
   final String? errorText;
   final bool obscureText;
@@ -35,6 +40,10 @@ final class AppTextField extends StatefulWidget {
 }
 
 class _AppTextFieldState extends State<AppTextField> {
+  static const ValidationRuleSet _requiredValidationRuleSet = ValidationRuleSet(
+    <ValidationRule>[RequiredValidationRule()],
+  );
+
   static const BoxConstraints _iconConstraints = BoxConstraints(
     minWidth: 48,
     minHeight: 48,
@@ -57,7 +66,11 @@ class _AppTextFieldState extends State<AppTextField> {
     final ColorScheme colorScheme = theme.colorScheme;
     final Widget? effectiveSuffixIcon = widget.obscureText
         ? IconButton(
-            tooltip: _obscureText ? 'Show password' : 'Hide password',
+        tooltip: context.l10n.tr(
+          _obscureText
+            ? AppLocaleKeys.commonShowPassword
+            : AppLocaleKeys.commonHidePassword,
+        ),
             padding: _zeroPadding,
             visualDensity: _compactDensity,
             constraints: _iconConstraints,
@@ -76,11 +89,34 @@ class _AppTextFieldState extends State<AppTextField> {
 
     return TextFormField(
       controller: widget.controller,
+      focusNode: widget.focusNode,
       onChanged: widget.onChanged,
       obscureText: _obscureText,
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
-      validator: widget.validator,
+      validator: (String? value) {
+        if (widget.isRequired) {
+          final String? requiredMessage = _requiredValidationRuleSet
+              .asValidator(
+                (ValidationFailure failure) => context.l10n.trArgs(
+                  failure.messageKey,
+                  args: failure.arguments,
+                ),
+              )
+              .call(value);
+
+          if (requiredMessage != null && requiredMessage.isNotEmpty) {
+            return requiredMessage;
+          }
+        }
+
+        final String? Function(String?)? customValidator = widget.validator;
+        if (customValidator == null) {
+          return null;
+        }
+
+        return customValidator(value);
+      },
       cursorColor: colorScheme.primary,
       textAlignVertical: TextAlignVertical.center,
       style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),

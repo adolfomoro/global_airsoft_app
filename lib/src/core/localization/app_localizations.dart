@@ -43,22 +43,7 @@ class AppLocalizations {
   }
 
   String tr(String key) {
-    final String? primary = _localizedValues[key];
-    if (primary != null && primary.trim().isNotEmpty) {
-      return primary;
-    }
-
-    final bool isEnglishLocale =
-        AppLocalizations.toLanguageTag(locale) == _fallbackLanguageTag;
-
-    if (!isEnglishLocale) {
-      final String? englishValue = _englishValues[key];
-      if (englishValue != null && englishValue.trim().isNotEmpty) {
-        return englishValue;
-      }
-    }
-
-    return key;
+    return _lookupLocalizedValue(key) ?? key;
   }
 
   String trArgs(
@@ -74,6 +59,25 @@ class AppLocalizations {
     }
 
     return value;
+  }
+
+  String? _lookupLocalizedValue(String key) {
+    final String? primary = _localizedValues[key];
+    if (primary != null && primary.trim().isNotEmpty) {
+      return primary;
+    }
+
+    final bool isEnglishLocale =
+        AppLocalizations.toLanguageTag(locale) == _fallbackLanguageTag;
+
+    if (!isEnglishLocale) {
+      final String? englishValue = _englishValues[key];
+      if (englishValue != null && englishValue.trim().isNotEmpty) {
+        return englishValue;
+      }
+    }
+
+    return null;
   }
 
   static Locale resolveFromPreferred(List<Locale>? preferredLocales) {
