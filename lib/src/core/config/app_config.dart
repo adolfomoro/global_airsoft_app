@@ -18,6 +18,8 @@ extension AppEnvironmentX on AppEnvironment {
 final class AppConfig {
   static const int _defaultTimeoutMs = 15000;
   static const int _minimumTimeoutMs = 1000;
+  static final RegExp _trailingSlashesRegex = RegExp(r'/+$');
+  static final RegExp _edgeSlashesRegex = RegExp(r'^/+|/+$');
 
   const AppConfig({
     required this.environment,
@@ -164,12 +166,12 @@ final class AppConfig {
   }
 
   static String _normalizeBaseUrl(String value) {
-    return value.trim().replaceFirst(RegExp(r'/+$'), '');
+    return value.trim().replaceFirst(_trailingSlashesRegex, '');
   }
 
   static String _normalizeApiVersion(String value) {
     final String normalized = value.trim().toLowerCase().replaceAll(
-      RegExp(r'^/+|/+$'),
+      _edgeSlashesRegex,
       '',
     );
     if (normalized.isEmpty) {

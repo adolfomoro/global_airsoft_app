@@ -8,11 +8,15 @@ final class ApiExceptionInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler _) {
+    throw _toTypedApiException(err);
+  }
+
+  ApiException _toTypedApiException(DioException err) {
     final Response<dynamic>? response = err.response;
-    final bool isAbpFormatted = _isAbpFormatted(response);
-    if (isAbpFormatted) {
-      final Object? data = response?.data;
-      final Map<String, dynamic>? normalized = _normalizeJsonMap(data);
+    if (_isAbpFormatted(response)) {
+      final Map<String, dynamic>? normalized = _normalizeJsonMap(
+        response?.data,
+      );
       if (normalized != null) {
         try {
           final AbpErrorResponse parsed = AbpErrorResponse.fromJson(normalized);
@@ -21,15 +25,14 @@ final class ApiExceptionInterceptor extends Interceptor {
             statusCode: response?.statusCode,
             cause: err,
           );
-          throw exception.toTypedException();
+          return exception.toTypedException();
         } on FormatException {
           // Fall through and map to generic API exception.
         }
       }
     }
 
-    final ApiException fallbackException = ApiException.fromDioException(err);
-    throw fallbackException.toTypedException();
+    return ApiException.fromDioException(err).toTypedException();
   }
 
   bool _isAbpFormatted(Response<dynamic>? response) {

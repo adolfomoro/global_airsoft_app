@@ -16,11 +16,6 @@ final class AuthService {
   final AuthStorageService _authStorageService;
   final AppLogger _logger;
 
-  Future<bool> isAuthenticated() async {
-    final String? token = await _authStorageService.getJwtToken();
-    return token != null && token.isNotEmpty;
-  }
-
   Future<void> login(String login, String password) async {
     final UserLoginInputDto input = UserLoginInputDto(
       login: login,

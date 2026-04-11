@@ -13,6 +13,7 @@ final class DeviceRegistrationService {
   static const String _unknownPlatform = 'Unknown';
   static const String _unknownDeviceType = 'Unknown';
   static const String _initialAppVersion = '0.0.0';
+  static const String _emptyPushToken = '';
   static const int _maxSyncAttempts = 3;
 
   DeviceRegistrationService({
@@ -75,7 +76,8 @@ final class DeviceRegistrationService {
     _lastDeviceType = _normalizeStored(snapshot.lastDeviceType);
     _lastAppVersion = _normalizeStored(snapshot.lastAppVersion);
     _lastDeviceModel = _normalizeStored(snapshot.lastDeviceModel);
-    _lastPushToken = _normalizeStored(snapshot.lastPushToken) ?? '';
+    _lastPushToken =
+        _normalizeStored(snapshot.lastPushToken) ?? _emptyPushToken;
   }
 
   String? _normalizeStored(String? value) {
@@ -133,14 +135,14 @@ final class DeviceRegistrationService {
           return false;
         }
 
-        if (!_needsRegisterOrUpdate()) {
+        if (_isRegistrationUpToDate()) {
           return true;
         }
 
         continue;
       }
 
-      if (!_needsRegisterOrUpdate()) {
+      if (_isRegistrationUpToDate()) {
         return true;
       }
 
@@ -153,7 +155,7 @@ final class DeviceRegistrationService {
           return false;
         }
 
-        if (!_needsRegisterOrUpdate()) {
+        if (_isRegistrationUpToDate()) {
           return true;
         }
       } finally {
@@ -191,27 +193,53 @@ final class DeviceRegistrationService {
     final String? storedDeviceId = _storedDeviceId;
     final String pushToken = _getPushNotificationToken();
 
-    if (storedDeviceId == null || _hasDeviceInfoChanged(pushToken)) {
-      final RegisterDeviceInputDto input = RegisterDeviceInputDto(
-        deviceId: storedDeviceId,
-        platform: _cachedPlatform,
-        deviceType: _cachedDeviceType,
-        appVersion: _cachedAppVersion,
-        deviceModel: _cachedDeviceModel,
-        pushNotificationToken: pushToken,
-        pushNotificationType: _pushNotificationType,
-      );
-
-      final output = await _deviceRepository.registerDevice(input);
-
-      await _saveCurrentValuesAsLastKnown(
-        pushToken: pushToken,
-        deviceId: output.deviceId,
-      );
-
-      _storedDeviceId = output.deviceId;
-      _cachedDeviceId = output.deviceId;
+    if (!_shouldSyncDevice(
+      storedDeviceId: storedDeviceId,
+      pushToken: pushToken,
+    )) {
+      return;
     }
+
+    final RegisterDeviceInputDto input = _buildRegisterDeviceInput(
+      storedDeviceId: storedDeviceId,
+      pushToken: pushToken,
+    );
+
+    final output = await _deviceRepository.registerDevice(input);
+
+    await _saveCurrentValuesAsLastKnown(
+      pushToken: pushToken,
+      deviceId: output.deviceId,
+    );
+
+    _storedDeviceId = output.deviceId;
+    _cachedDeviceId = output.deviceId;
+  }
+
+  bool _isRegistrationUpToDate() {
+    return !_needsRegisterOrUpdate();
+  }
+
+  bool _shouldSyncDevice({
+    required String? storedDeviceId,
+    required String pushToken,
+  }) {
+    return storedDeviceId == null || _hasDeviceInfoChanged(pushToken);
+  }
+
+  RegisterDeviceInputDto _buildRegisterDeviceInput({
+    required String? storedDeviceId,
+    required String pushToken,
+  }) {
+    return RegisterDeviceInputDto(
+      deviceId: storedDeviceId,
+      platform: _cachedPlatform,
+      deviceType: _cachedDeviceType,
+      appVersion: _cachedAppVersion,
+      deviceModel: _cachedDeviceModel,
+      pushNotificationToken: pushToken,
+      pushNotificationType: _pushNotificationType,
+    );
   }
 
   bool _needsRegisterOrUpdate() {

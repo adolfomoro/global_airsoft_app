@@ -21,14 +21,6 @@ final class AuthStorageService {
     return _secureStorage.setString(_jwtTokenKey, token);
   }
 
-  Future<String?> getRefreshToken() async {
-    try {
-      return await _secureStorage.getString(_refreshTokenKey);
-    } catch (_) {
-      return null;
-    }
-  }
-
   Future<void> saveRefreshToken(String token) {
     return _secureStorage.setString(_refreshTokenKey, token);
   }

@@ -7,11 +7,4 @@ enum PushNotificationType {
   const PushNotificationType(this.value);
 
   final int value;
-
-  factory PushNotificationType.fromValue(int value) {
-    return PushNotificationType.values.firstWhere(
-      (PushNotificationType type) => type.value == value,
-      orElse: () => PushNotificationType.unknown,
-    );
-  }
 }

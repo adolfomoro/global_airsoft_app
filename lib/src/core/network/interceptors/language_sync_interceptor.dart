@@ -1,6 +1,10 @@
 import 'package:dio/dio.dart';
 
 final class LanguageSyncInterceptor extends Interceptor {
+  static const String _acceptLanguageHeader = 'Accept-Language';
+  static const String _contentLanguageHeader = 'content-language';
+  static const String _contentLanguageHeaderCompact = 'contentlanguage';
+
   LanguageSyncInterceptor({
     required String Function() getDeviceLanguage,
     required Future<void> Function(String? contentLanguage) onContentLanguage,
@@ -17,7 +21,7 @@ final class LanguageSyncInterceptor extends Interceptor {
   ) async {
     final String language = _getDeviceLanguage().trim();
     if (language.isNotEmpty) {
-      options.headers['Accept-Language'] = language;
+      options.headers[_acceptLanguageHeader] = language;
     }
     handler.next(options);
   }
@@ -27,7 +31,7 @@ final class LanguageSyncInterceptor extends Interceptor {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) async {
-    await _onContentLanguage(_resolveContentLanguage(response.headers));
+    await _syncContentLanguage(response.headers);
     handler.next(response);
   }
 
@@ -36,9 +40,12 @@ final class LanguageSyncInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    final Headers? headers = err.response?.headers;
-    await _onContentLanguage(_resolveContentLanguage(headers));
+    await _syncContentLanguage(err.response?.headers);
     handler.next(err);
+  }
+
+  Future<void> _syncContentLanguage(Headers? headers) {
+    return _onContentLanguage(_resolveContentLanguage(headers));
   }
 
   String? _resolveContentLanguage(Headers? headers) {
@@ -46,7 +53,7 @@ final class LanguageSyncInterceptor extends Interceptor {
       return null;
     }
 
-    return headers.value('contentlanguage') ??
-        headers.value('content-language');
+    return headers.value(_contentLanguageHeaderCompact) ??
+        headers.value(_contentLanguageHeader);
   }
 }
