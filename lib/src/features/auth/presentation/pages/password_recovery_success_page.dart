@@ -12,56 +12,105 @@ class PasswordRecoverySuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
         title: Text(context.l10n.tr(AppLocaleKeys.authPasswordRecoveryTitle)),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const SizedBox(height: 20),
-              Container(
-                width: 68,
-                height: 68,
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(20),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                const SizedBox(height: 24),
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.primary.withValues(alpha: 0.10),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.mark_email_read_rounded,
+                      size: 56,
+                      color: colorScheme.primary,
+                    ),
+                  ),
                 ),
-                child: Icon(
-                  Icons.mark_email_read_rounded,
-                  size: 36,
-                  color: colorScheme.primary,
+                const SizedBox(height: 32),
+                Text(
+                  context.l10n.tr(
+                    AppLocaleKeys.authPasswordRecoverySuccessTitle,
+                  ),
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                context.l10n.tr(AppLocaleKeys.authPasswordRecoverySuccessTitle),
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                context.l10n.trArgs(
-                  AppLocaleKeys.authPasswordRecoverySuccessMessage,
-                  args: <String, Object>{'email': email},
+                const SizedBox(height: 16),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final message = context.l10n.tr(
+                      AppLocaleKeys.authPasswordRecoverySuccessMessage,
+                    );
+                    final parts = message.split('{email}');
+                    return RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                        children: [
+                          TextSpan(text: parts.first),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                              ),
+                              child: Text(
+                                email,
+                                style: textTheme.bodyLarge?.copyWith(
+                                  color: colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                          if (parts.length > 1) TextSpan(text: parts.last),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const Spacer(),
-              AppButton(
-                label: context.l10n.tr(
-                  AppLocaleKeys.authPasswordRecoverySuccessBackToLoginAction,
+                const SizedBox(height: 40),
+                AppButton(
+                  label: context.l10n.tr(
+                    AppLocaleKeys.authPasswordRecoverySuccessBackToLoginAction,
+                  ),
+                  onPressed: () {
+                    Navigator.of(
+                      context,
+                    ).popUntil((Route<void> route) => route.isFirst);
+                  },
                 ),
-                onPressed: () {
-                  Navigator.of(
-                    context,
-                  ).popUntil((Route<void> route) => route.isFirst);
-                },
-              ),
-            ],
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
