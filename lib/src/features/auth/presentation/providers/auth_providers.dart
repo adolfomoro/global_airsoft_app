@@ -5,7 +5,7 @@ import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
-import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/password_validation_rules_output_dto.dart';
 
 const int _maxPasswordRulesFetchAttempts = 3;

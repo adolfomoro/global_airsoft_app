@@ -11,7 +11,7 @@ import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_registration_service.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_storage_service.dart';
 import 'package:global_airsoft_app/src/features/device/data/constants/device_api_paths.dart';
-import 'package:global_airsoft_app/src/features/device/data/repositories/device_repository.dart';
+import 'package:global_airsoft_app/src/features/device/data/repositories/device_repository/device_repository.dart';
 
 final NotifierProvider<PushTokenNotifier, String> pushTokenProvider =
     NotifierProvider<PushTokenNotifier, String>(PushTokenNotifier.new);
