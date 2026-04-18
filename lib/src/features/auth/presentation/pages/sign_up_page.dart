@@ -10,6 +10,7 @@ import 'package:global_airsoft_app/src/app/widgets/focus_aware_scroll_coordinato
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
@@ -41,14 +42,23 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey _passwordFieldKey = GlobalKey();
   final GlobalKey _passwordRulesCardKey = GlobalKey();
-  late TextEditingController _fullNameController;
-  late TextEditingController _usernameController;
-  late TextEditingController _emailController;
-  late TextEditingController _passwordController;
-  late TextEditingController _confirmPasswordController;
   final FocusNode _passwordFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
-  late FocusAwareScrollCoordinator _passwordFocusScrollCoordinator;
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  late final FocusAwareScrollCoordinator _passwordFocusScrollCoordinator =
+      FocusAwareScrollCoordinator(
+        focusNode: _passwordFocusNode,
+        scrollController: _scrollController,
+        focusedFieldKey: _passwordFieldKey,
+        revealTargetKey: _passwordRulesCardKey,
+        minGapFromAppBar: 30,
+        desiredRevealRatio: 0.9,
+      );
   String? _fullNameError;
   String? _usernameError;
   String? _emailError;
@@ -59,19 +69,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _fullNameController = TextEditingController();
-    _usernameController = TextEditingController();
-    _emailController = TextEditingController();
-    _passwordController = TextEditingController();
-    _confirmPasswordController = TextEditingController();
-    _passwordFocusScrollCoordinator = FocusAwareScrollCoordinator(
-      focusNode: _passwordFocusNode,
-      scrollController: _scrollController,
-      focusedFieldKey: _passwordFieldKey,
-      revealTargetKey: _passwordRulesCardKey,
-      minGapFromAppBar: 30,
-      desiredRevealRatio: 0.9,
-    );
     _passwordFocusNode.addListener(_handlePasswordFocusChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
@@ -309,7 +306,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
           SnackBar(content: Text(message), backgroundColor: Colors.red),
         );
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.instance.error(
+        'Unexpected sign-up failure.',
+        error: error,
+        stackTrace: stackTrace,
+      );
       if (!mounted) {
         return;
       }

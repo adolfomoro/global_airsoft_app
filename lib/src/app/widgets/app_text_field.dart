@@ -58,7 +58,7 @@ class _AppTextFieldState extends State<AppTextField> {
   static const EdgeInsets _zeroPadding = EdgeInsets.zero;
   static const VisualDensity _compactDensity = VisualDensity.compact;
 
-  late bool _obscureText;
+  bool _obscureText = false;
 
   @override
   void initState() {

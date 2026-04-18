@@ -16,8 +16,12 @@ const String othersNotificationChannelId = 'others_channel';
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     await Firebase.initializeApp();
-  } catch (_) {
-    // Ignore duplicate initialization or missing runtime config in background.
+  } catch (error, stackTrace) {
+    AppLogger.instance.error(
+      'Firebase background handler initialization failed.',
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 }
 

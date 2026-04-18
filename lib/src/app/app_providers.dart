@@ -38,11 +38,6 @@ notificationPermissionServiceProvider = Provider<NotificationPermissionService>(
   },
 );
 
-final Provider<DeviceRegistrationRuntime> deviceRegistrationRuntimeProvider =
-    Provider<DeviceRegistrationRuntime>((Ref ref) {
-      return DeviceRegistrationRuntime();
-    });
-
 final Provider<DeviceStorageService> deviceStorageServiceProvider =
     Provider<DeviceStorageService>((Ref ref) {
       final secureStorage = ref.watch(secureStorageServiceProvider);
@@ -60,9 +55,6 @@ final Provider<DeviceRegistrationService> deviceRegistrationServiceProvider =
     Provider<DeviceRegistrationService>((Ref ref) {
       final deviceRepository = ref.watch(deviceRepositoryProvider);
       final storageService = ref.watch(deviceStorageServiceProvider);
-      final DeviceRegistrationRuntime runtime = ref.watch(
-        deviceRegistrationRuntimeProvider,
-      );
 
       final DeviceRegistrationService service = DeviceRegistrationService(
         deviceRepository: deviceRepository,
@@ -70,8 +62,6 @@ final Provider<DeviceRegistrationService> deviceRegistrationServiceProvider =
         getPushNotificationToken: () => ref.read(pushTokenProvider),
         logger: AppLogger.instance,
       );
-
-      runtime.attach(service);
       return service;
     });
 
@@ -84,18 +74,17 @@ final Provider<AppDioService> appDioServiceProvider = Provider<AppDioService>((
 ) {
   final AppConfig config = ref.watch(appConfigProvider);
   final String osLanguageTag = ref.watch(appOsLanguageTagProvider);
-  final DeviceRegistrationRuntime runtime = ref.watch(
-    deviceRegistrationRuntimeProvider,
-  );
   final localeController = ref.watch(appLocaleControllerProvider.notifier);
   return AppDioService.create(
     config: config,
     logger: AppLogger.instance,
     getDeviceId: () {
-      return runtime.getStoredDeviceId();
+      return ref.read(deviceRegistrationServiceProvider).getStoredDeviceId();
     },
     ensureDeviceSynced: () {
-      return runtime.ensureDeviceSynced();
+      return ref
+          .read(deviceRegistrationServiceProvider)
+          .ensureRegisteredBeforeRequest();
     },
     getDeviceLanguage: () {
       return osLanguageTag;
@@ -115,26 +104,5 @@ final class PushTokenNotifier extends Notifier<String> {
 
   void setToken(String token) {
     state = token;
-  }
-}
-
-final class DeviceRegistrationRuntime {
-  DeviceRegistrationService? _service;
-
-  void attach(DeviceRegistrationService service) {
-    _service = service;
-  }
-
-  String? getStoredDeviceId() {
-    return _service?.getStoredDeviceId();
-  }
-
-  Future<bool> ensureDeviceSynced() {
-    final DeviceRegistrationService? service = _service;
-    if (service == null) {
-      return Future<bool>.value(true);
-    }
-
-    return service.ensureRegisteredBeforeRequest();
   }
 }

@@ -4,6 +4,7 @@ import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class HomePage extends ConsumerWidget {
@@ -14,9 +15,17 @@ class HomePage extends ConsumerWidget {
     final authService = ref.read(authServiceProvider);
 
     Future<void> handleLogout() async {
-      await authService.logout();
-      if (context.mounted) {
-        ref.read(isAuthenticatedProvider.notifier).setUnauthenticated();
+      try {
+        await authService.logout();
+        if (context.mounted) {
+          ref.read(isAuthenticatedProvider.notifier).setUnauthenticated();
+        }
+      } catch (error, stackTrace) {
+        AppLogger.instance.error(
+          'Logout failed.',
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
     }
 

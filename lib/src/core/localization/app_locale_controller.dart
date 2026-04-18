@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:global_airsoft_app/src/core/localization/app_locale_dependency_providers.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_defaults.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';

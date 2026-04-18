@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/models/auth_profile.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/models/auth_tokens.dart';
@@ -19,7 +21,12 @@ final class AuthStorageService {
       final map = jsonDecode(raw);
       if (map is! Map<String, dynamic>) return null;
       return AuthTokens.fromJson(map);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.instance.error(
+        'Failed to read stored auth tokens.',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -31,7 +38,12 @@ final class AuthStorageService {
       final map = jsonDecode(raw);
       if (map is! Map<String, dynamic>) return null;
       return AuthProfile.fromJson(map);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.instance.error(
+        'Failed to read stored auth profile.',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }

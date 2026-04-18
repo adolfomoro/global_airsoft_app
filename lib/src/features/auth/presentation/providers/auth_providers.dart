@@ -77,8 +77,13 @@ final class PasswordValidationRulesNotifier
           .getPasswordValidationRules();
       _failureCount = 0;
       state = AsyncValue<PasswordValidationRulesOutputDto?>.data(rules);
-    } catch (_) {
+    } catch (error, stackTrace) {
       _failureCount = _failureCount + 1;
+      AppLogger.instance.error(
+        'Failed to fetch password validation rules.',
+        error: error,
+        stackTrace: stackTrace,
+      );
       state = const AsyncValue<PasswordValidationRulesOutputDto?>.data(null);
     }
   }

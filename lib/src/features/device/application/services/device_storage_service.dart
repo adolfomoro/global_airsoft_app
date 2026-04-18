@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
 
 final class DeviceStorageService {
@@ -23,7 +24,12 @@ final class DeviceStorageService {
       }
 
       return DeviceStorageSnapshot.fromJson(decoded);
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.instance.error(
+        'Failed to decode device storage snapshot.',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return DeviceStorageSnapshot.empty();
     }
   }
@@ -73,22 +79,22 @@ final class DeviceStorageSnapshot {
   Map<String, String> toJson() {
     final Map<String, String> result = <String, String>{};
 
-    if (deviceId != null && deviceId!.isNotEmpty) {
+    if (deviceId?.isNotEmpty ?? false) {
       result['deviceId'] = deviceId!;
     }
-    if (lastPlatform != null && lastPlatform!.isNotEmpty) {
+    if (lastPlatform?.isNotEmpty ?? false) {
       result['lastPlatform'] = lastPlatform!;
     }
-    if (lastDeviceType != null && lastDeviceType!.isNotEmpty) {
+    if (lastDeviceType?.isNotEmpty ?? false) {
       result['lastDeviceType'] = lastDeviceType!;
     }
-    if (lastAppVersion != null && lastAppVersion!.isNotEmpty) {
+    if (lastAppVersion?.isNotEmpty ?? false) {
       result['lastAppVersion'] = lastAppVersion!;
     }
-    if (lastDeviceModel != null && lastDeviceModel!.isNotEmpty) {
+    if (lastDeviceModel?.isNotEmpty ?? false) {
       result['lastDeviceModel'] = lastDeviceModel!;
     }
-    if (lastPushToken != null && lastPushToken!.isNotEmpty) {
+    if (lastPushToken?.isNotEmpty ?? false) {
       result['lastPushToken'] = lastPushToken!;
     }
 

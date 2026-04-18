@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:global_airsoft_app/core/widgets/app_unfocus_wrapper.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/theme/app_theme.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
@@ -10,6 +9,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_providers.da
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/notifications/widgets/notification_permission_listener.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_unfocus_wrapper.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/pages/login_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/pages/home_page.dart';

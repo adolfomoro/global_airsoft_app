@@ -5,6 +5,7 @@ import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
@@ -28,15 +29,9 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
   static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late TextEditingController _emailController;
+  final TextEditingController _emailController = TextEditingController();
   String? _emailError;
   bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _emailController = TextEditingController();
-  }
 
   @override
   void dispose() {
@@ -151,7 +146,12 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: Colors.red),
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.instance.error(
+        'Unexpected password recovery failure.',
+        error: error,
+        stackTrace: stackTrace,
+      );
       if (!mounted) {
         return;
       }

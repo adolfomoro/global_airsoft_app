@@ -8,6 +8,7 @@ import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
@@ -38,8 +39,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   );
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late TextEditingController _loginController;
-  late TextEditingController _passwordController;
+  final TextEditingController _loginController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   String? _loginError;
   String? _passwordError;
   bool _isLoading = false;
@@ -47,8 +48,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _loginController = TextEditingController();
-    _passwordController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         return;
@@ -197,7 +196,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           SnackBar(content: Text(message), backgroundColor: Colors.red),
         );
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.instance.error(
+        'Unexpected login failure.',
+        error: error,
+        stackTrace: stackTrace,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

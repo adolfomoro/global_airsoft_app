@@ -9,16 +9,16 @@ final class AppLocalizationService {
 
   final Future<AppLocalizations> _localizationsFuture;
 
-  Future<String> tr(String key) {
-    return _localizationsFuture.then((AppLocalizations l10n) => l10n.tr(key));
+  Future<String> tr(String key) async {
+    final AppLocalizations l10n = await _localizationsFuture;
+    return l10n.tr(key);
   }
 
   Future<String> trArgs(
     String key, {
     Map<String, Object?> args = const <String, Object?>{},
-  }) {
-    return _localizationsFuture.then(
-      (AppLocalizations l10n) => l10n.trArgs(key, args: args),
-    );
+  }) async {
+    final AppLocalizations l10n = await _localizationsFuture;
+    return l10n.trArgs(key, args: args);
   }
 }

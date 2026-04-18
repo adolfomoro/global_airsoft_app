@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -129,21 +127,28 @@ class _NotificationPermissionListenerState
       return;
     }
 
+    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
+      navigatorState.context,
+    );
+    final String errorMessage = navigatorState.context.l10n.tr(
+      AppLocaleKeys.notificationPermissionError,
+    );
+
     final bool? didAllow = await navigatorState.push<bool>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (BuildContext routeContext) {
+        builder: (BuildContext _) {
           return RequestNotificationPermissionScreen(
             onAllow: () {
               unawaited(
                 _requestSystemPermissionAndCloseScreen(
-                  routeContext: routeContext,
+                  navigatorState: navigatorState,
                   pushNotificationService: pushNotificationService,
                   notificationPermissionService: notificationPermissionService,
                 ),
               );
             },
-            onDismiss: () => Navigator.of(routeContext).pop(false),
+            onDismiss: () => navigatorState.pop(false),
           );
         },
       ),
@@ -154,16 +159,10 @@ class _NotificationPermissionListenerState
         return;
       }
 
-      final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
-        navigatorState.context,
-      );
       if (messenger == null) {
         return;
       }
 
-      final String errorMessage = navigatorState.context.l10n.tr(
-        AppLocaleKeys.notificationPermissionError,
-      );
       messenger.showSnackBar(SnackBar(content: Text(errorMessage)));
       return;
     }
@@ -174,7 +173,7 @@ class _NotificationPermissionListenerState
   }
 
   Future<void> _requestSystemPermissionAndCloseScreen({
-    required BuildContext routeContext,
+    required NavigatorState navigatorState,
     required PushNotificationService pushNotificationService,
     required NotificationPermissionService notificationPermissionService,
   }) async {
@@ -190,17 +189,22 @@ class _NotificationPermissionListenerState
         await notificationPermissionService.markPermissionGranted();
       }
 
-      if (!routeContext.mounted) {
+      if (!mounted || !navigatorState.mounted) {
         return;
       }
 
-      Navigator.of(routeContext).pop(granted);
-    } catch (_) {
-      if (!routeContext.mounted) {
+      navigatorState.pop(granted);
+    } catch (error, stackTrace) {
+      AppLogger.instance.error(
+        'Notification permission result could not be applied.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      if (!mounted || !navigatorState.mounted) {
         return;
       }
 
-      Navigator.of(routeContext).pop(null);
+      navigatorState.pop(null);
     }
   }
 
@@ -221,19 +225,19 @@ class _NotificationPermissionListenerState
     final bool? openSettings = await navigatorState.push<bool>(
       MaterialPageRoute(
         fullscreenDialog: true,
-        builder: (BuildContext routeContext) {
+        builder: (BuildContext _) {
           return RequestNotificationPermissionScreen(
             mode: NotificationPermissionScreenMode.openSettings,
             onAllow: () {
               unawaited(
                 _openSettingsAndCloseWhenGranted(
-                  routeContext: routeContext,
+                  navigatorState: navigatorState,
                   pushNotificationService: pushNotificationService,
                   notificationPermissionService: notificationPermissionService,
                 ),
               );
             },
-            onDismiss: () => Navigator.of(routeContext).pop(false),
+            onDismiss: () => navigatorState.pop(false),
           );
         },
       ),
@@ -252,7 +256,7 @@ class _NotificationPermissionListenerState
   }
 
   Future<void> _openSettingsAndCloseWhenGranted({
-    required BuildContext routeContext,
+    required NavigatorState navigatorState,
     required PushNotificationService pushNotificationService,
     required NotificationPermissionService notificationPermissionService,
   }) async {
@@ -263,12 +267,12 @@ class _NotificationPermissionListenerState
     _isOpeningSettings = true;
     try {
       final bool opened = await openAppSettings();
-      if (!opened || !mounted || !routeContext.mounted) {
+      if (!opened || !mounted || !navigatorState.mounted) {
         return;
       }
 
       await _waitForNextResume();
-      if (!mounted || !routeContext.mounted) {
+      if (!mounted || !navigatorState.mounted) {
         return;
       }
 
@@ -282,11 +286,11 @@ class _NotificationPermissionListenerState
       }
 
       await notificationPermissionService.markPermissionGranted();
-      if (!routeContext.mounted) {
+      if (!mounted || !navigatorState.mounted) {
         return;
       }
 
-      Navigator.of(routeContext).pop(true);
+      navigatorState.pop(true);
     } catch (error, stackTrace) {
       AppLogger.instance.error(
         'Open settings permission flow failed.',

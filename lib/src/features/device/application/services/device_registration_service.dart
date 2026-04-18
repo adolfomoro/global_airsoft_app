@@ -34,7 +34,6 @@ final class DeviceRegistrationService {
   String _cachedDeviceType = _unknownDeviceType;
   String _cachedAppVersion = _initialAppVersion;
   String? _cachedDeviceModel;
-  String? _cachedDeviceId;
   String? _storedDeviceId;
   String? _lastPlatform;
   String? _lastDeviceType;
@@ -70,7 +69,6 @@ final class DeviceRegistrationService {
     final DeviceStorageSnapshot snapshot = await _storageService.loadSnapshot();
 
     _storedDeviceId = _normalizeStored(snapshot.deviceId);
-    _cachedDeviceId = _storedDeviceId;
     _lastPlatform = _normalizeStored(snapshot.lastPlatform);
     _lastDeviceType = _normalizeStored(snapshot.lastDeviceType);
     _lastAppVersion = _normalizeStored(snapshot.lastAppVersion);
@@ -212,7 +210,6 @@ final class DeviceRegistrationService {
     );
 
     _storedDeviceId = output.deviceId;
-    _cachedDeviceId = output.deviceId;
   }
 
   bool _isRegistrationUpToDate() {
@@ -286,5 +283,5 @@ final class DeviceRegistrationService {
     return PushNotificationType.unknown;
   }
 
-  String? getStoredDeviceId() => _cachedDeviceId;
+  String? getStoredDeviceId() => _storedDeviceId;
 }
