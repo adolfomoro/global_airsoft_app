@@ -16,7 +16,9 @@ import 'package:global_airsoft_app/src/features/auth/application/services/auth_s
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/password_validation_rules_output_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/validation/auth_validation_patterns.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/validation/full_name_validation.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/validation/user_name_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_validation_rules_card.dart';
 
@@ -29,45 +31,26 @@ class SignUpPage extends ConsumerStatefulWidget {
 
 class _SignUpPageState extends ConsumerState<SignUpPage>
     with WidgetsBindingObserver {
-  static const int _minUserNameLength = 3;
-  static const int _maxUserNameLength = 32;
-  static final RegExp _userNamePattern = RegExp(r'^[a-z]+$');
-
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
-  static final ValidationRuleSet _userNameValidationRules =
-      ValidationRuleSet(<ValidationRule>[
-        const RequiredValidationRule(),
-        const MinLengthValidationRule(_minUserNameLength),
-        const MaxLengthValidationRule(_maxUserNameLength),
-        PatternValidationRule(
-          _userNamePattern,
-          messageKey: AppLocaleKeys.validationUserNameLowercaseOnly,
-          allowEmpty: false,
-          trimValue: true,
-        ),
-      ]);
-  static final ValidationRuleSet _emailValidationRules =
-      ValidationRuleSet(<ValidationRule>[
-        const RequiredValidationRule(),
-        const MaxLengthValidationRule(256),
-        PatternValidationRule(
-          AuthValidationPatterns.emailPattern,
-          allowEmpty: false,
-          trimValue: true,
-        ),
-      ]);
+  static final ValidationRuleSet _fullNameValidationRules =
+      FullNameValidation.rules;
+  static final ValidationRuleSet _usernameValidationRules =
+      UsernameValidation.rules;
+  static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey _passwordFieldKey = GlobalKey();
   final GlobalKey _passwordRulesCardKey = GlobalKey();
-  late TextEditingController _userNameController;
+  late TextEditingController _fullNameController;
+  late TextEditingController _usernameController;
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
   late TextEditingController _confirmPasswordController;
   final FocusNode _passwordFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   late FocusAwareScrollCoordinator _passwordFocusScrollCoordinator;
-  String? _userNameError;
+  String? _fullNameError;
+  String? _usernameError;
   String? _emailError;
   String? _passwordError;
   bool _isLoading = false;
@@ -76,7 +59,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _userNameController = TextEditingController();
+    _fullNameController = TextEditingController();
+    _usernameController = TextEditingController();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
@@ -118,7 +102,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _passwordFocusScrollCoordinator.dispose();
-    _userNameController.dispose();
+    _fullNameController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -128,13 +113,23 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     super.dispose();
   }
 
-  void _handleUserNameChanged(String _) {
-    if (_userNameError == null) {
+  void _handleFullNameChanged(String _) {
+    if (_fullNameError == null) {
       return;
     }
 
     setState(() {
-      _userNameError = null;
+      _fullNameError = null;
+    });
+  }
+
+  void _handleUsernameChanged(String _) {
+    if (_usernameError == null) {
+      return;
+    }
+
+    setState(() {
+      _usernameError = null;
     });
   }
 
@@ -229,7 +224,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     FocusScope.of(context).unfocus();
 
     setState(() {
-      _userNameError = null;
+      _fullNameError = null;
+      _usernameError = null;
       _emailError = null;
       _passwordError = null;
     });
@@ -246,7 +242,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     try {
       final AuthService authService = ref.read(authServiceProvider);
       await authService.signUp(
-        userName: _userNameController.text.trim().toLowerCase(),
+        fullName: _fullNameController.text.trim(),
+        username: _usernameController.text.trim().toLowerCase(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
@@ -271,20 +268,26 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
       final ValidationMappingResult mappedErrors = _validationErrorMapper.map(
         exception: error.failure,
         targetFields: const <String>{
-          CreateUserInputDto.userNameField,
+          CreateUserInputDto.fullNameField,
+          CreateUserInputDto.usernameField,
           CreateUserInputDto.emailField,
           CreateUserInputDto.passwordField,
         },
         memberAliases: const <String, String>{
-          'username': CreateUserInputDto.userNameField,
+          'fullName': CreateUserInputDto.fullNameField,
+          'fullname': CreateUserInputDto.fullNameField,
+          'name': CreateUserInputDto.fullNameField,
+          'username': CreateUserInputDto.usernameField,
           'email': CreateUserInputDto.emailField,
           'password': CreateUserInputDto.passwordField,
         },
       );
 
       setState(() {
-        _userNameError =
-            mappedErrors.fieldErrors[CreateUserInputDto.userNameField];
+        _fullNameError =
+            mappedErrors.fieldErrors[CreateUserInputDto.fullNameField];
+        _usernameError =
+            mappedErrors.fieldErrors[CreateUserInputDto.usernameField];
         _emailError = mappedErrors.fieldErrors[CreateUserInputDto.emailField];
         _passwordError =
             mappedErrors.fieldErrors[CreateUserInputDto.passwordField]
@@ -387,16 +390,31 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                   ),
                   const SizedBox(height: 24),
                   AppTextField(
-                    labelText: context.l10n.tr(AppLocaleKeys.authUserNameLabel),
-                    hintText: context.l10n.tr(AppLocaleKeys.authUserNameHint),
-                    controller: _userNameController,
-                    onChanged: _handleUserNameChanged,
-                    errorText: _userNameError,
-                    isRequired: _userNameValidationRules.hasRequiredRule,
+                    labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
+                    hintText: context.l10n.tr(AppLocaleKeys.authUsernameHint),
+                    controller: _usernameController,
+                    onChanged: _handleUsernameChanged,
+                    errorText: _usernameError,
+                    isRequired: _usernameValidationRules.hasRequiredRule,
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
                     prefixIcon: const Icon(Icons.alternate_email_rounded),
-                    validator: _userNameValidationRules.asValidator(
+                    validator: _usernameValidationRules.asValidator(
+                      _resolveValidationMessage,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  AppTextField(
+                    labelText: context.l10n.tr(AppLocaleKeys.authFullNameLabel),
+                    hintText: context.l10n.tr(AppLocaleKeys.authFullNameHint),
+                    controller: _fullNameController,
+                    onChanged: _handleFullNameChanged,
+                    errorText: _fullNameError,
+                    isRequired: _fullNameValidationRules.hasRequiredRule,
+                    keyboardType: TextInputType.name,
+                    textInputAction: TextInputAction.next,
+                    prefixIcon: const Icon(Icons.badge_outlined),
+                    validator: _fullNameValidationRules.asValidator(
                       _resolveValidationMessage,
                     ),
                   ),

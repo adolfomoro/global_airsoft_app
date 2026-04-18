@@ -1,11 +1,10 @@
-import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/validation/validation_failure.dart';
 import 'package:global_airsoft_app/src/core/validation/validation_rule.dart';
 
 final class PatternValidationRule extends ValidationRule {
   const PatternValidationRule(
-    this.pattern, {
-    this.messageKey = AppLocaleKeys.validationPattern,
+    this.pattern,
+    this.messageKey, {
     this.allowEmpty = true,
     this.trimValue = false,
     this.arguments = const <String, Object?>{},

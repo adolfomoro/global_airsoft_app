@@ -13,13 +13,11 @@ abstract final class AppLocaleKeys {
   static const String homeLogoutAction = 'home.logoutAction';
   static const String authLoginTitle = 'auth.loginTitle';
   static const String authLoginSubtitle = 'auth.loginSubtitle';
-  static const String authLoginContinueWith = 'auth.loginContinueWith';
   static const String authLoginIdentifierLabel = 'auth.loginIdentifierLabel';
   static const String authLoginNoAccount = 'auth.loginNoAccount';
   static const String authLoginSignUpAction = 'auth.loginSignUpAction';
   static const String authForgotPasswordAction = 'auth.forgotPasswordAction';
   static const String authSignInAction = 'auth.signInAction';
-  static const String authSignInWithGoogle = 'auth.signInWithGoogle';
   static const String authPasswordRecoveryTitle = 'auth.passwordRecoveryTitle';
   static const String authPasswordRecoveryHeading =
       'auth.passwordRecoveryHeading';
@@ -42,13 +40,15 @@ abstract final class AppLocaleKeys {
   static const String authSignUpSubtitle = 'auth.signUpSubtitle';
   static const String authSignUpAction = 'auth.signUpAction';
   static const String authBackToLoginAction = 'auth.backToLoginAction';
-  static const String authUserNameLabel = 'auth.userNameLabel';
-  static const String authUserNameHint = 'auth.userNameHint';
+  static const String authFullNameLabel = 'auth.fullNameLabel';
+  static const String authFullNameHint = 'auth.fullNameHint';
+  static const String authUsernameLabel = 'auth.usernameLabel';
+  static const String authUsernameHint = 'auth.usernameHint';
   static const String authPasswordLabel = 'auth.passwordLabel';
   static const String authEmailLabel = 'auth.emailLabel';
   static const String authEmailHint = 'auth.emailHint';
-  static const String authUserNameRestrictionHint =
-      'auth.userNameRestrictionHint';
+  static const String authUsernameRestrictionHint =
+      'auth.usernameRestrictionHint';
   static const String authConfirmPasswordLabel = 'auth.confirmPasswordLabel';
   static const String authConfirmPasswordRequired =
       'auth.confirmPasswordRequired';
@@ -137,8 +137,8 @@ abstract final class AppLocaleKeys {
       'validation.passwordRequireUppercase';
   static const String validationPasswordRequireNonAlphanumeric =
       'validation.passwordRequireNonAlphanumeric';
-  static const String validationUserNameLowercaseOnly =
-      'validation.userNameLowercaseOnly';
+  static const String validationUsernameLowercaseOnly =
+      'validation.usernameLowercaseOnly';
   static const String commonShowPassword = 'common.showPassword';
   static const String commonHidePassword = 'common.hidePassword';
 }

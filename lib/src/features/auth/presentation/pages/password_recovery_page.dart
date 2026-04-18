@@ -10,7 +10,7 @@ import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/validation/auth_validation_patterns.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/pages/password_recovery_success_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
@@ -25,16 +25,7 @@ class PasswordRecoveryPage extends ConsumerStatefulWidget {
 class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
-  static final ValidationRuleSet _emailValidationRules =
-      ValidationRuleSet(<ValidationRule>[
-        const RequiredValidationRule(),
-        const MaxLengthValidationRule(256),
-        PatternValidationRule(
-          AuthValidationPatterns.emailPattern,
-          allowEmpty: false,
-          trimValue: true,
-        ),
-      ]);
+  static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController _emailController;

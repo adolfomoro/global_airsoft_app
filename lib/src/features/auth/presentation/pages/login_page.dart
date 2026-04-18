@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
-import 'package:global_airsoft_app/src/app/widgets/app_google_sign_in_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_login_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
@@ -37,7 +36,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   static const ValidationRuleSet _passwordValidationRules = ValidationRuleSet(
     <ValidationRule>[RequiredValidationRule()],
   );
-  static void _noopAction() {}
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late TextEditingController _loginController;
@@ -353,36 +351,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                             onPressed: _isLoading ? null : _handleLogin,
                             isLoading: _isLoading,
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Divider(
-                                  color: colorScheme.outlineVariant,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                child: Text(
-                                  context.l10n.tr(
-                                    AppLocaleKeys.authLoginContinueWith,
-                                  ),
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ),
-                              Expanded(
-                                child: Divider(
-                                  color: colorScheme.outlineVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          AppGoogleSignInButton(
-                            onPressed: _isLoading ? null : _noopAction,
                           ),
                         ],
                       ),

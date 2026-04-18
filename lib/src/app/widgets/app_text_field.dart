@@ -19,6 +19,9 @@ final class AppTextField extends StatefulWidget {
     this.validator,
     this.keyboardType = TextInputType.text,
     this.textInputAction = TextInputAction.next,
+    this.autocorrect,
+    this.enableSuggestions,
+    this.enableIMEPersonalizedLearning,
   });
 
   final String labelText;
@@ -34,6 +37,9 @@ final class AppTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
   final TextInputAction textInputAction;
+  final bool? autocorrect;
+  final bool? enableSuggestions;
+  final bool? enableIMEPersonalizedLearning;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -61,30 +67,50 @@ class _AppTextFieldState extends State<AppTextField> {
   }
 
   @override
+  void didUpdateWidget(covariant AppTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.obscureText != widget.obscureText) {
+      _obscureText = widget.obscureText;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+    final bool effectiveAutocorrect = widget.autocorrect ?? !widget.obscureText;
+    final bool effectiveEnableSuggestions =
+        widget.enableSuggestions ?? !widget.obscureText;
+    final bool effectiveEnableIMEPersonalizedLearning =
+        widget.enableIMEPersonalizedLearning ?? !widget.obscureText;
+    final Widget obscureToggleIcon = IconButton(
+      tooltip: context.l10n.tr(
+        _obscureText
+            ? AppLocaleKeys.commonShowPassword
+            : AppLocaleKeys.commonHidePassword,
+      ),
+      padding: _zeroPadding,
+      visualDensity: _compactDensity,
+      constraints: _iconConstraints,
+      icon: Icon(
+        _obscureText
+            ? Icons.visibility_off_outlined
+            : Icons.visibility_outlined,
+      ),
+      onPressed: () {
+        setState(() {
+          _obscureText = !_obscureText;
+        });
+      },
+    );
     final Widget? effectiveSuffixIcon = widget.obscureText
-        ? IconButton(
-            tooltip: context.l10n.tr(
-              _obscureText
-                  ? AppLocaleKeys.commonShowPassword
-                  : AppLocaleKeys.commonHidePassword,
-            ),
-            padding: _zeroPadding,
-            visualDensity: _compactDensity,
-            constraints: _iconConstraints,
-            icon: Icon(
-              _obscureText
-                  ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined,
-            ),
-            onPressed: () {
-              setState(() {
-                _obscureText = !_obscureText;
-              });
-            },
-          )
+        ? (widget.suffixIcon == null
+              ? obscureToggleIcon
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[widget.suffixIcon!, obscureToggleIcon],
+                ))
         : widget.suffixIcon;
 
     return TextFormField(
@@ -92,6 +118,9 @@ class _AppTextFieldState extends State<AppTextField> {
       focusNode: widget.focusNode,
       onChanged: widget.onChanged,
       obscureText: _obscureText,
+      autocorrect: effectiveAutocorrect,
+      enableSuggestions: effectiveEnableSuggestions,
+      enableIMEPersonalizedLearning: effectiveEnableIMEPersonalizedLearning,
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
       validator: (String? value) {
