@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_form_padding.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/focus_aware_scroll_coordinator.dart';
@@ -374,8 +375,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
           controller: _scrollController,
           child: Form(
             key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(24),
+            child: AppFormPadding(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[

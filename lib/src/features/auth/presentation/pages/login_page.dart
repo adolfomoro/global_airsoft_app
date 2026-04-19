@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_form_padding.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_login_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
@@ -226,8 +227,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
+            child: AppFormPadding(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
@@ -293,71 +293,67 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   DecoratedBox(
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          AppLoginField(
-                            controller: _loginController,
-                            errorText: _loginError,
-                            onChanged: _handleLoginChanged,
-                            isRequired: _loginValidationRules.hasRequiredRule,
-                            validator: _loginValidationRules.asValidator(
-                              _resolveValidationMessage,
-                            ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        AppLoginField(
+                          controller: _loginController,
+                          errorText: _loginError,
+                          onChanged: _handleLoginChanged,
+                          isRequired: _loginValidationRules.hasRequiredRule,
+                          validator: _loginValidationRules.asValidator(
+                            _resolveValidationMessage,
                           ),
-                          const SizedBox(height: 16),
-                          AppPasswordField(
-                            labelText: context.l10n.tr(
-                              AppLocaleKeys.authPasswordLabel,
-                            ),
-                            controller: _passwordController,
-                            errorText: _passwordError,
-                            onChanged: _handlePasswordChanged,
-                            isRequired:
-                                _passwordValidationRules.hasRequiredRule,
-                            validator: _passwordValidationRules.asValidator(
-                              _resolveValidationMessage,
-                            ),
+                        ),
+                        const SizedBox(height: 16),
+                        AppPasswordField(
+                          labelText: context.l10n.tr(
+                            AppLocaleKeys.authPasswordLabel,
                           ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: _isLoading
-                                  ? null
-                                  : () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute<void>(
-                                          builder: (BuildContext context) {
-                                            return const PasswordRecoveryPage();
-                                          },
-                                        ),
-                                      );
-                                    },
-                              child: Text(
-                                context.l10n.tr(
-                                  AppLocaleKeys.authForgotPasswordAction,
-                                ),
+                          controller: _passwordController,
+                          errorText: _passwordError,
+                          onChanged: _handlePasswordChanged,
+                          isRequired: _passwordValidationRules.hasRequiredRule,
+                          validator: _passwordValidationRules.asValidator(
+                            _resolveValidationMessage,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _isLoading
+                                ? null
+                                : () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                        builder: (BuildContext context) {
+                                          return const PasswordRecoveryPage();
+                                        },
+                                      ),
+                                    );
+                                  },
+                            child: Text(
+                              context.l10n.tr(
+                                AppLocaleKeys.authForgotPasswordAction,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          AppButton(
-                            label: context.l10n.tr(
-                              AppLocaleKeys.authSignInAction,
-                            ),
-                            onPressed: _isLoading ? null : _handleLogin,
-                            isLoading: _isLoading,
+                        ),
+                        const SizedBox(height: 20),
+                        AppButton(
+                          label: context.l10n.tr(
+                            AppLocaleKeys.authSignInAction,
                           ),
-                        ],
-                      ),
+                          onPressed: _isLoading ? null : _handleLogin,
+                          isLoading: _isLoading,
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 18),

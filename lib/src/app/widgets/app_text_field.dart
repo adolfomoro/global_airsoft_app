@@ -60,6 +60,7 @@ class _AppTextFieldState extends State<AppTextField> {
 
   bool _obscureText = false;
   bool _isFocused = false;
+  bool _isPasswordTogglePressed = false;
 
   @override
   void initState() {
@@ -85,25 +86,50 @@ class _AppTextFieldState extends State<AppTextField> {
         widget.enableSuggestions ?? !widget.obscureText;
     final bool effectiveEnableIMEPersonalizedLearning =
         widget.enableIMEPersonalizedLearning ?? !widget.obscureText;
-    final Widget obscureToggleIcon = IconButton(
-      tooltip: context.l10n.tr(
+    final Widget obscureToggleIcon = Semantics(
+      button: true,
+      label: context.l10n.tr(
         _obscureText
             ? AppLocaleKeys.commonShowPassword
             : AppLocaleKeys.commonHidePassword,
       ),
-      padding: _zeroPadding,
-      visualDensity: _compactDensity,
-      constraints: _iconConstraints,
-      icon: Icon(
-        _obscureText
-            ? Icons.visibility_off_outlined
-            : Icons.visibility_outlined,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) {
+          if (_isPasswordTogglePressed) {
+            return;
+          }
+
+          setState(() {
+            _isPasswordTogglePressed = true;
+          });
+        },
+        onTapUp: (_) {
+          setState(() {
+            _isPasswordTogglePressed = false;
+            _obscureText = !_obscureText;
+          });
+        },
+        onTapCancel: () {
+          if (!_isPasswordTogglePressed) {
+            return;
+          }
+
+          setState(() {
+            _isPasswordTogglePressed = false;
+          });
+        },
+        child: AnimatedScale(
+          scale: _isPasswordTogglePressed ? 0.92 : 1,
+          duration: const Duration(milliseconds: 120),
+          curve: Curves.easeOut,
+          child: Icon(
+            _obscureText
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
+          ),
+        ),
       ),
-      onPressed: () {
-        setState(() {
-          _obscureText = !_obscureText;
-        });
-      },
     );
     final Widget? effectiveSuffixIcon = widget.obscureText
         ? (widget.suffixIcon == null

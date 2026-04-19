@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 final class AppTheme {
   AppTheme._();
@@ -59,12 +58,13 @@ final class AppTheme {
       useMaterial3: true,
       brightness: colorScheme.brightness,
     ).textTheme;
-    final TextTheme robotoFlexTextTheme = GoogleFonts.robotoFlexTextTheme(
-      baseTextTheme,
+    final TextTheme robotoFlexTextTheme = baseTextTheme.apply(
+      fontFamily: 'RobotoFlex',
     );
 
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'RobotoFlex',
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
       textTheme: robotoFlexTextTheme,
