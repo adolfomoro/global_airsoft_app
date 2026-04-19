@@ -122,6 +122,11 @@ final class DeviceRegistrationService {
   }
 
   Future<bool> ensureRegisteredBeforeRequest() async {
+    final String pushToken = _getPushNotificationToken().trim();
+    if (pushToken.isEmpty) {
+      return true;
+    }
+
     await initialize();
 
     for (int attempt = 0; attempt < _maxSyncAttempts; attempt++) {
@@ -190,6 +195,10 @@ final class DeviceRegistrationService {
     final String? storedDeviceId = _storedDeviceId;
     final String pushToken = _getPushNotificationToken();
 
+    if (pushToken.trim().isEmpty) {
+      return;
+    }
+
     if (!_shouldSyncDevice(
       storedDeviceId: storedDeviceId,
       pushToken: pushToken,
@@ -240,6 +249,10 @@ final class DeviceRegistrationService {
 
   bool _needsRegisterOrUpdate() {
     final String pushToken = _getPushNotificationToken();
+    if (pushToken.trim().isEmpty) {
+      return false;
+    }
+
     return _storedDeviceId == null || _hasDeviceInfoChanged(pushToken);
   }
 

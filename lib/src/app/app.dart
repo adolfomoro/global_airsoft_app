@@ -60,16 +60,6 @@ class _AppState extends ConsumerState<App> {
         stackTrace: stackTrace,
       );
     }
-
-    try {
-      await _initializeDeviceRegistration();
-    } catch (error, stackTrace) {
-      AppLogger.instance.error(
-        'Device registration startup failed.',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
   }
 
   Future<void> _initializePushNotifications() async {
@@ -82,12 +72,6 @@ class _AppState extends ConsumerState<App> {
             .registerInBackground();
       },
     );
-  }
-
-  Future<void> _initializeDeviceRegistration() async {
-    final service = ref.read(deviceRegistrationServiceProvider);
-    await service.initialize();
-    await service.registerInBackground();
   }
 
   @override
