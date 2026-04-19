@@ -8,6 +8,7 @@ final class AppLoginField extends StatelessWidget {
     super.key,
     required this.controller,
     this.onChanged,
+    this.onFieldSubmitted,
     this.errorText,
     this.validator,
     this.isRequired = false,
@@ -15,6 +16,7 @@ final class AppLoginField extends StatelessWidget {
 
   final TextEditingController controller;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onFieldSubmitted;
   final String? errorText;
   final String? Function(String?)? validator;
   final bool isRequired;
@@ -26,11 +28,16 @@ final class AppLoginField extends StatelessWidget {
       isRequired: isRequired,
       controller: controller,
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted,
       errorText: errorText,
       validator: validator,
       prefixIcon: const Icon(Icons.person_outline),
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
+      autofillHints: const <String>[
+        AutofillHints.username,
+        AutofillHints.email,
+      ],
     );
   }
 }

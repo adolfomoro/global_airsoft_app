@@ -8,6 +8,7 @@ final class AppPasswordField extends StatelessWidget {
     this.focusNode,
     this.labelText = 'Password',
     this.onChanged,
+    this.onFieldSubmitted,
     this.errorText,
     this.validator,
     this.isRequired = false,
@@ -18,6 +19,7 @@ final class AppPasswordField extends StatelessWidget {
   final FocusNode? focusNode;
   final String labelText;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onFieldSubmitted;
   final String? errorText;
   final String? Function(String?)? validator;
   final bool isRequired;
@@ -31,6 +33,7 @@ final class AppPasswordField extends StatelessWidget {
       controller: controller,
       focusNode: focusNode,
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted,
       errorText: errorText,
       validator: validator,
       obscureText: true,

@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_form_padding.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_gradient_background.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_login_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
@@ -223,166 +225,173 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: AppFormPadding(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  const SizedBox(height: 20),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+      body: AppGradientBackground(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Form(
+              key: _formKey,
+              child: AutofillGroup(
+                child: AppFormPadding(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      Container(
-                        width: 58,
-                        height: 58,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.track_changes_rounded,
-                              color: colorScheme.primary,
-                              size: 30,
-                            ),
-                            Positioned(
-                              bottom: 6,
-                              right: 6,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  'GA',
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        color: colorScheme.onPrimary,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                ),
+                      const SizedBox(height: 20),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Container(
+                            width: 58,
+                            height: 58,
+                            decoration: BoxDecoration(
+                              color: colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(
+                                AppDimensions.radiusLg,
                               ),
                             ),
-                          ],
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: <Widget>[
+                                Icon(
+                                  Icons.track_changes_rounded,
+                                  color: colorScheme.primary,
+                                  size: 30,
+                                ),
+                                Positioned(
+                                  bottom: 6,
+                                  right: 6,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      'GA',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(
+                                            color: colorScheme.onPrimary,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            context.l10n.tr(AppLocaleKeys.appTitle),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 8),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 480),
+                            child: Text(
+                              context.l10n.tr(AppLocaleKeys.authLoginSubtitle),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+                      AppLoginField(
+                        controller: _loginController,
+                        errorText: _loginError,
+                        onChanged: _handleLoginChanged,
+                        onFieldSubmitted: (_) {
+                          FocusScope.of(context).nextFocus();
+                        },
+                        isRequired: _loginValidationRules.hasRequiredRule,
+                        validator: _loginValidationRules.asValidator(
+                          _resolveValidationMessage,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        context.l10n.tr(AppLocaleKeys.appTitle),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
+                      const SizedBox(height: 16),
+                      AppPasswordField(
+                        labelText: context.l10n.tr(
+                          AppLocaleKeys.authPasswordLabel,
+                        ),
+                        controller: _passwordController,
+                        errorText: _passwordError,
+                        onChanged: _handlePasswordChanged,
+                        onFieldSubmitted: (_) {
+                          if (_isLoading) {
+                            return;
+                          }
+
+                          unawaited(_handleLogin());
+                        },
+                        isRequired: _passwordValidationRules.hasRequiredRule,
+                        validator: _passwordValidationRules.asValidator(
+                          _resolveValidationMessage,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 480),
-                        child: Text(
-                          context.l10n.tr(AppLocaleKeys.authLoginSubtitle),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (BuildContext context) {
+                                        return const PasswordRecoveryPage();
+                                      },
+                                    ),
+                                  );
+                                },
+                          child: Text(
+                            context.l10n.tr(
+                              AppLocaleKeys.authForgotPasswordAction,
+                            ),
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        AppLoginField(
-                          controller: _loginController,
-                          errorText: _loginError,
-                          onChanged: _handleLoginChanged,
-                          isRequired: _loginValidationRules.hasRequiredRule,
-                          validator: _loginValidationRules.asValidator(
-                            _resolveValidationMessage,
+                      const SizedBox(height: 20),
+                      AppButton(
+                        label: context.l10n.tr(AppLocaleKeys.authSignInAction),
+                        onPressed: _isLoading ? null : _handleLogin,
+                        isLoading: _isLoading,
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            context.l10n.tr(AppLocaleKeys.authLoginNoAccount),
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        AppPasswordField(
-                          labelText: context.l10n.tr(
-                            AppLocaleKeys.authPasswordLabel,
-                          ),
-                          controller: _passwordController,
-                          errorText: _passwordError,
-                          onChanged: _handlePasswordChanged,
-                          isRequired: _passwordValidationRules.hasRequiredRule,
-                          validator: _passwordValidationRules.asValidator(
-                            _resolveValidationMessage,
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
+                          TextButton(
                             onPressed: _isLoading
                                 ? null
                                 : () {
                                     Navigator.of(context).push(
                                       MaterialPageRoute<void>(
                                         builder: (BuildContext context) {
-                                          return const PasswordRecoveryPage();
+                                          return const SignUpPage();
                                         },
                                       ),
                                     );
                                   },
                             child: Text(
                               context.l10n.tr(
-                                AppLocaleKeys.authForgotPasswordAction,
+                                AppLocaleKeys.authLoginSignUpAction,
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        AppButton(
-                          label: context.l10n.tr(
-                            AppLocaleKeys.authSignInAction,
-                          ),
-                          onPressed: _isLoading ? null : _handleLogin,
-                          isLoading: _isLoading,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        context.l10n.tr(AppLocaleKeys.authLoginNoAccount),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      TextButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (BuildContext context) {
-                                      return const SignUpPage();
-                                    },
-                                  ),
-                                );
-                              },
-                        child: Text(
-                          context.l10n.tr(AppLocaleKeys.authLoginSignUpAction),
-                        ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

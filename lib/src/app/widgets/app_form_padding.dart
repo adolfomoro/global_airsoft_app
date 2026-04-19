@@ -10,13 +10,26 @@ final class AppFormPadding extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = _defaultPadding,
+    this.maxWidth = AppDimensions.maxContentWidth,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
+  final double? maxWidth;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(padding: padding, child: child);
+    Widget content = child;
+    if (maxWidth != null) {
+      content = ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth!),
+        child: content,
+      );
+    }
+
+    return Padding(
+      padding: padding,
+      child: Align(alignment: Alignment.topCenter, child: content),
+    );
   }
 }

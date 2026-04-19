@@ -22,6 +22,8 @@ final class AppTextField extends StatefulWidget {
     this.autocorrect,
     this.enableSuggestions,
     this.enableIMEPersonalizedLearning,
+    this.autofillHints,
+    this.onFieldSubmitted,
   });
 
   final String labelText;
@@ -40,6 +42,8 @@ final class AppTextField extends StatefulWidget {
   final bool? autocorrect;
   final bool? enableSuggestions;
   final bool? enableIMEPersonalizedLearning;
+  final Iterable<String>? autofillHints;
+  final ValueChanged<String>? onFieldSubmitted;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -54,9 +58,6 @@ class _AppTextFieldState extends State<AppTextField> {
     minWidth: 48,
     minHeight: 48,
   );
-
-  static const EdgeInsets _zeroPadding = EdgeInsets.zero;
-  static const VisualDensity _compactDensity = VisualDensity.compact;
 
   bool _obscureText = false;
   bool _isFocused = false;
@@ -152,6 +153,8 @@ class _AppTextFieldState extends State<AppTextField> {
         enableIMEPersonalizedLearning: effectiveEnableIMEPersonalizedLearning,
         keyboardType: widget.keyboardType,
         textInputAction: widget.textInputAction,
+        autofillHints: widget.autofillHints,
+        onFieldSubmitted: widget.onFieldSubmitted,
         validator: (String? value) {
           if (widget.isRequired) {
             final String? requiredMessage = _requiredValidationRuleSet
