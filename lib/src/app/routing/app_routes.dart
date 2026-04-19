@@ -16,15 +16,15 @@ final class AppRoutes {
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings, {
-    required bool isAuthenticated,
+    required bool Function() isAuthenticated,
   }) {
-    final String routeName =
-        settings.name ?? _defaultRouteName(isAuthenticated);
+    final bool authenticated = isAuthenticated();
+    final String routeName = settings.name ?? _defaultRouteName(authenticated);
     final _AppRouteDefinition definition =
-        _routes[routeName] ?? _routes[_defaultRouteName(isAuthenticated)]!;
+        _routes[routeName] ?? _routes[_defaultRouteName(authenticated)]!;
 
-    if (!_canAccess(definition.access, isAuthenticated)) {
-      return _buildFallbackRoute(isAuthenticated);
+    if (!_canAccess(definition.access, authenticated)) {
+      return _buildFallbackRoute(authenticated);
     }
 
     return MaterialPageRoute<dynamic>(

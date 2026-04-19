@@ -4,7 +4,7 @@ import 'package:global_airsoft_app/src/core/validation/validation.dart';
 abstract final class UsernameValidation {
   static const int minLength = 3;
   static const int maxLength = 40;
-  static final RegExp usernamePattern = RegExp(r'^[a-z]+$');
+  static final RegExp usernamePattern = RegExp(r'^[a-z0-9_.]+$');
 
   static final ValidationRuleSet rules = ValidationRuleSet(<ValidationRule>[
     const RequiredValidationRule(),

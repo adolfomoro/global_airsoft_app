@@ -45,24 +45,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-
-      unawaited(_warmUpPasswordRulesInBackground());
-    });
-  }
-
-  Future<void> _warmUpPasswordRulesInBackground() async {
-    await ref
-        .read(passwordValidationRulesProvider.notifier)
-        .fetchInBackground();
-  }
-
-  @override
   void dispose() {
     _loginController.dispose();
     _passwordController.dispose();
@@ -103,11 +85,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         baseKey: AppLocaleKeys.validationPasswordMinimumLength,
         value: failure.arguments['min'],
       ),
-      AppLocaleKeys.validationPasswordUniqueCharacters =>
-        _pluralizedValidationKey(
-          baseKey: AppLocaleKeys.validationPasswordUniqueCharacters,
-          value: failure.arguments['min'],
-        ),
       _ => failure.messageKey,
     };
 

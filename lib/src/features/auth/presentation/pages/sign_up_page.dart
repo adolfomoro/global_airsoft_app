@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
@@ -17,12 +15,12 @@ import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/password_validation_rules_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/full_name_validation.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/validation/password_validation_policy.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/user_name_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_validation_rules_card.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_requirements_hint.dart';
 
 class SignUpPage extends ConsumerStatefulWidget {
   const SignUpPage({super.key});
@@ -40,74 +38,62 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   static final ValidationRuleSet _usernameValidationRules =
       UsernameValidation.rules;
   static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
+  static final ValidationRuleSet _passwordValidationRules =
+      PasswordValidationPolicy.rules;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey _passwordFieldKey = GlobalKey();
-  final GlobalKey _passwordRulesCardKey = GlobalKey();
-  final FocusNode _passwordFocusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  late final FocusAwareScrollCoordinator _passwordFocusScrollCoordinator =
-      FocusAwareScrollCoordinator(
-        focusNode: _passwordFocusNode,
-        scrollController: _scrollController,
-        focusedFieldKey: _passwordFieldKey,
-        revealTargetKey: _passwordRulesCardKey,
-        minGapFromAppBar: 30,
-        desiredRevealRatio: 0.9,
-      );
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _passwordFocusNode = FocusNode();
+  final GlobalKey _passwordFieldKey = GlobalKey();
+  final GlobalKey _passwordHintKey = GlobalKey();
   String? _fullNameError;
   String? _usernameError;
   String? _emailError;
   String? _passwordError;
   bool _isLoading = false;
+  bool _isPasswordFocused = false;
+  bool _hasRevealedPasswordHint = false;
+  late final FocusAwareScrollCoordinator _passwordHintScrollCoordinator =
+      FocusAwareScrollCoordinator(
+        focusNode: _passwordFocusNode,
+        scrollController: _scrollController,
+        focusedFieldKey: _passwordFieldKey,
+        revealTargetKey: _passwordHintKey,
+        desiredRevealRatio: 1.0,
+      );
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _passwordFocusNode.addListener(_handlePasswordFocusChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-
-      unawaited(_warmUpPasswordRulesInBackground());
-    });
-  }
-
-  Future<void> _warmUpPasswordRulesInBackground() async {
-    await ref
-        .read(passwordValidationRulesProvider.notifier)
-        .fetchInBackground();
-  }
-
-  void _handlePasswordFocusChanged() {
-    _passwordFocusScrollCoordinator.onFocusChanged(context);
   }
 
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
-    _passwordFocusScrollCoordinator.onMetricsChanged(context);
+    if (_hasRevealedPasswordHint && _shouldShowPasswordHint()) {
+      _passwordHintScrollCoordinator.onMetricsChanged(context);
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _passwordFocusScrollCoordinator.dispose();
+    _passwordFocusNode.removeListener(_handlePasswordFocusChanged);
+    _passwordFocusNode.dispose();
+    _scrollController.dispose();
+    _passwordHintScrollCoordinator.dispose();
     _fullNameController.dispose();
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _passwordFocusNode.removeListener(_handlePasswordFocusChanged);
-    _passwordFocusNode.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -145,6 +131,51 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     setState(() {
       _passwordError = null;
     });
+
+    _requestPasswordHintRevealIfNeeded();
+  }
+
+  void _handlePasswordFocusChanged() {
+    if (_isPasswordFocused == _passwordFocusNode.hasFocus) {
+      return;
+    }
+
+    setState(() {
+      _isPasswordFocused = _passwordFocusNode.hasFocus;
+      if (!_isPasswordFocused) {
+        _hasRevealedPasswordHint = false;
+      }
+    });
+
+    _requestPasswordHintRevealIfNeeded();
+  }
+
+  bool _shouldShowPasswordHint() {
+    return _passwordValidationRules.validate(_passwordController.text) !=
+            null &&
+        (_isPasswordFocused || _passwordController.text.isNotEmpty);
+  }
+
+  bool _shouldRevealPasswordHintNow() {
+    return _isPasswordFocused &&
+        _passwordController.text.isNotEmpty &&
+        _shouldShowPasswordHint() &&
+        !_hasRevealedPasswordHint;
+  }
+
+  void _requestPasswordHintRevealIfNeeded() {
+    if (!_shouldRevealPasswordHintNow()) {
+      return;
+    }
+
+    _hasRevealedPasswordHint = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_shouldShowPasswordHint()) {
+        return;
+      }
+
+      _passwordHintScrollCoordinator.onFocusChanged(context);
+    });
   }
 
   String _resolveValidationMessage(ValidationFailure failure) {
@@ -161,11 +192,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
         baseKey: AppLocaleKeys.validationPasswordMinimumLength,
         value: failure.arguments['min'],
       ),
-      AppLocaleKeys.validationPasswordUniqueCharacters =>
-        _pluralizedValidationKey(
-          baseKey: AppLocaleKeys.validationPasswordUniqueCharacters,
-          value: failure.arguments['min'],
-        ),
       _ => failure.messageKey,
     };
 
@@ -191,18 +217,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
       baseKey: baseKey,
       isSingular: numericValue == 1,
     );
-  }
-
-  ValidationRuleSet _buildPasswordValidationRules(
-    PasswordValidationRulesOutputDto? rules,
-  ) {
-    if (rules == null) {
-      return const ValidationRuleSet(<ValidationRule>[
-        RequiredValidationRule(),
-      ]);
-    }
-
-    return rules.toValidationRuleSet();
   }
 
   String? _validateConfirmPassword(String? value) {
@@ -267,13 +281,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
           CreateUserInputDto.emailField,
           CreateUserInputDto.passwordField,
         },
-        memberAliases: const <String, String>{
-          'fullName': CreateUserInputDto.fullNameField,
-          'name': CreateUserInputDto.fullNameField,
-          'username': CreateUserInputDto.usernameField,
-          'email': CreateUserInputDto.emailField,
-          'password': CreateUserInputDto.passwordField,
-        },
       );
 
       setState(() {
@@ -287,7 +294,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                     ?.trim()
                     .isNotEmpty ==
                 true
-            ? context.l10n.tr(AppLocaleKeys.authPasswordRequirementsNotMet)
+            ? mappedErrors.fieldErrors[CreateUserInputDto.passwordField]
             : null;
       });
 
@@ -329,37 +336,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<PasswordValidationRulesOutputDto?> passwordRulesAsync = ref
-        .watch(passwordValidationRulesProvider);
-    final PasswordValidationRulesOutputDto? passwordRules =
-        passwordRulesAsync.asData?.value;
-    final bool hasPasswordRules = passwordRules != null;
-    final bool isPasswordRulesLoading = passwordRulesAsync.isLoading;
-    final ValidationRuleSet passwordValidationRules =
-        _buildPasswordValidationRules(passwordRules);
-    final ValidationRuleSet? effectivePasswordValidationRules = hasPasswordRules
-        ? passwordValidationRules
-        : null;
-    final bool canSubmit = !_isLoading && !isPasswordRulesLoading;
-    final Widget? passwordRulesWidget;
-    if (isPasswordRulesLoading && !hasPasswordRules) {
-      passwordRulesWidget = SizedBox(
-        key: _passwordRulesCardKey,
-        child: const PasswordValidationRulesCard(),
-      );
-    } else if (hasPasswordRules) {
-      passwordRulesWidget = SizedBox(
-        key: _passwordRulesCardKey,
-        child: PasswordValidationRulesCard(
-          rulesAsyncValue: AsyncValue<PasswordValidationRulesOutputDto>.data(
-            passwordRules,
-          ),
-          currentPassword: _passwordController.text,
-        ),
-      );
-    } else {
-      passwordRulesWidget = null;
-    }
+    final ValidationRuleSet passwordValidationRules = _passwordValidationRules;
+    final bool canSubmit = !_isLoading;
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
@@ -374,6 +352,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
+                  const SizedBox(height: 20),
                   Text(
                     context.l10n.tr(AppLocaleKeys.authSignUpHeading),
                     textAlign: TextAlign.center,
@@ -428,25 +407,24 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
+                  AppPasswordField(
                     key: _passwordFieldKey,
-                    child: AppPasswordField(
-                      labelText: context.l10n.tr(
-                        AppLocaleKeys.authPasswordLabel,
-                      ),
-                      controller: _passwordController,
-                      focusNode: _passwordFocusNode,
-                      onChanged: _handlePasswordChanged,
-                      errorText: _passwordError,
-                      isRequired:
-                          effectivePasswordValidationRules?.hasRequiredRule ??
-                          true,
-                      textInputAction: TextInputAction.done,
-                      validator: effectivePasswordValidationRules?.asValidator(
-                        (ValidationFailure failure) => context.l10n.tr(
-                          AppLocaleKeys.authPasswordRequirementsNotMet,
-                        ),
-                      ),
+                    labelText: context.l10n.tr(AppLocaleKeys.authPasswordLabel),
+                    controller: _passwordController,
+                    focusNode: _passwordFocusNode,
+                    onChanged: _handlePasswordChanged,
+                    errorText: _passwordError,
+                    isRequired: passwordValidationRules.hasRequiredRule,
+                    textInputAction: TextInputAction.done,
+                    validator: passwordValidationRules.asValidator(
+                      _resolveValidationMessage,
+                    ),
+                  ),
+                  SizedBox(
+                    key: _passwordHintKey,
+                    child: PasswordRequirementsHint(
+                      currentPassword: _passwordController.text,
+                      isFocused: _isPasswordFocused,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -459,9 +437,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                     textInputAction: TextInputAction.done,
                     validator: _validateConfirmPassword,
                   ),
-                  const SizedBox(height: 16),
-                  if (passwordRulesWidget case final Widget rulesWidget)
-                    rulesWidget,
                   const SizedBox(height: 24),
                   AppButton(
                     label: context.l10n.tr(AppLocaleKeys.authSignUpAction),

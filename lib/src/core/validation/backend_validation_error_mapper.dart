@@ -17,9 +17,14 @@ final class BackendValidationErrorMapper {
     final Map<String, String> fieldErrors = <String, String>{};
     final List<String> globalErrors = <String>[];
 
-    final Set<String> normalizedTargetFields = targetFields
-        .map(_normalizeFieldKey)
-        .toSet();
+    final Map<String, String> normalizedTargetFields = <String, String>{};
+    for (final String targetField in targetFields) {
+      normalizedTargetFields.putIfAbsent(
+        _normalizeFieldKey(targetField),
+        () => targetField,
+      );
+    }
+
     final Map<String, String> normalizedAliases = <String, String>{
       for (final MapEntry<String, String> entry in memberAliases.entries)
         _normalizeFieldKey(entry.key): _normalizeFieldKey(entry.value),
@@ -38,21 +43,32 @@ final class BackendValidationErrorMapper {
       }
 
       bool mappedToAnyField = false;
+      bool hasUnmappedMember = false;
 
       for (final String member in validationError.members) {
         final String normalizedMember = _normalizeMember(member);
-        final String targetKey =
-            normalizedAliases[normalizedMember] ?? normalizedMember;
-
-        if (!normalizedTargetFields.contains(targetKey)) {
+        if (normalizedMember.isEmpty) {
+          hasUnmappedMember = true;
           continue;
         }
 
-        fieldErrors.putIfAbsent(targetKey, () => validationError.message);
+        final String targetKey =
+            normalizedAliases[normalizedMember] ?? normalizedMember;
+        final String? originalTargetField = normalizedTargetFields[targetKey];
+
+        if (originalTargetField == null) {
+          hasUnmappedMember = true;
+          continue;
+        }
+
+        fieldErrors.putIfAbsent(
+          originalTargetField,
+          () => validationError.message,
+        );
         mappedToAnyField = true;
       }
 
-      if (!mappedToAnyField) {
+      if (!mappedToAnyField || hasUnmappedMember) {
         globalErrors.add(validationError.message);
       }
     }

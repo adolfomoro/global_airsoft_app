@@ -24,6 +24,7 @@ final class AppTextField extends StatefulWidget {
     this.enableIMEPersonalizedLearning,
     this.autofillHints,
     this.onFieldSubmitted,
+    this.errorMaxLines = 3,
   });
 
   final String labelText;
@@ -44,6 +45,7 @@ final class AppTextField extends StatefulWidget {
   final bool? enableIMEPersonalizedLearning;
   final Iterable<String>? autofillHints;
   final ValueChanged<String>? onFieldSubmitted;
+  final int? errorMaxLines;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -185,6 +187,7 @@ class _AppTextFieldState extends State<AppTextField> {
           label: _buildLabel(context),
           hintText: widget.hintText,
           errorText: widget.errorText,
+          errorMaxLines: widget.errorMaxLines,
           prefixIcon: widget.prefixIcon,
           suffixIcon: effectiveSuffixIcon,
           prefixIconConstraints: _iconConstraints,

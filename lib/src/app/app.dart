@@ -118,7 +118,7 @@ class _AppState extends ConsumerState<App> {
       onGenerateRoute: (RouteSettings settings) {
         return AppRoutes.onGenerateRoute(
           settings,
-          isAuthenticated: isAuthenticated,
+          isAuthenticated: () => ref.read(isAuthenticatedProvider),
         );
       },
       builder: (BuildContext context, Widget? child) {

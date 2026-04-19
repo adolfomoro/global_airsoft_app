@@ -5,7 +5,7 @@ import 'package:global_airsoft_app/src/core/validation/validation_rule.dart';
 final class UniqueCharactersValidationRule extends ValidationRule {
   const UniqueCharactersValidationRule(
     this.minUniqueCharacters, {
-    this.messageKey = AppLocaleKeys.validationPasswordUniqueCharacters,
+    this.messageKey = AppLocaleKeys.validationPattern,
     this.trimValue = false,
   }) : assert(minUniqueCharacters >= 0);
 

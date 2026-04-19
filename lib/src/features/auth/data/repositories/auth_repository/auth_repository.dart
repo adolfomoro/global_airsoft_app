@@ -8,7 +8,6 @@ import 'package:global_airsoft_app/src/features/auth/data/constants/auth_api_pat
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_output_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/password_validation_rules_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_output_dto.dart';
@@ -29,10 +28,6 @@ final class AuthRepository {
 
   Future<String> _signUpFailedMessage() {
     return _localizationService.tr(AppLocaleKeys.authSignUpFailed);
-  }
-
-  Future<String> _passwordRulesFailedMessage() {
-    return _localizationService.tr(AppLocaleKeys.authPasswordRulesFailed);
   }
 
   Future<String> _passwordRecoveryFailedMessage() {
@@ -138,34 +133,6 @@ final class AuthRepository {
     } on DioException {
       await _throwLocalizedFailure(
         failureMessageProvider: _signUpFailedMessage,
-      );
-    }
-  }
-
-  Future<PasswordValidationRulesOutputDto> getPasswordValidationRules() async {
-    try {
-      final Response<dynamic> response = await _dioService.get<dynamic>(
-        AuthApiPaths.passwordRules,
-      );
-
-      return _parseSuccessfulResponse(
-        response: response,
-        fromJson: PasswordValidationRulesOutputDto.fromJson,
-        failureMessageProvider: _passwordRulesFailedMessage,
-      );
-    } on AbpApiException catch (error) {
-      await _throwLocalizedAuthenticationException(
-        failureMessageProvider: _passwordRulesFailedMessage,
-        error: error,
-      );
-    } on ApiException catch (error) {
-      await _throwLocalizedAuthenticationException(
-        failureMessageProvider: _passwordRulesFailedMessage,
-        error: error,
-      );
-    } on DioException {
-      await _throwLocalizedFailure(
-        failureMessageProvider: _passwordRulesFailedMessage,
       );
     }
   }

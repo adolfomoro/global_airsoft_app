@@ -47,7 +47,7 @@ final Provider<DeviceStorageService> deviceStorageServiceProvider =
 
 final Provider<DeviceRepository> deviceRepositoryProvider =
     Provider<DeviceRepository>((Ref ref) {
-      final Dio dio = ref.watch(appDioClientProvider);
+      final Dio dio = ref.watch(deviceApiDioClientProvider);
       final AppLocalizationService localizationService = ref.watch(
         appLocalizationServiceProvider,
       );
@@ -75,15 +75,34 @@ final Provider<AppConfig> appConfigProvider = Provider<AppConfig>(
   (Ref ref) => AppConfig.fromDartDefines(),
 );
 
-final Provider<AppDioService> appDioServiceProvider = Provider<AppDioService>((
-  Ref ref,
-) {
+AppDioService _buildAppDioService(
+  Ref ref, {
+  String? Function()? getDeviceId,
+  Future<bool> Function()? ensureDeviceSynced,
+  Set<String> deviceSyncSkipPaths = const <String>{},
+}) {
   final AppConfig config = ref.watch(appConfigProvider);
   final String osLanguageTag = ref.watch(appOsLanguageTagProvider);
   final localeController = ref.watch(appLocaleControllerProvider.notifier);
+
   return AppDioService.create(
     config: config,
     logger: AppLogger.instance,
+    getDeviceId: getDeviceId,
+    ensureDeviceSynced: ensureDeviceSynced,
+    getDeviceLanguage: () {
+      return osLanguageTag;
+    },
+    onContentLanguage: localeController.syncFromServerContentLanguage,
+    deviceSyncSkipPaths: deviceSyncSkipPaths,
+  );
+}
+
+final Provider<AppDioService> appDioServiceProvider = Provider<AppDioService>((
+  Ref ref,
+) {
+  return _buildAppDioService(
+    ref,
     getDeviceId: () {
       return ref.read(deviceRegistrationServiceProvider).getStoredDeviceId();
     },
@@ -92,16 +111,21 @@ final Provider<AppDioService> appDioServiceProvider = Provider<AppDioService>((
           .read(deviceRegistrationServiceProvider)
           .ensureRegisteredBeforeRequest();
     },
-    getDeviceLanguage: () {
-      return osLanguageTag;
-    },
-    onContentLanguage: localeController.syncFromServerContentLanguage,
     deviceSyncSkipPaths: const <String>{DeviceApiPaths.registerDevice},
   );
 });
 
+final Provider<AppDioService> deviceApiDioServiceProvider =
+    Provider<AppDioService>((Ref ref) {
+      return _buildAppDioService(ref);
+    });
+
 final Provider<Dio> appDioClientProvider = Provider<Dio>(
   (Ref ref) => ref.watch(appDioServiceProvider).client,
+);
+
+final Provider<Dio> deviceApiDioClientProvider = Provider<Dio>(
+  (Ref ref) => ref.watch(deviceApiDioServiceProvider).client,
 );
 
 final class PushTokenNotifier extends Notifier<String> {

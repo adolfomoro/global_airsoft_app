@@ -6,9 +6,6 @@ import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
-import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/password_validation_rules_output_dto.dart';
-
-const int _maxPasswordRulesFetchAttempts = 3;
 
 final Provider<AuthStorageService> authStorageServiceProvider =
     Provider<AuthStorageService>((Ref ref) {
@@ -39,55 +36,6 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
     logger: AppLogger.instance,
   );
 });
-
-final NotifierProvider<
-  PasswordValidationRulesNotifier,
-  AsyncValue<PasswordValidationRulesOutputDto?>
->
-passwordValidationRulesProvider =
-    NotifierProvider<
-      PasswordValidationRulesNotifier,
-      AsyncValue<PasswordValidationRulesOutputDto?>
-    >(PasswordValidationRulesNotifier.new);
-
-final class PasswordValidationRulesNotifier
-    extends Notifier<AsyncValue<PasswordValidationRulesOutputDto?>> {
-  int _failureCount = 0;
-
-  @override
-  AsyncValue<PasswordValidationRulesOutputDto?> build() {
-    return const AsyncValue<PasswordValidationRulesOutputDto?>.data(null);
-  }
-
-  Future<void> fetchInBackground() async {
-    final bool hasRules = state.asData?.value != null;
-    if (hasRules || state.isLoading) {
-      return;
-    }
-
-    if (_failureCount >= _maxPasswordRulesFetchAttempts) {
-      return;
-    }
-
-    state = const AsyncValue<PasswordValidationRulesOutputDto?>.loading();
-
-    final AuthService authService = ref.read(authServiceProvider);
-    try {
-      final PasswordValidationRulesOutputDto rules = await authService
-          .getPasswordValidationRules();
-      _failureCount = 0;
-      state = AsyncValue<PasswordValidationRulesOutputDto?>.data(rules);
-    } catch (error, stackTrace) {
-      _failureCount = _failureCount + 1;
-      AppLogger.instance.error(
-        'Failed to fetch password validation rules.',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      state = const AsyncValue<PasswordValidationRulesOutputDto?>.data(null);
-    }
-  }
-}
 
 final Provider<bool> initialIsAuthenticatedProvider = Provider<bool>(
   (Ref ref) => false,

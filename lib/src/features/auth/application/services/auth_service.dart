@@ -4,7 +4,6 @@ import 'package:global_airsoft_app/src/features/auth/application/services/auth_s
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_output_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/password_validation_rules_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_output_dto.dart';
@@ -88,10 +87,6 @@ final class AuthService {
       UserLoginOutputDto(profile: output.profile, tokens: output.tokens),
       successLogMessage: 'User signed up successfully',
     );
-  }
-
-  Future<PasswordValidationRulesOutputDto> getPasswordValidationRules() {
-    return _authRepository.getPasswordValidationRules();
   }
 
   Future<void> requestPasswordRecovery(String email) {

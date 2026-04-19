@@ -62,24 +62,12 @@ abstract final class AppLocaleKeys {
   static const String authConfirmPasswordMismatch =
       'auth.confirmPasswordMismatch';
   static const String authPasswordRulesTitle = 'auth.passwordRulesTitle';
-  static const String authPasswordRulesLoading = 'auth.passwordRulesLoading';
   static const String authPasswordRulesMinimumLength =
       'auth.passwordRulesMinimumLength';
-  static const String authPasswordRulesUniqueCharacters =
-      'auth.passwordRulesUniqueCharacters';
-  static const String authPasswordRulesRequireDigit =
-      'auth.passwordRulesRequireDigit';
-  static const String authPasswordRulesRequireLowercase =
-      'auth.passwordRulesRequireLowercase';
-  static const String authPasswordRulesRequireUppercase =
-      'auth.passwordRulesRequireUppercase';
-  static const String authPasswordRulesRequireNonAlphanumeric =
-      'auth.passwordRulesRequireNonAlphanumeric';
-  static const String authPasswordRulesNoAdditionalRequirements =
-      'auth.passwordRulesNoAdditionalRequirements';
-  static const String authPasswordRulesFailed = 'auth.passwordRulesFailed';
-  static const String authPasswordRequirementsNotMet =
-      'auth.passwordRequirementsNotMet';
+  static const String authPasswordRulesLetterAndNumber =
+      'auth.passwordRulesLetterAndNumber';
+  static const String authPasswordRulesSpecialCharacter =
+      'auth.passwordRulesSpecialCharacter';
   static const String authLoginFailed = 'auth.loginFailed';
   static const String authSignUpFailed = 'auth.signUpFailed';
   static const String authPasswordRecoveryFailed =
@@ -134,16 +122,10 @@ abstract final class AppLocaleKeys {
   static const String validationPattern = 'validation.pattern';
   static const String validationPasswordMinimumLength =
       'validation.passwordMinimumLength';
-  static const String validationPasswordUniqueCharacters =
-      'validation.passwordUniqueCharacters';
-  static const String validationPasswordRequireDigit =
-      'validation.passwordRequireDigit';
-  static const String validationPasswordRequireLowercase =
-      'validation.passwordRequireLowercase';
-  static const String validationPasswordRequireUppercase =
-      'validation.passwordRequireUppercase';
-  static const String validationPasswordRequireNonAlphanumeric =
-      'validation.passwordRequireNonAlphanumeric';
+  static const String validationPasswordLetterAndNumber =
+      'validation.passwordLetterAndNumber';
+  static const String validationPasswordSpecialCharacter =
+      'validation.passwordSpecialCharacter';
   static const String validationUsernameLowercaseOnly =
       'validation.usernameLowercaseOnly';
   static const String commonShowPassword = 'common.showPassword';
