@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 final class AppTheme {
   AppTheme._();
@@ -54,10 +55,20 @@ final class AppTheme {
   }
 
   static ThemeData _buildTheme(ColorScheme colorScheme) {
+    final TextTheme baseTextTheme = ThemeData(
+      useMaterial3: true,
+      brightness: colorScheme.brightness,
+    ).textTheme;
+    final TextTheme robotoFlexTextTheme = GoogleFonts.robotoFlexTextTheme(
+      baseTextTheme,
+    );
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
+      textTheme: robotoFlexTextTheme,
+      primaryTextTheme: robotoFlexTextTheme,
       appBarTheme: AppBarTheme(
         centerTitle: false,
         backgroundColor: AppColors.transparent,
@@ -113,8 +124,16 @@ final class AppTheme {
         ),
         isDense: false,
         floatingLabelBehavior: FloatingLabelBehavior.auto,
-        labelStyle: const TextStyle(color: AppColors.onSurfaceDim),
-        floatingLabelStyle: const TextStyle(color: AppColors.secondaryLight),
+        labelStyle: const TextStyle(
+          color: AppColors.onSurfaceDim,
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),
+        floatingLabelStyle: const TextStyle(
+          color: AppColors.secondaryLight,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
         hintStyle: const TextStyle(color: AppColors.onSurfaceDim),
         prefixIconColor: AppColors.secondaryLight,
         suffixIconColor: AppColors.onSurfaceDim,

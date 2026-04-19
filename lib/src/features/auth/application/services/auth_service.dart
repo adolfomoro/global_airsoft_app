@@ -12,6 +12,8 @@ import 'package:global_airsoft_app/src/features/auth/domain/models/auth_profile.
 import 'package:global_airsoft_app/src/features/auth/domain/models/auth_tokens.dart';
 
 final class AuthService {
+  static const String _userIdBackupKey = 'user_id_for_backup';
+
   AuthService({
     required AuthRepository authRepository,
     required AuthStorageService authStorageService,
@@ -44,7 +46,7 @@ final class AuthService {
     );
     await _authStorageService.saveTokens(authTokens);
     await _authStorageService.saveProfile(authProfile);
-    await _sharedPrefs.setString('user_id_for_backup', profile.id);
+    await _sharedPrefs.setString(_userIdBackupKey, profile.id);
 
     _logger.info(successLogMessage);
   }
@@ -64,7 +66,7 @@ final class AuthService {
 
   Future<void> logout() async {
     await _authStorageService.clearAll();
-    await _sharedPrefs.remove('user_id_for_backup');
+    await _sharedPrefs.remove(_userIdBackupKey);
     _logger.info('User logged out');
   }
 

@@ -48,7 +48,13 @@ final Provider<DeviceStorageService> deviceStorageServiceProvider =
 final Provider<DeviceRepository> deviceRepositoryProvider =
     Provider<DeviceRepository>((Ref ref) {
       final Dio dio = ref.watch(appDioClientProvider);
-      return DeviceRepository(dio: dio);
+      final AppLocalizationService localizationService = ref.watch(
+        appLocalizationServiceProvider,
+      );
+      return DeviceRepository(
+        dio: dio,
+        localizationService: localizationService,
+      );
     });
 
 final Provider<DeviceRegistrationService> deviceRegistrationServiceProvider =

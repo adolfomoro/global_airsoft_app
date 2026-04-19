@@ -1,5 +1,4 @@
 import 'package:datadog_flutter_plugin/datadog_flutter_plugin.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
@@ -11,6 +10,7 @@ final class AppTelemetry {
 
   bool _initialized = false;
   bool _enabled = false;
+  DatadogLogger? _appLogger;
 
   Future<void> initialize(AppConfig config) async {
     if (_initialized) {
@@ -19,6 +19,9 @@ final class AppTelemetry {
 
     _initialized = true;
     _enabled = false;
+    _appLogger = null;
+    AppLogger.instance.setRemoteInfoReporter(null);
+    AppLogger.instance.setRemoteErrorReporter(null);
 
     if (!config.datadogEnabled) {
       return;
@@ -55,6 +58,18 @@ final class AppTelemetry {
         datadogConfiguration,
         TrackingConsent.granted,
       );
+
+      _appLogger = DatadogSdk.instance.logs?.createLogger(
+        DatadogLoggerConfiguration(
+          service: config.datadogServiceName,
+          name: 'app-logs',
+          remoteLogThreshold: LogLevel.info,
+          customConsoleLogFunction: null,
+        ),
+      );
+
+      AppLogger.instance.setRemoteInfoReporter(_reportAppLoggerInfo);
+      AppLogger.instance.setRemoteErrorReporter(_reportAppLoggerError);
       _enabled = true;
     } catch (error, stackTrace) {
       AppLogger.instance.error(
@@ -63,7 +78,35 @@ final class AppTelemetry {
         stackTrace: stackTrace,
       );
       _enabled = false;
+      _appLogger = null;
+      AppLogger.instance.setRemoteInfoReporter(null);
+      AppLogger.instance.setRemoteErrorReporter(null);
     }
+  }
+
+  void _reportAppLoggerInfo(String message) {
+    if (!_enabled) {
+      return;
+    }
+
+    _appLogger?.info(message);
+  }
+
+  void _reportAppLoggerError(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    if (!_enabled) {
+      return;
+    }
+
+    _appLogger?.error(
+      message,
+      errorMessage: error?.toString(),
+      errorKind: error?.runtimeType.toString(),
+      errorStackTrace: stackTrace,
+    );
   }
 
   void reportFlutterError(FlutterErrorDetails details) {

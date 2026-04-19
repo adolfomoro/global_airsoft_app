@@ -1,8 +1,13 @@
 {
     "app.title": "Global Airsoft App",
+    "app.startupFailedTitle": "Startup failed",
+    "app.startupFailedMessage": "The app could not start. Please restart the application.",
     "home.title": "Home",
     "home.mainLabel": "main",
     "home.logoutAction": "Logout",
+    "device.registrationFailed": "Unable to register the device.",
+    "device.registrationEmptyResponse": "Device registration returned an empty response.",
+    "device.registrationInvalidPayloadFormat": "Device registration returned an invalid payload.",
     "auth.loginTitle": "Login",
     "auth.loginSubtitle": "Discover matches, connect your squad, and get real-time updates from the community.",
     "auth.loginIdentifierLabel": "Email or username",

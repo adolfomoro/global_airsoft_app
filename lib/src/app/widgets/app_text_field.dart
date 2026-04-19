@@ -59,6 +59,7 @@ class _AppTextFieldState extends State<AppTextField> {
   static const VisualDensity _compactDensity = VisualDensity.compact;
 
   bool _obscureText = false;
+  bool _isFocused = false;
 
   @override
   void initState() {
@@ -113,78 +114,108 @@ class _AppTextFieldState extends State<AppTextField> {
                 ))
         : widget.suffixIcon;
 
-    return TextFormField(
-      controller: widget.controller,
-      focusNode: widget.focusNode,
-      onChanged: widget.onChanged,
-      obscureText: _obscureText,
-      autocorrect: effectiveAutocorrect,
-      enableSuggestions: effectiveEnableSuggestions,
-      enableIMEPersonalizedLearning: effectiveEnableIMEPersonalizedLearning,
-      keyboardType: widget.keyboardType,
-      textInputAction: widget.textInputAction,
-      validator: (String? value) {
-        if (widget.isRequired) {
-          final String? requiredMessage = _requiredValidationRuleSet
-              .asValidator(
-                (ValidationFailure failure) => context.l10n.trArgs(
-                  failure.messageKey,
-                  args: failure.arguments,
-                ),
-              )
-              .call(value);
+    return Focus(
+      onFocusChange: _handleFocusChange,
+      child: TextFormField(
+        controller: widget.controller,
+        focusNode: widget.focusNode,
+        onChanged: widget.onChanged,
+        obscureText: _obscureText,
+        autocorrect: effectiveAutocorrect,
+        enableSuggestions: effectiveEnableSuggestions,
+        enableIMEPersonalizedLearning: effectiveEnableIMEPersonalizedLearning,
+        keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
+        validator: (String? value) {
+          if (widget.isRequired) {
+            final String? requiredMessage = _requiredValidationRuleSet
+                .asValidator(
+                  (ValidationFailure failure) => context.l10n.trArgs(
+                    failure.messageKey,
+                    args: failure.arguments,
+                  ),
+                )
+                .call(value);
 
-          if (requiredMessage != null && requiredMessage.isNotEmpty) {
-            return requiredMessage;
+            if (requiredMessage != null && requiredMessage.isNotEmpty) {
+              return requiredMessage;
+            }
           }
-        }
 
-        final String? Function(String?)? customValidator = widget.validator;
-        if (customValidator == null) {
-          return null;
-        }
+          final String? Function(String?)? customValidator = widget.validator;
+          if (customValidator == null) {
+            return null;
+          }
 
-        return customValidator(value);
-      },
-      cursorColor: colorScheme.primary,
-      textAlignVertical: TextAlignVertical.center,
-      style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
-      decoration: InputDecoration(
-        label: _buildLabel(context),
-        hintText: widget.hintText,
-        errorText: widget.errorText,
-        prefixIcon: widget.prefixIcon,
-        suffixIcon: effectiveSuffixIcon,
-        prefixIconConstraints: _iconConstraints,
-        suffixIconConstraints: _iconConstraints,
-        errorStyle: TextStyle(color: colorScheme.error),
+          return customValidator(value);
+        },
+        cursorColor: colorScheme.primary,
+        textAlignVertical: TextAlignVertical.center,
+        style: _inputTextStyle(theme),
+        decoration: InputDecoration(
+          label: _buildLabel(context),
+          hintText: widget.hintText,
+          errorText: widget.errorText,
+          prefixIcon: widget.prefixIcon,
+          suffixIcon: effectiveSuffixIcon,
+          prefixIconConstraints: _iconConstraints,
+          suffixIconConstraints: _iconConstraints,
+          errorStyle: TextStyle(color: colorScheme.error),
+        ),
       ),
     );
   }
 
+  void _handleFocusChange(bool hasFocus) {
+    if (_isFocused == hasFocus) {
+      return;
+    }
+
+    setState(() {
+      _isFocused = hasFocus;
+    });
+  }
+
+  TextStyle _inputTextStyle(ThemeData theme) {
+    final TextStyle baseStyle = theme.textTheme.bodyLarge ?? const TextStyle();
+
+    return baseStyle.copyWith(color: theme.colorScheme.onSurface);
+  }
+
   Widget _buildLabel(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle? labelStyle =
-        theme.inputDecorationTheme.labelStyle ?? theme.textTheme.bodyMedium;
-    final Color hintColor =
-        theme.inputDecorationTheme.hintStyle?.color ??
-        labelStyle?.color ??
-        theme.colorScheme.onSurfaceVariant;
+    final TextStyle normalLabelStyle =
+        theme.inputDecorationTheme.labelStyle ??
+        theme.textTheme.bodyMedium ??
+        const TextStyle();
+    final TextStyle floatingLabelStyle =
+        theme.inputDecorationTheme.floatingLabelStyle ??
+        theme.textTheme.bodySmall ??
+        normalLabelStyle;
+    final TextStyle effectiveLabelStyle = _isFocused
+        ? floatingLabelStyle
+        : normalLabelStyle;
 
-    if (!widget.isRequired) {
-      return Text(widget.labelText, style: labelStyle);
+    if (_isFocused || !widget.isRequired) {
+      return Text(widget.labelText, style: effectiveLabelStyle);
     }
+
+    final double baseFontSize =
+        effectiveLabelStyle.fontSize ?? normalLabelStyle.fontSize ?? 14;
 
     return Text.rich(
       TextSpan(
         text: widget.labelText,
-        style: labelStyle,
+        style: effectiveLabelStyle,
         children: <InlineSpan>[
-          TextSpan(
-            text: ' *',
-            style: labelStyle?.copyWith(
-              color: hintColor,
-              fontWeight: FontWeight.w700,
+          WidgetSpan(
+            alignment: PlaceholderAlignment.top,
+            child: Text(
+              ' *',
+              style: effectiveLabelStyle.copyWith(
+                fontSize: baseFontSize * 0.85,
+                height: 1,
+              ),
             ),
           ),
         ],

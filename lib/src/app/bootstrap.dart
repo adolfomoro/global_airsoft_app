@@ -4,6 +4,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:global_airsoft_app/src/app/theme/app_theme.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/monitoring/app_telemetry.dart';
 
@@ -73,15 +75,48 @@ class _StartupFallbackApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    final Locale resolvedLocale = AppLocalizations.resolveFromPreferred(
+      WidgetsBinding.instance.platformDispatcher.locales,
+    );
+
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
+      locale: resolvedLocale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(
         body: Center(
           child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              'App startup failed. Please restart the application.',
-              textAlign: TextAlign.center,
+            padding: const EdgeInsets.all(24),
+            child: Builder(
+              builder: (BuildContext context) {
+                final AppLocalizations localizations = AppLocalizations.of(
+                  context,
+                );
+
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(
+                      Icons.error_outline,
+                      size: 72,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      localizations.tr(AppLocaleKeys.appStartupFailedTitle),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      localizations.tr(AppLocaleKeys.appStartupFailedMessage),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),

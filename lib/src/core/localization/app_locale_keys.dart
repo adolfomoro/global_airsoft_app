@@ -8,9 +8,16 @@ abstract final class AppLocaleKeys {
   }
 
   static const String appTitle = 'app.title';
+  static const String appStartupFailedTitle = 'app.startupFailedTitle';
+  static const String appStartupFailedMessage = 'app.startupFailedMessage';
   static const String homeTitle = 'home.title';
   static const String homeMainLabel = 'home.mainLabel';
   static const String homeLogoutAction = 'home.logoutAction';
+  static const String deviceRegistrationFailed = 'device.registrationFailed';
+  static const String deviceRegistrationEmptyResponse =
+      'device.registrationEmptyResponse';
+  static const String deviceRegistrationInvalidPayloadFormat =
+      'device.registrationInvalidPayloadFormat';
   static const String authLoginTitle = 'auth.loginTitle';
   static const String authLoginSubtitle = 'auth.loginSubtitle';
   static const String authLoginIdentifierLabel = 'auth.loginIdentifierLabel';

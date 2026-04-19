@@ -39,6 +39,53 @@ final class AuthRepository {
     return _localizationService.tr(AppLocaleKeys.authPasswordRecoveryFailed);
   }
 
+  Future<T> _parseSuccessfulResponse<T>({
+    required Response<dynamic> response,
+    required T Function(Map<String, dynamic> json) fromJson,
+    required Future<String> Function() failureMessageProvider,
+  }) async {
+    if (response.statusCode.isSuccessStatusCode &&
+        response.data is Map<String, dynamic>) {
+      return fromJson(response.data as Map<String, dynamic>);
+    }
+
+    final String localizedFailureMessage = await failureMessageProvider();
+    throw AuthenticationException(
+      failure: UnknownApiException(message: localizedFailureMessage),
+      messageOverride: localizedFailureMessage,
+    );
+  }
+
+  Future<Never> _throwLocalizedAuthenticationException({
+    required Future<String> Function() failureMessageProvider,
+    required ApiException error,
+  }) async {
+    final String localizedFailureMessage = await failureMessageProvider();
+
+    if (error is AbpApiException) {
+      throw AuthenticationException.fromAbpException(
+        error,
+        messageOverride: localizedFailureMessage,
+      );
+    }
+
+    throw AuthenticationException.fromApiException(
+      error,
+      messageOverride: localizedFailureMessage,
+    );
+  }
+
+  Future<Never> _throwLocalizedFailure({
+    required Future<String> Function() failureMessageProvider,
+  }) async {
+    final String localizedFailureMessage = await failureMessageProvider();
+
+    throw AuthenticationException(
+      failure: UnknownApiException(message: localizedFailureMessage),
+      messageOverride: localizedFailureMessage,
+    );
+  }
+
   Future<UserLoginOutputDto> login(UserLoginInputDto input) async {
     try {
       final Response<dynamic> response = await _dioService.post<dynamic>(
@@ -46,31 +93,23 @@ final class AuthRepository {
         data: input.toJson(),
       );
 
-      if (response.statusCode.isSuccessStatusCode && response.data != null) {
-        if (response.data is Map<String, dynamic>) {
-          return UserLoginOutputDto.fromJson(
-            response.data as Map<String, dynamic>,
-          );
-        }
-      }
-
-      final String localizedFailureMessage = await _loginFailedMessage();
-      throw AuthenticationException(
-        failure: UnknownApiException(message: localizedFailureMessage),
-        messageOverride: localizedFailureMessage,
+      return _parseSuccessfulResponse(
+        response: response,
+        fromJson: UserLoginOutputDto.fromJson,
+        failureMessageProvider: _loginFailedMessage,
       );
     } on AbpApiException catch (error) {
-      final String localizedFailureMessage = await _loginFailedMessage();
-      throw AuthenticationException.fromAbpException(
-        error,
-        messageOverride: localizedFailureMessage,
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _loginFailedMessage,
+        error: error,
       );
     } on ApiException catch (error) {
-      final String localizedFailureMessage = await _loginFailedMessage();
-      throw AuthenticationException.fromApiException(
-        error,
-        messageOverride: localizedFailureMessage,
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _loginFailedMessage,
+        error: error,
       );
+    } on DioException {
+      await _throwLocalizedFailure(failureMessageProvider: _loginFailedMessage);
     }
   }
 
@@ -81,29 +120,24 @@ final class AuthRepository {
         data: input.toJson(),
       );
 
-      if (response.statusCode.isSuccessStatusCode &&
-          response.data is Map<String, dynamic>) {
-        return CreateUserOutputDto.fromJson(
-          response.data as Map<String, dynamic>,
-        );
-      }
-
-      final String localizedFailureMessage = await _signUpFailedMessage();
-      throw AuthenticationException(
-        failure: UnknownApiException(message: localizedFailureMessage),
-        messageOverride: localizedFailureMessage,
+      return _parseSuccessfulResponse(
+        response: response,
+        fromJson: CreateUserOutputDto.fromJson,
+        failureMessageProvider: _signUpFailedMessage,
       );
     } on AbpApiException catch (error) {
-      final String localizedFailureMessage = await _signUpFailedMessage();
-      throw AuthenticationException.fromAbpException(
-        error,
-        messageOverride: localizedFailureMessage,
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _signUpFailedMessage,
+        error: error,
       );
     } on ApiException catch (error) {
-      final String localizedFailureMessage = await _signUpFailedMessage();
-      throw AuthenticationException.fromApiException(
-        error,
-        messageOverride: localizedFailureMessage,
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _signUpFailedMessage,
+        error: error,
+      );
+    } on DioException {
+      await _throwLocalizedFailure(
+        failureMessageProvider: _signUpFailedMessage,
       );
     }
   }
@@ -114,32 +148,24 @@ final class AuthRepository {
         AuthApiPaths.passwordRules,
       );
 
-      if (response.statusCode.isSuccessStatusCode &&
-          response.data is Map<String, dynamic>) {
-        return PasswordValidationRulesOutputDto.fromJson(
-          response.data as Map<String, dynamic>,
-        );
-      }
-
-      final String localizedFailureMessage =
-          await _passwordRulesFailedMessage();
-      throw AuthenticationException(
-        failure: UnknownApiException(message: localizedFailureMessage),
-        messageOverride: localizedFailureMessage,
+      return _parseSuccessfulResponse(
+        response: response,
+        fromJson: PasswordValidationRulesOutputDto.fromJson,
+        failureMessageProvider: _passwordRulesFailedMessage,
       );
     } on AbpApiException catch (error) {
-      final String localizedFailureMessage =
-          await _passwordRulesFailedMessage();
-      throw AuthenticationException.fromAbpException(
-        error,
-        messageOverride: localizedFailureMessage,
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _passwordRulesFailedMessage,
+        error: error,
       );
     } on ApiException catch (error) {
-      final String localizedFailureMessage =
-          await _passwordRulesFailedMessage();
-      throw AuthenticationException.fromApiException(
-        error,
-        messageOverride: localizedFailureMessage,
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _passwordRulesFailedMessage,
+        error: error,
+      );
+    } on DioException {
+      await _throwLocalizedFailure(
+        failureMessageProvider: _passwordRulesFailedMessage,
       );
     }
   }
@@ -157,25 +183,22 @@ final class AuthRepository {
         return;
       }
 
-      final String localizedFailureMessage =
-          await _passwordRecoveryFailedMessage();
-      throw AuthenticationException(
-        failure: UnknownApiException(message: localizedFailureMessage),
-        messageOverride: localizedFailureMessage,
+      await _throwLocalizedFailure(
+        failureMessageProvider: _passwordRecoveryFailedMessage,
       );
     } on AbpApiException catch (error) {
-      final String localizedFailureMessage =
-          await _passwordRecoveryFailedMessage();
-      throw AuthenticationException.fromAbpException(
-        error,
-        messageOverride: localizedFailureMessage,
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _passwordRecoveryFailedMessage,
+        error: error,
       );
     } on ApiException catch (error) {
-      final String localizedFailureMessage =
-          await _passwordRecoveryFailedMessage();
-      throw AuthenticationException.fromApiException(
-        error,
-        messageOverride: localizedFailureMessage,
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _passwordRecoveryFailedMessage,
+        error: error,
+      );
+    } on DioException {
+      await _throwLocalizedFailure(
+        failureMessageProvider: _passwordRecoveryFailedMessage,
       );
     }
   }

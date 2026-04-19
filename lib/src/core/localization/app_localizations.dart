@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 
 class AppLocalizations {
   AppLocalizations._(
@@ -296,10 +297,10 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
         if (pendingLoad != null) {
           unawaited(pendingLoad);
         }
-        assert(() {
-          debugPrint('Localization load failed for $assetCode: $error');
-          return true;
-        }());
+        AppLogger.instance.error(
+          'Localization load failed for $assetCode',
+          error: error,
+        );
         return <String, String>{};
       }
     });

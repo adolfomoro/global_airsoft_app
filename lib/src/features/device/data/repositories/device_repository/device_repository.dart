@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/features/device/data/constants/device_api_paths.dart';
 import 'package:global_airsoft_app/src/features/device/data/exceptions/device_registration_exception.dart';
@@ -6,9 +8,30 @@ import 'package:global_airsoft_app/src/features/device/data/repositories/device_
 import 'package:global_airsoft_app/src/features/device/data/repositories/device_repository/dto/register_device_output_dto.dart';
 
 final class DeviceRepository {
-  DeviceRepository({required Dio dio}) : _dio = dio;
+  DeviceRepository({
+    required Dio dio,
+    required AppLocalizationService localizationService,
+  }) : _dio = dio,
+       _localizationService = localizationService;
 
   final Dio _dio;
+  final AppLocalizationService _localizationService;
+
+  Future<String> _registrationFailedMessage() {
+    return _localizationService.tr(AppLocaleKeys.deviceRegistrationFailed);
+  }
+
+  Future<String> _emptyResponseMessage() {
+    return _localizationService.tr(
+      AppLocaleKeys.deviceRegistrationEmptyResponse,
+    );
+  }
+
+  Future<String> _invalidPayloadMessage() {
+    return _localizationService.tr(
+      AppLocaleKeys.deviceRegistrationInvalidPayloadFormat,
+    );
+  }
 
   Future<RegisterDeviceOutputDto> registerDevice(
     RegisterDeviceInputDto input,
@@ -22,8 +45,9 @@ final class DeviceRepository {
 
       final Map<String, dynamic>? responseData = response.data;
       if (responseData == null) {
+        final String localizedMessage = await _emptyResponseMessage();
         throw DeviceRegistrationException(
-          message: 'Empty response while registering device.',
+          message: localizedMessage,
           statusCode: response.statusCode,
         );
       }
@@ -35,14 +59,16 @@ final class DeviceRepository {
         rethrow;
       }
 
+      final String localizedMessage = await _registrationFailedMessage();
       throw DeviceRegistrationException(
-        message: 'Failed to register device: ${exception.message}',
+        message: localizedMessage,
         statusCode: exception.response?.statusCode,
         cause: exception,
       );
     } on FormatException catch (exception) {
+      final String localizedMessage = await _invalidPayloadMessage();
       throw DeviceRegistrationException(
-        message: 'Invalid device registration payload format.',
+        message: localizedMessage,
         cause: exception,
       );
     }

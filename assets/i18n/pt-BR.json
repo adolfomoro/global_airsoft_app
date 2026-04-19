@@ -1,8 +1,13 @@
 {
     "app.title": "Global Airsoft App",
+    "app.startupFailedTitle": "Falha na inicialização",
+    "app.startupFailedMessage": "Não foi possível iniciar o aplicativo. Reinicie o app.",
     "home.title": "Home",
     "home.mainLabel": "principal",
     "home.logoutAction": "Sair",
+    "device.registrationFailed": "Não foi possível registrar o dispositivo.",
+    "device.registrationEmptyResponse": "O registro do dispositivo retornou uma resposta vazia.",
+    "device.registrationInvalidPayloadFormat": "O registro do dispositivo retornou um payload inválido.",
     "auth.loginTitle": "Login",
     "auth.loginSubtitle": "Descubra partidas, conecte seu squad e receba atualizações em tempo real da comunidade.",
     "auth.loginIdentifierLabel": "Email ou nome de usuario",

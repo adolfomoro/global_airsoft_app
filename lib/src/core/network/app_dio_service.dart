@@ -69,7 +69,7 @@ final class AppDioService {
           responseHeader: false,
           error: true,
           logPrint: (Object object) {
-            logger.info(object.toString());
+            logger.debug(object.toString());
           },
         ),
       );
@@ -98,7 +98,7 @@ final class AppDioService {
       final HttpClient client = HttpClient();
       client
           .badCertificateCallback = (X509Certificate cert, String host, int port) {
-        logger.info(
+        logger.debug(
           'TLS certificate validation disabled for DEV environment: $host:$port',
         );
         return true;
