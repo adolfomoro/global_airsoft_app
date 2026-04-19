@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 abstract final class AppColors {
   static const Color background = Color(0xFF0D0D0D);
   static const Color backgroundMid = Color(0xFF131313);
+  static const Color shimmerBackground = Color(0xFF242424);
+  static const Color shimmerHighlight = Color(0xFF3A3A3A);
   static const Color surface = Color(0xFF1A1A1A);
   static const Color surfaceVariant = Color(0xFF2D2D2D);
 

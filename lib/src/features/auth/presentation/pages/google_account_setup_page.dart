@@ -61,7 +61,7 @@ class _GoogleAccountSetupPageState extends State<GoogleAccountSetupPage> {
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 40),
                 Center(
                   child: AppProfilePictureEditor.network(
                     imageUrl: profilePictureUrl,
@@ -69,7 +69,7 @@ class _GoogleAccountSetupPageState extends State<GoogleAccountSetupPage> {
                     onEditTap: _handleProfileEditTap,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 50),
                 AppTextField(
                   labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
                   controller: _profileNameController,

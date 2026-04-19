@@ -29,7 +29,7 @@
     "auth.fullNameLabel": "Full name",
     "auth.usernameLabel": "Username",
     "auth.googleAccountSetupTitle": "Complete your profile",
-    "auth.googleAccountSetupSubtitle": "Review the information from Google before you continue.",
+    "auth.googleAccountSetupSubtitle": "Review the information provided by Google and make any changes you want before continuing.",
     "auth.passwordLabel": "Password",
     "auth.usernameRestrictionHint": "Use only lowercase letters (a-z). No spaces, numbers, or symbols.",
     "auth.confirmPasswordLabel": "Confirm password",

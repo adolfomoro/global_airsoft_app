@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_profile_image_placeholder.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 
 class AppProfilePictureEditor extends StatelessWidget {
   const AppProfilePictureEditor.network({
     required String imageUrl,
     required this.onPhotoTap,
     required this.onEditTap,
-    this.size = 124,
-    this.badgeSize = 36,
+    this.size = 126,
+    this.badgeSize = 38,
     super.key,
   }) : _imageUrl = imageUrl,
        _imageProvider = null;
@@ -16,8 +17,8 @@ class AppProfilePictureEditor extends StatelessWidget {
     required ImageProvider imageProvider,
     required this.onPhotoTap,
     required this.onEditTap,
-    this.size = 124,
-    this.badgeSize = 36,
+    this.size = 126,
+    this.badgeSize = 38,
     super.key,
   }) : _imageUrl = null,
        _imageProvider = imageProvider;
@@ -38,6 +39,10 @@ class AppProfilePictureEditor extends StatelessWidget {
     return AppProfileImagePlaceholder(size: size);
   }
 
+  Widget _buildLoadingSkeleton() {
+    return AppSkeleton.circle(size: size);
+  }
+
   Widget _buildImage() {
     if (_imageProvider != null) {
       final ImageProvider imageProvider = _imageProvider;
@@ -56,7 +61,7 @@ class AppProfilePictureEditor extends StatelessWidget {
                 return child;
               }
 
-              return _buildPlaceholder();
+              return _buildLoadingSkeleton();
             },
         errorBuilder:
             (BuildContext context, Object error, StackTrace? stackTrace) {
@@ -78,7 +83,7 @@ class AppProfilePictureEditor extends StatelessWidget {
               return child;
             }
 
-            return _buildPlaceholder();
+            return _buildLoadingSkeleton();
           },
       errorBuilder:
           (BuildContext context, Object error, StackTrace? stackTrace) {
@@ -94,7 +99,6 @@ class AppProfilePictureEditor extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Profile picture',
       child: SizedBox(
         width: size,
         height: size,
@@ -141,7 +145,7 @@ class AppProfilePictureEditor extends StatelessWidget {
                     ],
                   ),
                   child: Icon(
-                    Icons.edit_rounded,
+                    Icons.camera_alt_rounded,
                     size: badgeSize * 0.47,
                     color: colorScheme.onPrimary,
                   ),
