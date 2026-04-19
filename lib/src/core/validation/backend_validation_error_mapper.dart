@@ -1,5 +1,8 @@
 import 'package:global_airsoft_app/src/core/network/abp_error_response.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
+import 'package:global_airsoft_app/src/core/validation/validation_mapping_result.dart';
+
+export 'package:global_airsoft_app/src/core/validation/validation_mapping_result.dart';
 
 final class BackendValidationErrorMapper {
   const BackendValidationErrorMapper();
@@ -87,16 +90,4 @@ final class BackendValidationErrorMapper {
   String _normalizeFieldKey(String value) {
     return value.trim().toLowerCase();
   }
-}
-
-final class ValidationMappingResult {
-  const ValidationMappingResult({
-    required this.fieldErrors,
-    required this.globalErrors,
-  });
-
-  final Map<String, String> fieldErrors;
-  final List<String> globalErrors;
-
-  bool get hasFieldErrors => fieldErrors.isNotEmpty;
 }
