@@ -131,7 +131,7 @@ class _AppImageZoomViewerBody extends StatefulWidget {
 }
 
 class _AppImageZoomViewerBodyState extends State<_AppImageZoomViewerBody>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   static const Duration _resetDuration = Duration(milliseconds: 180);
   static const Duration _imageRevealDuration = Duration(milliseconds: 160);
   static const double _blurSigma = 30;

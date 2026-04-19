@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_profile_image_placeholder.dart';
 
 class AppProfilePictureEditor extends StatelessWidget {
   const AppProfilePictureEditor.network({
@@ -33,29 +34,33 @@ class AppProfilePictureEditor extends StatelessWidget {
     return (imageUrl != null && imageUrl.isNotEmpty) || _imageProvider != null;
   }
 
-  Widget _buildFallback(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-
-    return Container(
-      color: colorScheme.surfaceContainerHighest,
-      alignment: Alignment.center,
-      child: Icon(
-        Icons.account_circle_outlined,
-        size: size * 0.58,
-        color: colorScheme.onSurfaceVariant,
-      ),
-    );
+  Widget _buildPlaceholder() {
+    return AppProfileImagePlaceholder(size: size);
   }
 
-  Widget _buildImage(BuildContext context) {
+  Widget _buildImage() {
     if (_imageProvider != null) {
+      final ImageProvider imageProvider = _imageProvider;
+
       return Image(
-        image: _imageProvider,
+        image: imageProvider,
         fit: BoxFit.cover,
+        frameBuilder:
+            (
+              BuildContext context,
+              Widget child,
+              int? frame,
+              bool wasSynchronouslyLoaded,
+            ) {
+              if (wasSynchronouslyLoaded || frame != null) {
+                return child;
+              }
+
+              return _buildPlaceholder();
+            },
         errorBuilder:
             (BuildContext context, Object error, StackTrace? stackTrace) {
-              return _buildFallback(context);
+              return _buildPlaceholder();
             },
       );
     }
@@ -63,9 +68,21 @@ class AppProfilePictureEditor extends StatelessWidget {
     return Image.network(
       _imageUrl!,
       fit: BoxFit.cover,
+      loadingBuilder:
+          (
+            BuildContext context,
+            Widget child,
+            ImageChunkEvent? loadingProgress,
+          ) {
+            if (loadingProgress == null) {
+              return child;
+            }
+
+            return _buildPlaceholder();
+          },
       errorBuilder:
           (BuildContext context, Object error, StackTrace? stackTrace) {
-            return _buildFallback(context);
+            return _buildPlaceholder();
           },
     );
   }
@@ -99,7 +116,7 @@ class AppProfilePictureEditor extends StatelessWidget {
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: ClipOval(child: _buildImage(context)),
+                child: ClipOval(child: _buildImage()),
               ),
             ),
             Positioned(
