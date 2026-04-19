@@ -30,12 +30,9 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
-  static const ValidationRuleSet _loginValidationRules =
-      ValidationRuleSet(<ValidationRule>[
-        RequiredValidationRule(),
-        MinLengthValidationRule(3),
-        MaxLengthValidationRule(256),
-      ]);
+  static final ValidationRuleSet _loginValidationRules = ValidationRuleSet(
+    <ValidationRule>[RequiredValidationRule()],
+  );
   static const ValidationRuleSet _passwordValidationRules = ValidationRuleSet(
     <ValidationRule>[RequiredValidationRule()],
   );
@@ -155,7 +152,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     try {
       final AuthService authService = ref.read(authServiceProvider);
-      await authService.login(_loginController.text, _passwordController.text);
+      await authService.login(
+        _loginController.text.trim(),
+        _passwordController.text,
+      );
       await ref
           .read(appLocaleControllerProvider.notifier)
           .forceApplyServerLocaleIfPending();
