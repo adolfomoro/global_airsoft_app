@@ -71,14 +71,14 @@ final class AuthService {
   }
 
   Future<void> signUp({
-    required String fullName,
     required String username,
+    required String fullName,
     required String email,
     required String password,
   }) async {
     final CreateUserInputDto input = CreateUserInputDto(
-      fullName: fullName,
       username: username,
+      fullName: fullName,
       email: email,
       password: password,
     );

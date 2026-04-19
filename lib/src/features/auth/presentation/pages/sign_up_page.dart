@@ -240,8 +240,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     try {
       final AuthService authService = ref.read(authServiceProvider);
       await authService.signUp(
-        fullName: _fullNameController.text.trim(),
         username: _usernameController.text.trim().toLowerCase(),
+        fullName: _fullNameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
@@ -269,7 +269,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
         },
         memberAliases: const <String, String>{
           'fullName': CreateUserInputDto.fullNameField,
-          'fullname': CreateUserInputDto.fullNameField,
           'name': CreateUserInputDto.fullNameField,
           'username': CreateUserInputDto.usernameField,
           'email': CreateUserInputDto.emailField,
