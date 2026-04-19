@@ -22,22 +22,40 @@ final class AppGradientBackground extends StatelessWidget {
     final List<Color> effectiveColors =
         colors ??
         <Color>[
-          colorScheme.primaryContainer.withOpacity(0.20),
+          colorScheme.primaryContainer.withValues(alpha: 0.20),
           colorScheme.surface,
           colorScheme.surface,
         ];
 
+    final Size viewportSize = MediaQuery.sizeOf(context);
+
     return SizedBox.expand(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: begin,
-            end: end,
-            colors: effectiveColors,
-            stops: stops,
+      child: Stack(
+        fit: StackFit.expand,
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          IgnorePointer(
+            child: OverflowBox(
+              alignment: Alignment.topCenter,
+              minWidth: viewportSize.width,
+              maxWidth: viewportSize.width,
+              minHeight: viewportSize.height,
+              maxHeight: viewportSize.height,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: begin,
+                    end: end,
+                    colors: effectiveColors,
+                    stops: stops,
+                  ),
+                ),
+                child: const SizedBox.expand(),
+              ),
+            ),
           ),
-        ),
-        child: child,
+          child,
+        ],
       ),
     );
   }

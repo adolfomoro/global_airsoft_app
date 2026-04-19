@@ -254,10 +254,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
       }
 
       ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
-      Navigator.of(
-        context,
-        rootNavigator: true,
-      ).popUntil((Route<void> route) => route.isFirst);
     } on AuthenticationException catch (error) {
       if (!mounted) {
         return;
@@ -400,7 +396,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                     isRequired: _usernameValidationRules.hasRequiredRule,
                     keyboardType: TextInputType.text,
                     textInputAction: TextInputAction.next,
-                    prefixIcon: const Icon(Icons.alternate_email_rounded),
                     validator: _usernameValidationRules.asValidator(
                       _resolveValidationMessage,
                     ),
@@ -415,7 +410,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                     isRequired: _fullNameValidationRules.hasRequiredRule,
                     keyboardType: TextInputType.name,
                     textInputAction: TextInputAction.next,
-                    prefixIcon: const Icon(Icons.badge_outlined),
                     validator: _fullNameValidationRules.asValidator(
                       _resolveValidationMessage,
                     ),
@@ -430,7 +424,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                     isRequired: _emailValidationRules.hasRequiredRule,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    prefixIcon: const Icon(Icons.mail_outline_rounded),
                     validator: _emailValidationRules.asValidator(
                       _resolveValidationMessage,
                     ),

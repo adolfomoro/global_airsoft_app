@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_form_padding.dart';
@@ -17,8 +18,6 @@ import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/pages/password_recovery_page.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -163,10 +162,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (mounted) {
         ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
-        Navigator.of(
-          context,
-          rootNavigator: true,
-        ).popUntil((Route<void> route) => route.isFirst);
       }
     } on AuthenticationException catch (error) {
       if (mounted) {
@@ -340,13 +335,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           onPressed: _isLoading
                               ? null
                               : () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (BuildContext context) {
-                                        return const PasswordRecoveryPage();
-                                      },
-                                    ),
-                                  );
+                                  Navigator.of(
+                                    context,
+                                  ).pushNamed(AppRoutePaths.passwordRecovery);
                                 },
                           child: Text(
                             context.l10n.tr(
@@ -373,13 +364,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             onPressed: _isLoading
                                 ? null
                                 : () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                        builder: (BuildContext context) {
-                                          return const SignUpPage();
-                                        },
-                                      ),
-                                    );
+                                    Navigator.of(
+                                      context,
+                                    ).pushNamed(AppRoutePaths.signUp);
                                   },
                             child: Text(
                               context.l10n.tr(

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
+import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
+import 'package:global_airsoft_app/src/app/routing/app_routes.dart';
 import 'package:global_airsoft_app/src/app/theme/app_theme.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
@@ -10,9 +12,7 @@ import 'package:global_airsoft_app/src/core/localization/app_localizations.dart'
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/notifications/widgets/notification_permission_listener.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_unfocus_wrapper.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/pages/login_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:global_airsoft_app/src/features/home/presentation/pages/home_page.dart';
 
 final GlobalKey<NavigatorState> _appNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -24,9 +24,29 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
+  ProviderSubscription<bool>? _authSubscription;
+
   @override
   void initState() {
     super.initState();
+    _authSubscription = ref.listenManual<bool>(isAuthenticatedProvider, (
+      bool? previous,
+      bool next,
+    ) {
+      if (previous == null || previous == next) {
+        return;
+      }
+
+      final NavigatorState? navigatorState = _appNavigatorKey.currentState;
+      if (navigatorState == null || !navigatorState.mounted) {
+        return;
+      }
+
+      final String targetRoute = next
+          ? AppRoutePaths.home
+          : AppRoutePaths.login;
+      navigatorState.pushNamedAndRemoveUntil(targetRoute, (_) => false);
+    });
     unawaited(_initializeStartupServices());
   }
 
@@ -71,6 +91,13 @@ class _AppState extends ConsumerState<App> {
   }
 
   @override
+  void dispose() {
+    _authSubscription?.close();
+    _authSubscription = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final Locale locale = ref.watch(appLocaleControllerProvider);
     final bool isAuthenticated = ref.watch(isAuthenticatedProvider);
@@ -87,7 +114,13 @@ class _AppState extends ConsumerState<App> {
       theme: AppTheme.dark,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
-      home: isAuthenticated ? const HomePage() : const LoginPage(),
+      initialRoute: isAuthenticated ? AppRoutePaths.home : AppRoutePaths.login,
+      onGenerateRoute: (RouteSettings settings) {
+        return AppRoutes.onGenerateRoute(
+          settings,
+          isAuthenticated: isAuthenticated,
+        );
+      },
       builder: (BuildContext context, Widget? child) {
         return NotificationPermissionListener(
           navigatorKey: _appNavigatorKey,

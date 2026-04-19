@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
@@ -12,7 +13,6 @@ import 'package:global_airsoft_app/src/features/auth/application/services/auth_s
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/pages/password_recovery_success_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class PasswordRecoveryPage extends ConsumerStatefulWidget {
@@ -112,12 +112,9 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
         return;
       }
 
-      await Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (BuildContext context) {
-            return PasswordRecoverySuccessPage(email: normalizedEmail);
-          },
-        ),
+      await Navigator.of(context).pushReplacementNamed(
+        AppRoutePaths.passwordRecoverySuccess,
+        arguments: normalizedEmail,
       );
     } on AuthenticationException catch (error) {
       if (!mounted) {

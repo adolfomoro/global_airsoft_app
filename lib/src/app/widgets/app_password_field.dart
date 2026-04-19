@@ -37,7 +37,6 @@ final class AppPasswordField extends StatelessWidget {
       errorText: errorText,
       validator: validator,
       obscureText: true,
-      prefixIcon: const Icon(Icons.lock_outline),
       keyboardType: TextInputType.visiblePassword,
       textInputAction: textInputAction,
     );

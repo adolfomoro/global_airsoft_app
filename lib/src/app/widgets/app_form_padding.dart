@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 
 final class AppFormPadding extends StatelessWidget {
-  static const EdgeInsets _defaultPadding = EdgeInsets.all(
-    AppDimensions.spacing2xl,
+  static const EdgeInsets _defaultPadding = EdgeInsets.symmetric(
+    horizontal: AppDimensions.spacing2xl,
   );
 
   const AppFormPadding({

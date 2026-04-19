@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
@@ -103,9 +104,10 @@ class PasswordRecoverySuccessPage extends StatelessWidget {
                     AppLocaleKeys.authPasswordRecoverySuccessBackToLoginAction,
                   ),
                   onPressed: () {
-                    Navigator.of(
-                      context,
-                    ).popUntil((Route<void> route) => route.isFirst);
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRoutePaths.login,
+                      (_) => false,
+                    );
                   },
                 ),
                 const SizedBox(height: 24),
