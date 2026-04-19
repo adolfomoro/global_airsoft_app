@@ -25,7 +25,7 @@ void main() {
   });
 
   test('redirects unauthenticated routes to home when already signed in', () {
-    bool isAuthenticated = true;
+    final bool isAuthenticated = true;
 
     final Route<dynamic> loginRoute = AppRoutes.onGenerateRoute(
       const RouteSettings(name: AppRoutePaths.login),
@@ -36,7 +36,7 @@ void main() {
   });
 
   test('generates a single initial route without expanding the stack', () {
-    bool isAuthenticated = false;
+    final bool isAuthenticated = false;
 
     final List<Route<dynamic>> routes = AppRoutes.onGenerateInitialRoutes(
       AppRoutePaths.login,

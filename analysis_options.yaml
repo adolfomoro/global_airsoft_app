@@ -17,7 +17,7 @@ analyzer:
   errors:
     missing_required_param: error
     missing_return: error
-    dead_code: warning
+    dead_code: error
     invalid_use_of_protected_member: error
 
 linter:

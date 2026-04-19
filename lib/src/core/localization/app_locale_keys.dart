@@ -32,8 +32,6 @@ abstract final class AppLocaleKeys {
       'auth.passwordRecoverySubtitle';
   static const String authPasswordRecoveryEmailLabel =
       'auth.passwordRecoveryEmailLabel';
-  static const String authPasswordRecoveryEmailHint =
-      'auth.passwordRecoveryEmailHint';
   static const String authPasswordRecoverySendAction =
       'auth.passwordRecoverySendAction';
   static const String authPasswordRecoverySuccessTitle =
@@ -48,12 +46,9 @@ abstract final class AppLocaleKeys {
   static const String authSignUpAction = 'auth.signUpAction';
   static const String authBackToLoginAction = 'auth.backToLoginAction';
   static const String authFullNameLabel = 'auth.fullNameLabel';
-  static const String authFullNameHint = 'auth.fullNameHint';
   static const String authUsernameLabel = 'auth.usernameLabel';
-  static const String authUsernameHint = 'auth.usernameHint';
   static const String authPasswordLabel = 'auth.passwordLabel';
   static const String authEmailLabel = 'auth.emailLabel';
-  static const String authEmailHint = 'auth.emailHint';
   static const String authUsernameRestrictionHint =
       'auth.usernameRestrictionHint';
   static const String authConfirmPasswordLabel = 'auth.confirmPasswordLabel';

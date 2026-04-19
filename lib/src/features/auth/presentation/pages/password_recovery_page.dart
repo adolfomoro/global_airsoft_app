@@ -202,9 +202,6 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
                     labelText: context.l10n.tr(
                       AppLocaleKeys.authPasswordRecoveryEmailLabel,
                     ),
-                    hintText: context.l10n.tr(
-                      AppLocaleKeys.authPasswordRecoveryEmailHint,
-                    ),
                     controller: _emailController,
                     errorText: _emailError,
                     onChanged: _handleEmailChanged,

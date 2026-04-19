@@ -366,7 +366,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                   const SizedBox(height: 24),
                   AppTextField(
                     labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
-                    hintText: context.l10n.tr(AppLocaleKeys.authUsernameHint),
                     controller: _usernameController,
                     onChanged: _handleUsernameChanged,
                     errorText: _usernameError,
@@ -380,7 +379,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                   const SizedBox(height: 16),
                   AppTextField(
                     labelText: context.l10n.tr(AppLocaleKeys.authFullNameLabel),
-                    hintText: context.l10n.tr(AppLocaleKeys.authFullNameHint),
                     controller: _fullNameController,
                     onChanged: _handleFullNameChanged,
                     errorText: _fullNameError,
@@ -394,7 +392,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                   const SizedBox(height: 16),
                   AppTextField(
                     labelText: context.l10n.tr(AppLocaleKeys.authEmailLabel),
-                    hintText: context.l10n.tr(AppLocaleKeys.authEmailHint),
                     controller: _emailController,
                     onChanged: _handleEmailChanged,
                     errorText: _emailError,

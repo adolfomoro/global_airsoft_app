@@ -1,5 +1,5 @@
-import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/validation/validation.dart';
 
 abstract final class FullNameValidation {
   static const int minLength = 5;
