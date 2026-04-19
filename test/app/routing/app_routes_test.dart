@@ -34,4 +34,16 @@ void main() {
 
     expect(loginRoute.settings.name, AppRoutePaths.home);
   });
+
+  test('generates a single initial route without expanding the stack', () {
+    bool isAuthenticated = false;
+
+    final List<Route<dynamic>> routes = AppRoutes.onGenerateInitialRoutes(
+      AppRoutePaths.login,
+      isAuthenticated: () => isAuthenticated,
+    );
+
+    expect(routes, hasLength(1));
+    expect(routes.single.settings.name, AppRoutePaths.login);
+  });
 }

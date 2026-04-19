@@ -79,6 +79,7 @@
     "validation.maxLength.one": "Use no máximo {max} caractere.",
     "validation.maxLength.other": "Use no máximo {max} caracteres.",
     "validation.pattern": "O formato é inválido.",
+    "validation.fullNameComplete": "Informe nome e sobrenome.",
     "validation.passwordMinimumLength": "Use pelo menos {min} caracteres.",
     "validation.passwordMinimumLength.one": "Use pelo menos {min} caractere.",
     "validation.passwordMinimumLength.other": "Use pelo menos {min} caracteres.",

@@ -79,6 +79,7 @@
     "validation.maxLength.one": "Use at most {max} character.",
     "validation.maxLength.other": "Use at most {max} characters.",
     "validation.pattern": "The format is invalid.",
+    "validation.fullNameComplete": "Enter a first and last name.",
     "validation.passwordMinimumLength": "Use at least {min} characters.",
     "validation.passwordMinimumLength.one": "Use at least {min} character.",
     "validation.passwordMinimumLength.other": "Use at least {min} characters.",

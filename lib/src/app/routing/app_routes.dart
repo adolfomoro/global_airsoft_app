@@ -14,6 +14,18 @@ typedef AppRoutePageBuilder =
 final class AppRoutes {
   AppRoutes._();
 
+  static List<Route<dynamic>> onGenerateInitialRoutes(
+    String initialRouteName, {
+    required bool Function() isAuthenticated,
+  }) {
+    return <Route<dynamic>>[
+      onGenerateRoute(
+        RouteSettings(name: initialRouteName),
+        isAuthenticated: isAuthenticated,
+      ),
+    ];
+  }
+
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings, {
     required bool Function() isAuthenticated,

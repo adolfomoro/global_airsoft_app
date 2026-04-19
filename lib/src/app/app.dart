@@ -115,6 +115,12 @@ class _AppState extends ConsumerState<App> {
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
       initialRoute: isAuthenticated ? AppRoutePaths.home : AppRoutePaths.login,
+      onGenerateInitialRoutes: (String initialRouteName) {
+        return AppRoutes.onGenerateInitialRoutes(
+          initialRouteName,
+          isAuthenticated: () => ref.read(isAuthenticatedProvider),
+        );
+      },
       onGenerateRoute: (RouteSettings settings) {
         return AppRoutes.onGenerateRoute(
           settings,

@@ -13,9 +13,9 @@ class AppUnfocusWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
+    return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) => _handlePointerDown(),
+      onTap: _handlePointerDown,
       child: child,
     );
   }

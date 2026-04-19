@@ -158,7 +158,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
 
   bool _shouldRevealPasswordHintNow() {
     return _isPasswordFocused &&
-        _passwordController.text.isNotEmpty &&
         _shouldShowPasswordHint() &&
         !_hasRevealedPasswordHint;
   }

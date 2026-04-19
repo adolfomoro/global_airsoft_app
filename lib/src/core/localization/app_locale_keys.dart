@@ -120,6 +120,8 @@ abstract final class AppLocaleKeys {
   static const String validationMinLength = 'validation.minLength';
   static const String validationMaxLength = 'validation.maxLength';
   static const String validationPattern = 'validation.pattern';
+  static const String validationFullNameComplete =
+      'validation.fullNameComplete';
   static const String validationPasswordMinimumLength =
       'validation.passwordMinimumLength';
   static const String validationPasswordLetterAndNumber =
