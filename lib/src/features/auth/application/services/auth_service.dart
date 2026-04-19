@@ -1,9 +1,12 @@
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/shared_prefs_key_value_store.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
+import 'package:global_airsoft_app/src/features/auth/data/exceptions/google_sign_in_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_output_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_in_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_in_response_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_output_dto.dart';
@@ -87,6 +90,28 @@ final class AuthService {
       UserLoginOutputDto(profile: output.profile, tokens: output.tokens),
       successLogMessage: 'User signed up successfully',
     );
+  }
+
+  Future<GoogleSignInResponseOutputDto> signInWithGoogle(String idToken) async {
+    final GoogleSignInInputDto input = GoogleSignInInputDto(idToken: idToken);
+    final GoogleSignInResponseOutputDto output = await _authRepository
+        .signInWithGoogle(input);
+
+    if (output.userExists) {
+      final UserLoginOutputDto? login = output.login;
+      if (login == null) {
+        throw const GoogleSignInException(
+          'Google sign-in succeeded but no login payload was returned.',
+        );
+      }
+
+      await persistAuthenticatedUser(
+        login,
+        successLogMessage: 'User signed in with Google successfully',
+      );
+    }
+
+    return output;
   }
 
   Future<void> requestPasswordRecovery(String email) {

@@ -34,6 +34,7 @@ final class AppConfig {
     required this.datadogRumApplicationId,
     required this.datadogServiceName,
     required this.datadogSite,
+    required this.googleSignInServerClientId,
   });
 
   final AppEnvironment environment;
@@ -48,6 +49,7 @@ final class AppConfig {
   final String datadogRumApplicationId;
   final String datadogServiceName;
   final String datadogSite;
+  final String googleSignInServerClientId;
 
   factory AppConfig.fromDartDefines() {
     final String envRaw = const String.fromEnvironment(
@@ -109,6 +111,17 @@ final class AppConfig {
     final String datadogSite = _normalizeDatadogSite(
       const String.fromEnvironment('DATADOG_SITE', defaultValue: 'us1'),
     );
+    const String googleSignInServerClientIdFromServerDefine =
+        String.fromEnvironment(
+          'GOOGLE_SIGN_IN_SERVER_CLIENT_ID',
+          defaultValue: '',
+        );
+    const String googleSignInServerClientIdFromLegacyDefine =
+        String.fromEnvironment('GOOGLE_SIGN_IN_CLIENT_ID', defaultValue: '');
+    final String googleSignInServerClientId =
+        googleSignInServerClientIdFromServerDefine.trim().isNotEmpty
+        ? googleSignInServerClientIdFromServerDefine.trim()
+        : googleSignInServerClientIdFromLegacyDefine.trim();
     final bool datadogEnabled =
         const bool.fromEnvironment('DATADOG_ENABLED', defaultValue: false) ||
         environment == AppEnvironment.staging ||
@@ -130,6 +143,7 @@ final class AppConfig {
       datadogRumApplicationId: datadogRumApplicationId,
       datadogServiceName: datadogServiceName,
       datadogSite: datadogSite,
+      googleSignInServerClientId: googleSignInServerClientId,
     );
   }
 

@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
+import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
+import 'package:global_airsoft_app/src/features/auth/application/services/google_sign_in_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
 
 final Provider<AuthStorageService> authStorageServiceProvider =
@@ -36,6 +38,14 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
     logger: AppLogger.instance,
   );
 });
+
+final Provider<GoogleSignInService> googleSignInServiceProvider =
+    Provider<GoogleSignInService>((Ref ref) {
+      final AppConfig config = ref.watch(appConfigProvider);
+      return GoogleSignInService(
+        serverClientId: config.googleSignInServerClientId,
+      );
+    });
 
 final Provider<bool> initialIsAuthenticatedProvider = Provider<bool>(
   (Ref ref) => false,

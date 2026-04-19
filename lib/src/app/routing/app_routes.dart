@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/models/google_account_setup_arguments.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/pages/google_account_setup_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/pages/login_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/pages/password_recovery_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/pages/password_recovery_success_page.dart';
@@ -83,6 +85,21 @@ final class AppRoutes {
           access: AppRouteAccess.unauthenticatedOnly,
           builder: (BuildContext context, Object? arguments) {
             return const SignUpPage();
+          },
+        ),
+        AppRoutePaths.googleAccountSetup: _AppRouteDefinition(
+          access: AppRouteAccess.unauthenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            final GoogleAccountSetupArguments setupArguments =
+                arguments is GoogleAccountSetupArguments
+                ? arguments
+                : const GoogleAccountSetupArguments(
+                    challengeToken: '',
+                    profilePictureUrl: '',
+                    profileName: '',
+                  );
+
+            return GoogleAccountSetupPage(arguments: setupArguments);
           },
         ),
         AppRoutePaths.passwordRecovery: _AppRouteDefinition(

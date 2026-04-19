@@ -199,9 +199,7 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
                   ),
                   const SizedBox(height: 24),
                   AppTextField(
-                    labelText: context.l10n.tr(
-                      AppLocaleKeys.authPasswordRecoveryEmailLabel,
-                    ),
+                    labelText: context.l10n.tr(AppLocaleKeys.authEmailLabel),
                     controller: _emailController,
                     errorText: _emailError,
                     onChanged: _handleEmailChanged,

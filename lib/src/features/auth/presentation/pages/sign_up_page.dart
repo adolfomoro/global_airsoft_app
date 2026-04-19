@@ -187,10 +187,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
         baseKey: AppLocaleKeys.validationMaxLength,
         value: failure.arguments['max'],
       ),
-      AppLocaleKeys.validationPasswordMinimumLength => _pluralizedValidationKey(
-        baseKey: AppLocaleKeys.validationPasswordMinimumLength,
-        value: failure.arguments['min'],
-      ),
       _ => failure.messageKey,
     };
 
@@ -340,7 +336,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
-        title: Text(context.l10n.tr(AppLocaleKeys.authSignUpTitle)),
+        title: Text(context.l10n.tr(AppLocaleKeys.authSignUpAction)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

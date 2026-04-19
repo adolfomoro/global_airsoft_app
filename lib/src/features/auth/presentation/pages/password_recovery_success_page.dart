@@ -100,9 +100,7 @@ class PasswordRecoverySuccessPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
                 AppButton(
-                  label: context.l10n.tr(
-                    AppLocaleKeys.authPasswordRecoverySuccessBackToLoginAction,
-                  ),
+                  label: context.l10n.tr(AppLocaleKeys.authBackToLoginAction),
                   onPressed: () {
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       AppRoutePaths.login,

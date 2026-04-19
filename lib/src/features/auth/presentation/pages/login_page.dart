@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
@@ -16,8 +17,11 @@ import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
+import 'package:global_airsoft_app/src/features/auth/application/services/google_sign_in_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
+import 'package:global_airsoft_app/src/features/auth/data/exceptions/google_sign_in_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/models/google_account_setup_arguments.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -42,7 +46,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   String? _loginError;
   String? _passwordError;
-  bool _isLoading = false;
+  bool _isLoginLoading = false;
+  bool _isGoogleLoading = false;
+
+  bool get _isAnyAuthLoading => _isLoginLoading || _isGoogleLoading;
 
   @override
   void dispose() {
@@ -81,10 +88,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         baseKey: AppLocaleKeys.validationMaxLength,
         value: failure.arguments['max'],
       ),
-      AppLocaleKeys.validationPasswordMinimumLength => _pluralizedValidationKey(
-        baseKey: AppLocaleKeys.validationPasswordMinimumLength,
-        value: failure.arguments['min'],
-      ),
       _ => failure.messageKey,
     };
 
@@ -113,19 +116,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _handleLogin() async {
+    if (_isAnyAuthLoading) {
+      return;
+    }
+
     FocusScope.of(context).unfocus();
 
     setState(() {
       _loginError = null;
       _passwordError = null;
+      _isLoginLoading = true;
     });
 
     final FormState? formState = _formKey.currentState;
     if (!(formState?.validate() ?? false)) {
       return;
     }
-
-    setState(() => _isLoading = true);
 
     try {
       final AuthService authService = ref.read(authServiceProvider);
@@ -187,7 +193,115 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoginLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleGoogleAuthentication() async {
+    if (_isAnyAuthLoading) {
+      return;
+    }
+
+    setState(() {
+      _loginError = null;
+      _passwordError = null;
+      _isGoogleLoading = true;
+    });
+
+    try {
+      final GoogleSignInService googleSignInService = ref.read(
+        googleSignInServiceProvider,
+      );
+      final String? idToken = await googleSignInService.requestIdToken();
+      if (idToken == null) {
+        return;
+      }
+
+      final AuthService authService = ref.read(authServiceProvider);
+      final response = await authService.signInWithGoogle(idToken);
+
+      if (!mounted) {
+        return;
+      }
+
+      if (response.userExists) {
+        await ref
+            .read(appLocaleControllerProvider.notifier)
+            .forceApplyServerLocaleIfPending();
+        ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
+        return;
+      }
+
+      final suggestion = response.suggestion;
+      if (suggestion == null) {
+        throw const GoogleSignInException(
+          'Google sign-in returned no profile suggestion.',
+        );
+      }
+
+      await Navigator.of(context).pushNamed(
+        AppRoutePaths.googleAccountSetup,
+        arguments: GoogleAccountSetupArguments(
+          challengeToken: response.challengeToken ?? '',
+          profilePictureUrl: suggestion.profilePictureUrl,
+          profileName: suggestion.username,
+        ),
+      );
+    } on AuthenticationException catch (error) {
+      if (mounted) {
+        final mappedErrors = _validationErrorMapper.map(
+          exception: error.failure,
+          targetFields: const <String>{},
+        );
+
+        final String? globalError = mappedErrors.globalErrors
+            .where((String e) => e.trim().isNotEmpty)
+            .cast<String?>()
+            .firstWhere((String? e) => e != null, orElse: () => null);
+
+        final String fallbackMessage = context.l10n.tr(
+          AppLocaleKeys.authGoogleSignInFailed,
+        );
+        final String message = error.message ?? globalError ?? fallbackMessage;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.red),
+        );
+      }
+    } on GoogleSignInException catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.tr(AppLocaleKeys.authGoogleSignInFailed),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (error, stackTrace) {
+      AppLogger.instance.error(
+        'Unexpected Google sign-in failure.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.tr(AppLocaleKeys.authGoogleSignInFailed),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGoogleLoading = false;
+        });
       }
     }
   }
@@ -296,7 +410,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         errorText: _passwordError,
                         onChanged: _handlePasswordChanged,
                         onFieldSubmitted: (_) {
-                          if (_isLoading) {
+                          if (_isAnyAuthLoading) {
                             return;
                           }
 
@@ -310,7 +424,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: _isLoading
+                          onPressed: _isAnyAuthLoading
                               ? null
                               : () {
                                   Navigator.of(
@@ -327,8 +441,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const SizedBox(height: 20),
                       AppButton(
                         label: context.l10n.tr(AppLocaleKeys.authSignInAction),
-                        onPressed: _isLoading ? null : _handleLogin,
-                        isLoading: _isLoading,
+                        onPressed: _isAnyAuthLoading ? null : _handleLogin,
+                        isLoading: _isLoginLoading,
+                      ),
+                      const SizedBox(height: 12),
+                      AppButton(
+                        label: context.l10n.tr(
+                          AppLocaleKeys.authGoogleContinueAction,
+                        ),
+                        onPressed: _isAnyAuthLoading
+                            ? null
+                            : _handleGoogleAuthentication,
+                        variant: AppButtonVariant.secondary,
+                        icon: FontAwesomeIcons.google,
+                        isLoading: _isGoogleLoading,
                       ),
                       const SizedBox(height: 18),
                       Row(
@@ -339,7 +465,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           TextButton(
-                            onPressed: _isLoading
+                            onPressed: _isAnyAuthLoading
                                 ? null
                                 : () {
                                     Navigator.of(
@@ -347,9 +473,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     ).pushNamed(AppRoutePaths.signUp);
                                   },
                             child: Text(
-                              context.l10n.tr(
-                                AppLocaleKeys.authLoginSignUpAction,
-                              ),
+                              context.l10n.tr(AppLocaleKeys.authSignUpAction),
                             ),
                           ),
                         ],

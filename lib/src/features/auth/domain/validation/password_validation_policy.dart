@@ -19,7 +19,7 @@ abstract final class PasswordValidationPolicy {
           labelKey: AppLocaleKeys.authPasswordRulesMinimumLength,
           rule: MinLengthValidationRule(
             minLength,
-            messageKey: AppLocaleKeys.validationPasswordMinimumLength,
+            messageKey: AppLocaleKeys.validationMinLength,
           ),
         ),
         PasswordRequirementSpec(

@@ -22,31 +22,31 @@ abstract final class AppLocaleKeys {
   static const String authLoginSubtitle = 'auth.loginSubtitle';
   static const String authLoginIdentifierLabel = 'auth.loginIdentifierLabel';
   static const String authLoginNoAccount = 'auth.loginNoAccount';
-  static const String authLoginSignUpAction = 'auth.loginSignUpAction';
+  static const String authGoogleContinueAction = 'auth.googleContinueAction';
   static const String authForgotPasswordAction = 'auth.forgotPasswordAction';
   static const String authSignInAction = 'auth.signInAction';
+  static const String authGoogleSignInFailed = 'auth.googleSignInFailed';
   static const String authPasswordRecoveryTitle = 'auth.passwordRecoveryTitle';
   static const String authPasswordRecoveryHeading =
       'auth.passwordRecoveryHeading';
   static const String authPasswordRecoverySubtitle =
       'auth.passwordRecoverySubtitle';
-  static const String authPasswordRecoveryEmailLabel =
-      'auth.passwordRecoveryEmailLabel';
   static const String authPasswordRecoverySendAction =
       'auth.passwordRecoverySendAction';
   static const String authPasswordRecoverySuccessTitle =
       'auth.passwordRecoverySuccessTitle';
   static const String authPasswordRecoverySuccessMessage =
       'auth.passwordRecoverySuccessMessage';
-  static const String authPasswordRecoverySuccessBackToLoginAction =
-      'auth.passwordRecoverySuccessBackToLoginAction';
-  static const String authSignUpTitle = 'auth.signUpTitle';
   static const String authSignUpHeading = 'auth.signUpHeading';
   static const String authSignUpSubtitle = 'auth.signUpSubtitle';
   static const String authSignUpAction = 'auth.signUpAction';
   static const String authBackToLoginAction = 'auth.backToLoginAction';
   static const String authFullNameLabel = 'auth.fullNameLabel';
   static const String authUsernameLabel = 'auth.usernameLabel';
+  static const String authGoogleAccountSetupTitle =
+      'auth.googleAccountSetupTitle';
+  static const String authGoogleAccountSetupSubtitle =
+      'auth.googleAccountSetupSubtitle';
   static const String authPasswordLabel = 'auth.passwordLabel';
   static const String authEmailLabel = 'auth.emailLabel';
   static const String authUsernameRestrictionHint =
@@ -95,8 +95,6 @@ abstract final class AppLocaleKeys {
       'notification.permissionDeniedBody';
   static const String notificationPermissionOpenSettings =
       'notification.permissionOpenSettings';
-  static const String notificationPermissionOpenSettingsDismiss =
-      'notification.permissionOpenSettingsDismiss';
   static const String notificationPermissionError =
       'notification.permissionError';
   static const String notificationChannelMessages =
@@ -117,8 +115,6 @@ abstract final class AppLocaleKeys {
   static const String validationPattern = 'validation.pattern';
   static const String validationFullNameComplete =
       'validation.fullNameComplete';
-  static const String validationPasswordMinimumLength =
-      'validation.passwordMinimumLength';
   static const String validationPasswordLetterAndNumber =
       'validation.passwordLetterAndNumber';
   static const String validationPasswordSpecialCharacter =

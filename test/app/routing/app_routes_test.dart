@@ -35,6 +35,17 @@ void main() {
     expect(loginRoute.settings.name, AppRoutePaths.home);
   });
 
+  test('maps the google account setup route for unauthenticated users', () {
+    final bool isAuthenticated = false;
+
+    final Route<dynamic> route = AppRoutes.onGenerateRoute(
+      const RouteSettings(name: AppRoutePaths.googleAccountSetup),
+      isAuthenticated: () => isAuthenticated,
+    );
+
+    expect(route.settings.name, AppRoutePaths.googleAccountSetup);
+  });
+
   test('generates a single initial route without expanding the stack', () {
     final bool isAuthenticated = false;
 

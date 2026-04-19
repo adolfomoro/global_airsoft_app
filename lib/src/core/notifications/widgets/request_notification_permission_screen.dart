@@ -32,7 +32,7 @@ class RequestNotificationPermissionScreen extends StatelessWidget {
         ? l10n.tr(AppLocaleKeys.notificationPermissionOpenSettings)
         : l10n.tr(AppLocaleKeys.notificationPermissionAllow);
     final String dismissLabel = isOpenSettingsMode
-        ? l10n.tr(AppLocaleKeys.notificationPermissionOpenSettingsDismiss)
+        ? l10n.tr(AppLocaleKeys.notificationPermissionDismiss)
         : l10n.tr(AppLocaleKeys.notificationPermissionDismiss);
 
     return Scaffold(

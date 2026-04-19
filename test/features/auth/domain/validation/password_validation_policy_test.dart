@@ -11,7 +11,7 @@ void main() {
     final failure = PasswordValidationPolicy.rules.validate('Abc12!');
 
     expect(failure, isNotNull);
-    expect(failure?.messageKey, AppLocaleKeys.validationPasswordMinimumLength);
+    expect(failure?.messageKey, AppLocaleKeys.validationMinLength);
   });
 
   test('requires a letter and a number together', () {
