@@ -145,7 +145,7 @@ class AppProfilePictureEditor extends StatelessWidget {
                     ],
                   ),
                   child: Icon(
-                    Icons.camera_alt_rounded,
+                    Icons.edit_rounded,
                     size: badgeSize * 0.47,
                     color: colorScheme.onPrimary,
                   ),
