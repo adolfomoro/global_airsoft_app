@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/core/media/captured_image_mirror_service.dart';
 
 class ProfilePhotoCameraCapturePage extends StatefulWidget {
   const ProfilePhotoCameraCapturePage({super.key});
@@ -14,6 +15,9 @@ class ProfilePhotoCameraCapturePage extends StatefulWidget {
 class _ProfilePhotoCameraCapturePageState
     extends State<ProfilePhotoCameraCapturePage>
     with WidgetsBindingObserver {
+  final CapturedImageMirrorService _capturedImageMirrorService =
+      const CapturedImageMirrorService();
+
   CameraController? _controller;
   List<CameraDescription> _cameras = const <CameraDescription>[];
   int _selectedCameraIndex = 0;
@@ -186,7 +190,18 @@ class _ProfilePhotoCameraCapturePageState
         return;
       }
 
-      Navigator.of(context).pop(File(capturedFile.path));
+      final File capturedPhoto = File(capturedFile.path);
+      final File mirroredPhoto = await _capturedImageMirrorService
+          .mirrorCapturedPhotoIfNeeded(
+            sourceFile: capturedPhoto,
+            shouldMirror: _shouldMirrorCapturedPhoto(),
+          );
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.of(context).pop(mirroredPhoto);
     } catch (_) {
       if (!mounted) {
         return;
@@ -253,25 +268,63 @@ class _ProfilePhotoCameraCapturePageState
       return _buildLoadingState(context);
     }
 
-    return Center(
-      child: ShaderMask(
-        blendMode: BlendMode.dstIn,
-        shaderCallback: (Rect bounds) {
-          return const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: <Color>[
-              Colors.transparent,
-              Colors.white,
-              Colors.white,
-              Colors.transparent,
-            ],
-            stops: <double>[0.0, 0.02, 0.98, 1.0],
-          ).createShader(bounds);
-        },
-        child: CameraPreview(controller),
-      ),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final Widget preview = CameraPreview(controller);
+        final bool shouldFadeEdges = _shouldFadePreviewEdges(
+          constraints,
+          controller.value.aspectRatio,
+        );
+
+        if (!shouldFadeEdges) {
+          return Center(child: preview);
+        }
+
+        return Center(
+          child: ShaderMask(
+            blendMode: BlendMode.dstIn,
+            shaderCallback: (Rect bounds) {
+              return const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: <Color>[
+                  Colors.transparent,
+                  Colors.white,
+                  Colors.white,
+                  Colors.transparent,
+                ],
+                stops: <double>[0.0, 0.02, 0.98, 1.0],
+              ).createShader(bounds);
+            },
+            child: preview,
+          ),
+        );
+      },
     );
+  }
+
+  bool _shouldFadePreviewEdges(BoxConstraints constraints, double aspectRatio) {
+    if (!constraints.hasBoundedWidth ||
+        !constraints.hasBoundedHeight ||
+        aspectRatio <= 0) {
+      return true;
+    }
+
+    const double tolerance = 0.5;
+    final double fittedHeight = constraints.maxWidth / aspectRatio;
+
+    return fittedHeight + tolerance < constraints.maxHeight;
+  }
+
+  bool _shouldMirrorCapturedPhoto() {
+    if (!Platform.isAndroid ||
+        _selectedCameraIndex < 0 ||
+        _selectedCameraIndex >= _cameras.length) {
+      return false;
+    }
+
+    return _cameras[_selectedCameraIndex].lensDirection ==
+        CameraLensDirection.front;
   }
 
   Widget _buildTopBar(BuildContext context) {
