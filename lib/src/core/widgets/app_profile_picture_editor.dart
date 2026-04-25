@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_profile_image_placeholder.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 
@@ -11,7 +13,8 @@ class AppProfilePictureEditor extends StatelessWidget {
     this.badgeSize = 38,
     super.key,
   }) : _imageUrl = imageUrl,
-       _imageProvider = null;
+       _imageProvider = null,
+       _profilePhoto = null;
 
   const AppProfilePictureEditor.imageProvider({
     required ImageProvider imageProvider,
@@ -21,16 +24,33 @@ class AppProfilePictureEditor extends StatelessWidget {
     this.badgeSize = 38,
     super.key,
   }) : _imageUrl = null,
-       _imageProvider = imageProvider;
+       _imageProvider = imageProvider,
+       _profilePhoto = null;
+
+  const AppProfilePictureEditor.profilePhoto({
+    required ProfilePhoto profilePhoto,
+    required this.onPhotoTap,
+    required this.onEditTap,
+    this.size = 126,
+    this.badgeSize = 38,
+    super.key,
+  }) : _imageUrl = null,
+       _imageProvider = null,
+       _profilePhoto = profilePhoto;
 
   final String? _imageUrl;
   final ImageProvider? _imageProvider;
+  final ProfilePhoto? _profilePhoto;
   final VoidCallback onPhotoTap;
   final VoidCallback onEditTap;
   final double size;
   final double badgeSize;
 
   bool get _hasImage {
+    if (_profilePhoto != null) {
+      return _profilePhoto.hasPhoto;
+    }
+
     final String? imageUrl = _imageUrl;
     return (imageUrl != null && imageUrl.isNotEmpty) || _imageProvider != null;
   }
@@ -44,6 +64,59 @@ class AppProfilePictureEditor extends StatelessWidget {
   }
 
   Widget _buildImage() {
+    // Handle ProfilePhoto
+    if (_profilePhoto != null) {
+      if (_profilePhoto.isLocal) {
+        final File localFile = _profilePhoto.localFile!;
+        return Image.file(
+          localFile,
+          fit: BoxFit.cover,
+          frameBuilder:
+              (
+                BuildContext context,
+                Widget child,
+                int? frame,
+                bool wasSynchronouslyLoaded,
+              ) {
+                if (wasSynchronouslyLoaded || frame != null) {
+                  return child;
+                }
+
+                return _buildLoadingSkeleton();
+              },
+          errorBuilder:
+              (BuildContext context, Object error, StackTrace? stackTrace) {
+                return _buildPlaceholder();
+              },
+        );
+      } else if (_profilePhoto.isNetwork) {
+        final String networkUrl = _profilePhoto.networkUrl!;
+        return Image.network(
+          networkUrl,
+          fit: BoxFit.cover,
+          loadingBuilder:
+              (
+                BuildContext context,
+                Widget child,
+                ImageChunkEvent? loadingProgress,
+              ) {
+                if (loadingProgress == null) {
+                  return child;
+                }
+
+                return _buildLoadingSkeleton();
+              },
+          errorBuilder:
+              (BuildContext context, Object error, StackTrace? stackTrace) {
+                return _buildPlaceholder();
+              },
+        );
+      }
+
+      return _buildPlaceholder();
+    }
+
+    // Handle ImageProvider
     if (_imageProvider != null) {
       final ImageProvider imageProvider = _imageProvider;
 
@@ -70,6 +143,7 @@ class AppProfilePictureEditor extends StatelessWidget {
       );
     }
 
+    // Handle network URL
     return Image.network(
       _imageUrl!,
       fit: BoxFit.cover,

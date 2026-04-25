@@ -77,5 +77,16 @@
     "validation.fullNameComplete": "Enter a first and last name.",
     "validation.passwordLetterAndNumber": "Use one letter and one number.",
     "validation.passwordSpecialCharacter": "Use one special character.",
-    "validation.usernameLowercaseOnly": "Use lowercase letters, numbers, _ and . only."
+    "validation.usernameLowercaseOnly": "Use lowercase letters, numbers, _ and . only.",
+    "profilePhoto.selectPhotoTitle": "Profile photo",
+    "profilePhoto.cropTitle": "Crop photo",
+    "profilePhoto.takePhoto": "Take photo",
+    "profilePhoto.selectFromGallery": "Choose from gallery",
+    "profilePhoto.deletePhoto": "Remove photo",
+    "profilePhoto.cancel": "Cancel",
+    "profilePhoto.cameraPermissionDeniedTitle": "Camera access required",
+    "profilePhoto.cameraPermissionDeniedMessage": "To take photos, allow camera access in your device settings.",
+    "profilePhoto.galleryPermissionDeniedTitle": "Gallery access required",
+    "profilePhoto.galleryPermissionDeniedMessage": "To select photos, allow gallery access in your device settings.",
+    "profilePhoto.permissionOpenSettings": "Open settings"
 }

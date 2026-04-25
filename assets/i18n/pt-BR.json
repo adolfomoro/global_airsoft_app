@@ -77,5 +77,16 @@
     "validation.fullNameComplete": "Informe nome e sobrenome.",
     "validation.passwordLetterAndNumber": "Use uma letra e um número.",
     "validation.passwordSpecialCharacter": "Use um caractere especial.",
-    "validation.usernameLowercaseOnly": "Use letras minúsculas, números, _ e . apenas."
+    "validation.usernameLowercaseOnly": "Use letras minúsculas, números, _ e . apenas.",
+    "profilePhoto.selectPhotoTitle": "Foto de perfil",
+    "profilePhoto.cropTitle": "Cortar foto",
+    "profilePhoto.takePhoto": "Tirar foto",
+    "profilePhoto.selectFromGallery": "Escolher da galeria",
+    "profilePhoto.deletePhoto": "Remover foto",
+    "profilePhoto.cancel": "Cancelar",
+    "profilePhoto.cameraPermissionDeniedTitle": "Acesso à câmera necessário",
+    "profilePhoto.cameraPermissionDeniedMessage": "Para tirar fotos, permita o acesso à câmera nas configurações do aparelho.",
+    "profilePhoto.galleryPermissionDeniedTitle": "Acesso à galeria necessário",
+    "profilePhoto.galleryPermissionDeniedMessage": "Para selecionar fotos, permita o acesso à galeria nas configurações do aparelho.",
+    "profilePhoto.permissionOpenSettings": "Abrir configurações"
 }

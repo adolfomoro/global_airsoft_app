@@ -123,4 +123,22 @@ abstract final class AppLocaleKeys {
       'validation.usernameLowercaseOnly';
   static const String commonShowPassword = 'common.showPassword';
   static const String commonHidePassword = 'common.hidePassword';
+  static const String profilePhotoSelectPhotoTitle =
+      'profilePhoto.selectPhotoTitle';
+  static const String profilePhotoCropTitle = 'profilePhoto.cropTitle';
+  static const String profilePhotoTakePhoto = 'profilePhoto.takePhoto';
+  static const String profilePhotoSelectFromGallery =
+      'profilePhoto.selectFromGallery';
+  static const String profilePhotoDeletePhoto = 'profilePhoto.deletePhoto';
+  static const String profilePhotoCancel = 'profilePhoto.cancel';
+  static const String profilePhotoCameraPermissionDeniedTitle =
+      'profilePhoto.cameraPermissionDeniedTitle';
+  static const String profilePhotoCameraPermissionDeniedMessage =
+      'profilePhoto.cameraPermissionDeniedMessage';
+  static const String profilePhotoGalleryPermissionDeniedTitle =
+      'profilePhoto.galleryPermissionDeniedTitle';
+  static const String profilePhotoGalleryPermissionDeniedMessage =
+      'profilePhoto.galleryPermissionDeniedMessage';
+  static const String profilePhotoPermissionOpenSettings =
+      'profilePhoto.permissionOpenSettings';
 }

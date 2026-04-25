@@ -4,12 +4,15 @@ import 'package:global_airsoft_app/src/core/localization/app_localization_servic
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/network/http_status_code_extensions.dart';
+import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 import 'package:global_airsoft_app/src/features/auth/data/constants/auth_api_paths.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_output_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/external_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_in_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_in_response_output_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_output_dto.dart';
@@ -170,6 +173,49 @@ final class AuthRepository {
     } on DioException {
       await _throwLocalizedFailure(
         failureMessageProvider: _googleSignInFailedMessage,
+      );
+    }
+  }
+
+  Future<CreateUserOutputDto> signUpWithGoogle(
+    GoogleSignUpConfirmInputDto input,
+  ) async {
+    try {
+      final dynamic requestData;
+
+      if (input.hasProfilePicture) {
+        requestData = await MultipartUploadUtil.createFormData(
+          input.profilePictureFile!,
+          fieldName: ExternalSignUpConfirmInputDto.profilePictureFileField,
+          additionalFields: input.toJson(),
+        );
+      } else {
+        requestData = input.toJson();
+      }
+
+      final Response<dynamic> response = await _dioService.post<dynamic>(
+        AuthApiPaths.signUpGoogle,
+        data: requestData,
+      );
+
+      return _parseSuccessfulResponse(
+        response: response,
+        fromJson: CreateUserOutputDto.fromJson,
+        failureMessageProvider: _signUpFailedMessage,
+      );
+    } on AbpApiException catch (error) {
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _signUpFailedMessage,
+        error: error,
+      );
+    } on ApiException catch (error) {
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _signUpFailedMessage,
+        error: error,
+      );
+    } on DioException {
+      await _throwLocalizedFailure(
+        failureMessageProvider: _signUpFailedMessage,
       );
     }
   }

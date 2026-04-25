@@ -7,6 +7,7 @@ import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repo
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_in_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_in_response_output_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_output_dto.dart';
@@ -112,6 +113,16 @@ final class AuthService {
     }
 
     return output;
+  }
+
+  Future<void> signUpWithGoogle(GoogleSignUpConfirmInputDto input) async {
+    final CreateUserOutputDto output = await _authRepository.signUpWithGoogle(
+      input,
+    );
+    await persistAuthenticatedUser(
+      UserLoginOutputDto(profile: output.profile, tokens: output.tokens),
+      successLogMessage: 'User signed up with Google successfully',
+    );
   }
 
   Future<void> requestPasswordRecovery(String email) {
