@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
-import 'package:global_airsoft_app/src/app/widgets/app_form_padding.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_form_with_bottom_actions.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/focus_aware_scroll_coordinator.dart';
@@ -338,116 +338,120 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
       appBar: AppAdaptiveAppBar(
         title: Text(context.l10n.tr(AppLocaleKeys.authSignUpAction)),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Form(
-            key: _formKey,
-            child: AppFormPadding(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  const SizedBox(height: 20),
-                  Text(
-                    context.l10n.tr(AppLocaleKeys.authSignUpHeading),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n.tr(AppLocaleKeys.authSignUpSubtitle),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 24),
-                  AppTextField(
-                    labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
-                    controller: _usernameController,
-                    onChanged: _handleUsernameChanged,
-                    errorText: _usernameError,
-                    isRequired: _usernameValidationRules.hasRequiredRule,
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.next,
-                    validator: _usernameValidationRules.asValidator(
-                      _resolveValidationMessage,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  AppTextField(
-                    labelText: context.l10n.tr(AppLocaleKeys.authFullNameLabel),
-                    controller: _fullNameController,
-                    onChanged: _handleFullNameChanged,
-                    errorText: _fullNameError,
-                    isRequired: _fullNameValidationRules.hasRequiredRule,
-                    keyboardType: TextInputType.name,
-                    textInputAction: TextInputAction.next,
-                    validator: _fullNameValidationRules.asValidator(
-                      _resolveValidationMessage,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  AppTextField(
-                    labelText: context.l10n.tr(AppLocaleKeys.authEmailLabel),
-                    controller: _emailController,
-                    onChanged: _handleEmailChanged,
-                    errorText: _emailError,
-                    isRequired: _emailValidationRules.hasRequiredRule,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    validator: _emailValidationRules.asValidator(
-                      _resolveValidationMessage,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  AppPasswordField(
-                    key: _passwordFieldKey,
-                    labelText: context.l10n.tr(AppLocaleKeys.authPasswordLabel),
-                    controller: _passwordController,
-                    focusNode: _passwordFocusNode,
-                    onChanged: _handlePasswordChanged,
-                    errorText: _passwordError,
-                    isRequired: passwordValidationRules.hasRequiredRule,
-                    textInputAction: TextInputAction.done,
-                    validator: passwordValidationRules.asValidator(
-                      _resolveValidationMessage,
-                    ),
-                  ),
-                  SizedBox(
-                    key: _passwordHintKey,
-                    child: PasswordRequirementsHint(
-                      currentPassword: _passwordController.text,
-                      isFocused: _isPasswordFocused,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  AppPasswordField(
-                    controller: _confirmPasswordController,
-                    labelText: context.l10n.tr(
-                      AppLocaleKeys.authConfirmPasswordLabel,
-                    ),
-                    isRequired: true,
-                    textInputAction: TextInputAction.done,
-                    validator: _validateConfirmPassword,
-                  ),
-                  const SizedBox(height: 24),
-                  AppButton(
-                    label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
-                    isLoading: _isLoading,
-                    onPressed: canSubmit ? _handleSignUp : null,
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () => Navigator.of(context).pop(),
-                    child: Text(
-                      context.l10n.tr(AppLocaleKeys.authBackToLoginAction),
-                    ),
-                  ),
-                ],
+      body: Form(
+        key: _formKey,
+        child: AppFormWithBottomActions(
+          scrollController: _scrollController,
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              const SizedBox(height: 20),
+              Text(
+                context.l10n.tr(AppLocaleKeys.authSignUpHeading),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.l10n.tr(AppLocaleKeys.authSignUpSubtitle),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 24),
+              AppTextField(
+                labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
+                controller: _usernameController,
+                onChanged: _handleUsernameChanged,
+                errorText: _usernameError,
+                isRequired: _usernameValidationRules.hasRequiredRule,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.next,
+                validator: _usernameValidationRules.asValidator(
+                  _resolveValidationMessage,
+                ),
+              ),
+              const SizedBox(height: 16),
+              AppTextField(
+                labelText: context.l10n.tr(AppLocaleKeys.authFullNameLabel),
+                controller: _fullNameController,
+                onChanged: _handleFullNameChanged,
+                errorText: _fullNameError,
+                isRequired: _fullNameValidationRules.hasRequiredRule,
+                keyboardType: TextInputType.name,
+                textInputAction: TextInputAction.next,
+                validator: _fullNameValidationRules.asValidator(
+                  _resolveValidationMessage,
+                ),
+              ),
+              const SizedBox(height: 16),
+              AppTextField(
+                labelText: context.l10n.tr(AppLocaleKeys.authEmailLabel),
+                controller: _emailController,
+                onChanged: _handleEmailChanged,
+                errorText: _emailError,
+                isRequired: _emailValidationRules.hasRequiredRule,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                validator: _emailValidationRules.asValidator(
+                  _resolveValidationMessage,
+                ),
+              ),
+              const SizedBox(height: 16),
+              AppPasswordField(
+                key: _passwordFieldKey,
+                labelText: context.l10n.tr(AppLocaleKeys.authPasswordLabel),
+                controller: _passwordController,
+                focusNode: _passwordFocusNode,
+                onChanged: _handlePasswordChanged,
+                errorText: _passwordError,
+                isRequired: passwordValidationRules.hasRequiredRule,
+                textInputAction: TextInputAction.done,
+                validator: passwordValidationRules.asValidator(
+                  _resolveValidationMessage,
+                ),
+              ),
+              SizedBox(
+                key: _passwordHintKey,
+                child: PasswordRequirementsHint(
+                  currentPassword: _passwordController.text,
+                  isFocused: _isPasswordFocused,
+                ),
+              ),
+              const SizedBox(height: 16),
+              AppPasswordField(
+                controller: _confirmPasswordController,
+                labelText: context.l10n.tr(
+                  AppLocaleKeys.authConfirmPasswordLabel,
+                ),
+                isRequired: true,
+                textInputAction: TextInputAction.done,
+                validator: _validateConfirmPassword,
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+          bottomActions: <AppFormBottomAction>[
+            AppFormBottomAction(
+              showWhenKeyboardOpen: true,
+              child: AppButton(
+                label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
+                isLoading: _isLoading,
+                onPressed: canSubmit ? _handleSignUp : null,
               ),
             ),
-          ),
+            AppFormBottomAction(child: const SizedBox(height: 8)),
+            AppFormBottomAction(
+              showWhenKeyboardOpen: false,
+              child: TextButton(
+                onPressed: _isLoading
+                    ? null
+                    : () => Navigator.of(context).pop(),
+                child: Text(
+                  context.l10n.tr(AppLocaleKeys.authBackToLoginAction),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

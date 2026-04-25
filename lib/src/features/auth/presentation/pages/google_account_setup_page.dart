@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
-import 'package:global_airsoft_app/src/app/widgets/app_form_padding.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_form_with_bottom_actions.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
@@ -49,40 +49,40 @@ class _GoogleAccountSetupPageState extends State<GoogleAccountSetupPage> {
       appBar: AppAdaptiveAppBar(
         title: Text(context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupTitle)),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: AppFormPadding(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const SizedBox(height: 20),
-                Text(
-                  context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupSubtitle),
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 40),
-                Center(
-                  child: AppProfilePictureEditor.network(
-                    imageUrl: profilePictureUrl,
-                    onPhotoTap: () => _handleProfilePhotoTap(profilePictureUrl),
-                    onEditTap: _handleProfileEditTap,
-                  ),
-                ),
-                const SizedBox(height: 50),
-                AppTextField(
-                  labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
-                  controller: _profileNameController,
-                ),
-                const SizedBox(height: 24),
-                AppButton(
-                  label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
-                  onPressed: () {},
-                ),
-              ],
+      body: AppFormWithBottomActions(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const SizedBox(height: 20),
+            Text(
+              context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupSubtitle),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 40),
+            Center(
+              child: AppProfilePictureEditor.network(
+                imageUrl: profilePictureUrl,
+                onPhotoTap: () => _handleProfilePhotoTap(profilePictureUrl),
+                onEditTap: _handleProfileEditTap,
+              ),
+            ),
+            const SizedBox(height: 50),
+            AppTextField(
+              labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
+              controller: _profileNameController,
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+        bottomActions: <AppFormBottomAction>[
+          AppFormBottomAction(
+            child: AppButton(
+              label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
+              onPressed: () {},
             ),
           ),
-        ),
+        ],
       ),
     );
   }
