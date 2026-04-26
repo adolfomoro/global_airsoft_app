@@ -81,8 +81,43 @@ void main() {
     );
 
     await tester.pump();
+    expect(tester.takeException(), isNull);
 
     expect(shown, isTrue);
     expect(find.text('Localized login failed message.'), findsOneWidget);
+    expect(find.byType(SnackBar), findsOneWidget);
+  });
+
+  testWidgets('shows ios-specific notification overlay on cupertino platform', (
+    WidgetTester tester,
+  ) async {
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+
+    final bool shown = AppSnackBarPresenter.showSuccess(
+      capturedContext,
+      'Profile updated successfully.',
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(tester.takeException(), isNull);
+
+    expect(shown, isTrue);
+    expect(find.text('Profile updated successfully.'), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
   });
 }
