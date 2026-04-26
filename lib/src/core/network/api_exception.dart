@@ -124,7 +124,7 @@ class ApiException implements Exception {
       case 404:
         return NotFoundApiException.fromApiException(this);
       case 409:
-        return ConflictApiException.fromApiException(this);
+        return UserFriendlyApiException.fromApiException(this);
       case 501:
         return NotImplementedApiException.fromApiException(this);
       default:
@@ -240,8 +240,8 @@ class NotFoundApiException extends ApiException {
   }
 }
 
-class ConflictApiException extends ApiException {
-  const ConflictApiException({
+class UserFriendlyApiException extends ApiException {
+  const UserFriendlyApiException({
     required super.message,
     super.statusCode,
     super.code,
@@ -252,8 +252,8 @@ class ConflictApiException extends ApiException {
     super.isFallbackMessage,
   });
 
-  factory ConflictApiException.fromApiException(ApiException error) {
-    return ConflictApiException(
+  factory UserFriendlyApiException.fromApiException(ApiException error) {
+    return UserFriendlyApiException(
       message: error.message,
       statusCode: error.statusCode,
       code: error.code,
