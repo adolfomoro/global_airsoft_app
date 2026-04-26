@@ -7,5 +7,6 @@ final class AuthApiPaths {
   static const String refreshTokens = '/auth/tokens/refresh';
   static const String signUp = '/auth/sign-up';
   static const String signUpGoogle = '/auth/sign-up/google';
+  static const String usernameAvailability = '/auth/usernames/availability';
   static const String passwordRecovery = '/auth/password/recovery';
 }

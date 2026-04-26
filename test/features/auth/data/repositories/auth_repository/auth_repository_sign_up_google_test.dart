@@ -10,6 +10,8 @@ import 'package:global_airsoft_app/src/core/localization/app_localization_servic
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/check_username_availability_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/check_username_availability_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/external_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_up_confirm_input_dto.dart';
@@ -156,5 +158,33 @@ void main() {
     );
     expect(formData.files.single.value.filename, 'photo.jpg');
     expect(output.tokens.jwtToken, 'jwt-token');
+  });
+
+  test('checkUsernameAvailability sends query and parses suggestions', () async {
+    final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
+      respond: (RequestOptions options) async {
+        return ResponseBody.fromString(
+          '{"userName":"player","isAvailable":false,"suggestions":["player.1","player.2"]}',
+          HttpStatus.ok,
+          headers: <String, List<String>>{
+            Headers.contentTypeHeader: <String>[Headers.jsonContentType],
+          },
+        );
+      },
+    );
+    final AuthRepository repository = await _buildRepository(adapter);
+
+    final CheckUsernameAvailabilityOutputDto output = await repository
+        .checkUsernameAvailability(
+          const CheckUsernameAvailabilityInputDto(userName: 'player'),
+        );
+
+    final RequestOptions requestOptions = adapter.lastRequestOptions!;
+    expect(requestOptions.path, '/auth/usernames/availability');
+    expect(requestOptions.queryParameters, <String, dynamic>{
+      CheckUsernameAvailabilityInputDto.userNameField: 'player',
+    });
+    expect(output.isAvailable, isFalse);
+    expect(output.suggestions, <String>['player.1', 'player.2']);
   });
 }

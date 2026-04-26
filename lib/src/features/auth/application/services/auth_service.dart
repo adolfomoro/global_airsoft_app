@@ -4,6 +4,8 @@ import 'package:global_airsoft_app/src/features/auth/application/services/auth_s
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/google_sign_in_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/check_username_availability_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/check_username_availability_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_in_input_dto.dart';
@@ -104,6 +106,17 @@ final class AuthService {
       UserLoginOutputDto(profile: output.profile, tokens: output.tokens),
       successLogMessage: 'User signed up successfully',
     );
+  }
+
+  Future<CheckUsernameAvailabilityOutputDto> checkUsernameAvailability(
+    String username,
+  ) {
+    final CheckUsernameAvailabilityInputDto input =
+        CheckUsernameAvailabilityInputDto(
+          userName: username.trim().toLowerCase(),
+        );
+
+    return _authRepository.checkUsernameAvailability(input);
   }
 
   Future<GoogleSignInResponseOutputDto> signInWithGoogle(String idToken) async {

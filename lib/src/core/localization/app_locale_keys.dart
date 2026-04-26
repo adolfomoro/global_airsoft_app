@@ -59,10 +59,22 @@ abstract final class AppLocaleKeys {
       'auth.googleAccountSetupTitle';
   static const String authGoogleAccountSetupSubtitle =
       'auth.googleAccountSetupSubtitle';
+  static const String authGoogleAccountSetupGoogleConnected =
+      'auth.googleAccountSetupGoogleConnected';
+  static const String authGoogleAccountSetupPhotoHint =
+      'auth.googleAccountSetupPhotoHint';
   static const String authPasswordLabel = 'auth.passwordLabel';
   static const String authEmailLabel = 'auth.emailLabel';
   static const String authUsernameRestrictionHint =
       'auth.usernameRestrictionHint';
+  static const String authUsernameReady = 'auth.usernameReady';
+  static const String authUsernameExampleHint = 'auth.usernameExampleHint';
+  static const String authUsernameChecking = 'auth.usernameChecking';
+  static const String authUsernameUnavailable = 'auth.usernameUnavailable';
+  static const String authUsernameSuggestionsLabel =
+      'auth.usernameSuggestionsLabel';
+  static const String authUsernameAvailabilityFailed =
+      'auth.usernameAvailabilityFailed';
   static const String authConfirmPasswordLabel = 'auth.confirmPasswordLabel';
   static const String authConfirmPasswordRequired =
       'auth.confirmPasswordRequired';

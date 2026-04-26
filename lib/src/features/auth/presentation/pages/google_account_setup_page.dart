@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_form_with_bottom_actions.dart';
-import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
@@ -14,7 +15,6 @@ import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
 import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
-import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_profile_image_zoom_viewer.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_profile_picture_editor.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
@@ -23,8 +23,8 @@ import 'package:global_airsoft_app/src/features/auth/application/services/auth_s
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/external_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_up_confirm_input_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/validation/user_name_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
 class _GoogleSetupProfilePhotoNotifier extends Notifier<ProfilePhoto> {
   @override
@@ -72,15 +72,28 @@ class _GoogleAccountSetupPageState
     extends ConsumerState<GoogleAccountSetupPage> {
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
-  static final ValidationRuleSet _usernameValidationRules =
-      UsernameValidation.rules;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late final TextEditingController _profileNameController =
-      TextEditingController(text: widget.profileName);
+      TextEditingController(
+        text: _suggestUsernameFromProfileName(widget.profileName),
+      );
 
   bool _isLoading = false;
+  bool _hasSubmitted = false;
   String? _usernameError;
+  UsernameAvailabilityStatus _usernameAvailabilityStatus =
+      UsernameAvailabilityStatus.idle;
+
+  static String _suggestUsernameFromProfileName(String profileName) {
+    return profileName
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'\s+'), '.')
+        .replaceAll(RegExp(r'[^a-z0-9_.]'), '')
+        .replaceAll(RegExp(r'[_.]{2,}'), '.')
+        .replaceAll(RegExp(r'^[_.]+|[_.]+$'), '');
+  }
 
   @override
   void initState() {
@@ -136,30 +149,31 @@ class _GoogleAccountSetupPageState
     }
   }
 
-  String? _validateUsername(String? value) {
-    if (_usernameError != null) {
-      return _usernameError;
+  void _handleUsernameChanged(String _) {
+    if (_usernameError == null) {
+      return;
     }
 
-    final String normalizedValue = (value ?? '').trim().toLowerCase();
-    if (normalizedValue.isEmpty) {
-      return null;
+    setState(() {
+      _usernameError = null;
+    });
+  }
+
+  void _handleUsernameAvailabilityChanged(UsernameAvailabilityStatus status) {
+    if (_usernameAvailabilityStatus == status) {
+      return;
     }
 
-    final ValidationFailure? failure = _usernameValidationRules.validate(
-      normalizedValue,
-    );
-    if (failure != null) {
-      return context.l10n.trArgs(failure.messageKey, args: failure.arguments);
-    }
-
-    return null;
+    setState(() {
+      _usernameAvailabilityStatus = status;
+    });
   }
 
   Future<void> _handleGoogleSignUp() async {
     FocusScope.of(context).unfocus();
 
     setState(() {
+      _hasSubmitted = true;
       _usernameError = null;
     });
 
@@ -273,46 +287,73 @@ class _GoogleAccountSetupPageState
     final ProfilePhoto profilePhoto = ref.watch(
       _googleSetupProfilePhotoProvider,
     );
-
     final bool canSubmit =
-        !_isLoading && _profileNameController.text.trim().isNotEmpty;
+        !_isLoading &&
+        _usernameAvailabilityStatus != UsernameAvailabilityStatus.waiting &&
+        _usernameAvailabilityStatus != UsernameAvailabilityStatus.checking &&
+        _usernameAvailabilityStatus != UsernameAvailabilityStatus.unavailable;
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
         title: Text(context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupTitle)),
       ),
       body: AppFormWithBottomActions(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         body: Form(
           key: _formKey,
+          autovalidateMode: _hasSubmitted
+              ? AutovalidateMode.onUserInteraction
+              : AutovalidateMode.disabled,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              const SizedBox(height: 20),
+              const SizedBox(height: AppDimensions.spacingXl),
+              const Center(child: _GoogleConnectedPill()),
+              const SizedBox(height: AppDimensions.spacingLg),
+              Text(
+                context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupTitle),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spacingXs),
               Text(
                 context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupSubtitle),
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 40),
-              Center(
-                child: AppProfilePictureEditor.profilePhoto(
-                  profilePhoto: profilePhoto,
-                  onPhotoTap: _handleProfilePhotoTap,
-                  onEditTap: _handleProfileEditTap,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.35,
                 ),
               ),
-              const SizedBox(height: 50),
-              AppTextField(
-                labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
-                controller: _profileNameController,
-                validator: _validateUsername,
+              const SizedBox(height: AppDimensions.spacing2xl),
+              _ProfilePhotoSection(
+                profilePhoto: profilePhoto,
+                onPhotoTap: _handleProfilePhotoTap,
+                onEditTap: _handleProfileEditTap,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppDimensions.spacing2xl),
+              UsernameAvailabilityField(
+                controller: _profileNameController,
+                onChanged: _handleUsernameChanged,
+                errorText: _usernameError,
+                textInputAction: TextInputAction.done,
+                onAvailabilityChanged: _handleUsernameAvailabilityChanged,
+                onFieldSubmitted: (_) {
+                  if (!canSubmit) {
+                    return;
+                  }
+
+                  _handleGoogleSignUp();
+                },
+              ),
+              const SizedBox(height: AppDimensions.spacing2xl),
             ],
           ),
         ),
         bottomActions: <AppFormBottomAction>[
           AppFormBottomAction(
+            showWhenKeyboardOpen: true,
             child: AppButton(
               label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
               onPressed: canSubmit ? _handleGoogleSignUp : null,
@@ -321,6 +362,99 @@ class _GoogleAccountSetupPageState
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GoogleConnectedPill extends StatelessWidget {
+  const _GoogleConnectedPill();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.58),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacingMd,
+          vertical: AppDimensions.spacingXs,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(FontAwesomeIcons.google, size: 14, color: colorScheme.primary),
+            const SizedBox(width: AppDimensions.spacingXs),
+            Text(
+              context.l10n.tr(
+                AppLocaleKeys.authGoogleAccountSetupGoogleConnected,
+              ),
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(width: AppDimensions.spacingXs),
+            Icon(Icons.verified_rounded, size: 16, color: colorScheme.primary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfilePhotoSection extends StatelessWidget {
+  const _ProfilePhotoSection({
+    required this.profilePhoto,
+    required this.onPhotoTap,
+    required this.onEditTap,
+  });
+
+  final ProfilePhoto profilePhoto;
+  final VoidCallback onPhotoTap;
+  final VoidCallback onEditTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        AppProfilePictureEditor.profilePhoto(
+          profilePhoto: profilePhoto,
+          size: 124,
+          badgeSize: 40,
+          onPhotoTap: onPhotoTap,
+          onEditTap: onEditTap,
+        ),
+        const SizedBox(height: AppDimensions.spacingLg),
+        Text(
+          context.l10n.tr(AppLocaleKeys.profilePhotoSelectPhotoTitle),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: AppDimensions.spacingXs),
+        Text(
+          context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupPhotoHint),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            height: 1.35,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -6,6 +6,8 @@ import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/network/http_status_code_extensions.dart';
 import 'package:global_airsoft_app/src/features/auth/data/constants/auth_api_paths.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/check_username_availability_input_dto.dart';
+import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/check_username_availability_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_in_input_dto.dart';
@@ -31,6 +33,12 @@ final class AuthRepository {
 
   Future<String> _signUpFailedMessage() {
     return _localizationService.tr(AppLocaleKeys.authSignUpFailed);
+  }
+
+  Future<String> _usernameAvailabilityFailedMessage() {
+    return _localizationService.tr(
+      AppLocaleKeys.authUsernameAvailabilityFailed,
+    );
   }
 
   Future<String> _passwordRecoveryFailedMessage() {
@@ -144,6 +152,37 @@ final class AuthRepository {
     } on DioException {
       await _throwLocalizedFailure(
         failureMessageProvider: _signUpFailedMessage,
+      );
+    }
+  }
+
+  Future<CheckUsernameAvailabilityOutputDto> checkUsernameAvailability(
+    CheckUsernameAvailabilityInputDto input,
+  ) async {
+    try {
+      final Response<dynamic> response = await _dioService.get<dynamic>(
+        AuthApiPaths.usernameAvailability,
+        queryParameters: input.toQueryParameters(),
+      );
+
+      return _parseSuccessfulResponse(
+        response: response,
+        fromJson: CheckUsernameAvailabilityOutputDto.fromJson,
+        failureMessageProvider: _usernameAvailabilityFailedMessage,
+      );
+    } on AbpApiException catch (error) {
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _usernameAvailabilityFailedMessage,
+        error: error,
+      );
+    } on ApiException catch (error) {
+      await _throwLocalizedAuthenticationException(
+        failureMessageProvider: _usernameAvailabilityFailedMessage,
+        error: error,
+      );
+    } on DioException {
+      await _throwLocalizedFailure(
+        failureMessageProvider: _usernameAvailabilityFailedMessage,
       );
     }
   }
