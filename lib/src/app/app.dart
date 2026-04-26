@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/app/app_navigator.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/routing/app_routes.dart';
@@ -13,8 +14,6 @@ import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/notifications/widgets/notification_permission_listener.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_unfocus_wrapper.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
-
-final GlobalKey<NavigatorState> _appNavigatorKey = GlobalKey<NavigatorState>();
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});
@@ -37,7 +36,7 @@ class _AppState extends ConsumerState<App> {
         return;
       }
 
-      final NavigatorState? navigatorState = _appNavigatorKey.currentState;
+      final NavigatorState? navigatorState = appNavigatorKey.currentState;
       if (navigatorState == null || !navigatorState.mounted) {
         return;
       }
@@ -87,7 +86,7 @@ class _AppState extends ConsumerState<App> {
     final bool isAuthenticated = ref.watch(isAuthenticatedProvider);
 
     return MaterialApp(
-      navigatorKey: _appNavigatorKey,
+      navigatorKey: appNavigatorKey,
       debugShowCheckedModeBanner: false,
       onGenerateTitle: (BuildContext context) {
         return context.l10n.tr(AppLocaleKeys.appTitle);
@@ -113,7 +112,7 @@ class _AppState extends ConsumerState<App> {
       },
       builder: (BuildContext context, Widget? child) {
         return NotificationPermissionListener(
-          navigatorKey: _appNavigatorKey,
+          navigatorKey: appNavigatorKey,
           child: AppUnfocusWrapper(child: child ?? const SizedBox.shrink()),
         );
       },

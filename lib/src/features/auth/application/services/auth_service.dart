@@ -1,5 +1,6 @@
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/shared_prefs_key_value_store.dart';
+import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_coordinator.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/google_sign_in_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
@@ -50,6 +51,8 @@ final class AuthService {
     await _authStorageService.saveTokens(authTokens);
     await _authStorageService.saveProfile(authProfile);
     await _sharedPrefs.setString(_userIdBackupKey, profile.id);
+    AuthSecurityCoordinator.instance.cacheTokens(authTokens);
+    AuthSecurityCoordinator.instance.notifySessionChanged();
 
     _logger.info(successLogMessage);
   }
@@ -68,9 +71,29 @@ final class AuthService {
   }
 
   Future<void> logout() async {
+    try {
+      await _authRepository.logout();
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Remote logout failed.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+
+    await _clearLocalSession();
+    _logger.info('User logged out');
+  }
+
+  Future<void> _clearLocalSession() async {
+    await AuthSecurityCoordinator.instance.clearSession();
+    if (AuthSecurityCoordinator.instance.isConfigured) {
+      return;
+    }
+
     await _authStorageService.clearAll();
     await _sharedPrefs.remove(_userIdBackupKey);
-    _logger.info('User logged out');
   }
 
   Future<void> signUp({

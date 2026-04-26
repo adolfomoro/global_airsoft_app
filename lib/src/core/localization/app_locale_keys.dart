@@ -13,6 +13,7 @@ abstract final class AppLocaleKeys {
   static const String homeTitle = 'home.title';
   static const String homeMainLabel = 'home.mainLabel';
   static const String homeLogoutAction = 'home.logoutAction';
+  static const String homeLogoutErrorMessage = 'home.logoutErrorMessage';
   static const String deviceRegistrationFailed = 'device.registrationFailed';
   static const String deviceRegistrationEmptyResponse =
       'device.registrationEmptyResponse';
@@ -26,6 +27,17 @@ abstract final class AppLocaleKeys {
   static const String authForgotPasswordAction = 'auth.forgotPasswordAction';
   static const String authSignInAction = 'auth.signInAction';
   static const String authGoogleSignInFailed = 'auth.googleSignInFailed';
+  static const String authLogoutFailed = 'auth.logoutFailed';
+  static const String authSessionEndedForSecurityMessage =
+      'auth.sessionEndedForSecurityMessage';
+  static const String authSecurityChangeDetectedMessage =
+      'auth.securityChangeDetectedMessage';
+  static const String authPermissionDeniedMessage =
+      'auth.permissionDeniedMessage';
+  static const String authTooManyAttemptsMessage =
+      'auth.tooManyAttemptsMessage';
+  static const String authServerUnavailableMessage =
+      'auth.serverUnavailableMessage';
   static const String authPasswordRecoveryTitle = 'auth.passwordRecoveryTitle';
   static const String authPasswordRecoveryHeading =
       'auth.passwordRecoveryHeading';
@@ -123,6 +135,8 @@ abstract final class AppLocaleKeys {
       'validation.usernameLowercaseOnly';
   static const String commonShowPassword = 'common.showPassword';
   static const String commonHidePassword = 'common.hidePassword';
+  static const String commonGenericApiErrorMessage =
+      'common.genericApiErrorMessage';
   static const String profilePhotoSelectPhotoTitle =
       'profilePhoto.selectPhotoTitle';
   static const String profilePhotoCropTitle = 'profilePhoto.cropTitle';

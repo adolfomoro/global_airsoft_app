@@ -9,8 +9,8 @@ final class UserLoginTokensOutputDto {
 
   factory UserLoginTokensOutputDto.fromJson(Map<String, dynamic> json) {
     return UserLoginTokensOutputDto(
-      jwtToken: (json['jwtToken'] as String?) ?? '',
-      refreshToken: (json['refreshToken'] as String?) ?? '',
+      jwtToken: (json['jwtToken'] as String?)?.trim() ?? '',
+      refreshToken: (json['refreshToken'] as String?)?.trim() ?? '',
     );
   }
 

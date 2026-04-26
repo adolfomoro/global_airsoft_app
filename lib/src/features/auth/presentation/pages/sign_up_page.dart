@@ -12,6 +12,7 @@ import 'package:global_airsoft_app/src/core/localization/app_localizations.dart'
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/create_user_input_dto.dart';
@@ -300,9 +301,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
 
       final String? message = error.message ?? globalError;
       if (message != null && message.trim().isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
-        );
+        context.showErrorSnackBar(message, source: error.failure);
       }
     } catch (error, stackTrace) {
       AppLogger.instance.error(
@@ -314,11 +313,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.tr(AppLocaleKeys.authSignUpFailed)),
-          backgroundColor: Colors.red,
-        ),
+      context.showErrorSnackBar(
+        context.l10n.tr(AppLocaleKeys.authSignUpFailed),
       );
     } finally {
       if (mounted) {

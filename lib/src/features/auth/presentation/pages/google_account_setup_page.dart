@@ -1,4 +1,6 @@
 import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
@@ -10,17 +12,18 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_providers.da
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
+import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_profile_image_zoom_viewer.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_profile_picture_editor.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/profile_photo_selection_bottom_sheet.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/external_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/user_name_validation.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/models/google_account_setup_arguments.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class _GoogleSetupProfilePhotoNotifier extends Notifier<ProfilePhoto> {
@@ -49,9 +52,16 @@ final _googleSetupProfilePhotoProvider =
     >(_GoogleSetupProfilePhotoNotifier.new);
 
 class GoogleAccountSetupPage extends ConsumerStatefulWidget {
-  const GoogleAccountSetupPage({required this.arguments, super.key});
+  const GoogleAccountSetupPage({
+    required this.challengeToken,
+    required this.profilePictureUrl,
+    required this.profileName,
+    super.key,
+  });
 
-  final GoogleAccountSetupArguments arguments;
+  final String challengeToken;
+  final String profilePictureUrl;
+  final String profileName;
 
   @override
   ConsumerState<GoogleAccountSetupPage> createState() =>
@@ -67,7 +77,7 @@ class _GoogleAccountSetupPageState
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late final TextEditingController _profileNameController =
-      TextEditingController(text: widget.arguments.profileName);
+      TextEditingController(text: widget.profileName);
 
   bool _isLoading = false;
   String? _usernameError;
@@ -76,7 +86,7 @@ class _GoogleAccountSetupPageState
   void initState() {
     super.initState();
 
-    final String profilePictureUrl = widget.arguments.profilePictureUrl.trim();
+    final String profilePictureUrl = widget.profilePictureUrl.trim();
     if (profilePictureUrl.isNotEmpty) {
       Future.microtask(() {
         ref
@@ -167,12 +177,13 @@ class _GoogleAccountSetupPageState
         _googleSetupProfilePhotoProvider,
       );
 
+      final MultipartFile? profilePictureFile =
+          await _resolveProfilePictureFile(profilePhoto);
+
       final GoogleSignUpConfirmInputDto input = GoogleSignUpConfirmInputDto(
-        challengeToken: widget.arguments.challengeToken,
+        challengeToken: widget.challengeToken,
         username: _profileNameController.text.trim().toLowerCase(),
-        profilePictureFile: profilePhoto.isLocal
-            ? profilePhoto.localFile
-            : null,
+        profilePictureFile: profilePictureFile,
       );
 
       final AuthService authService = ref.read(authServiceProvider);
@@ -210,9 +221,7 @@ class _GoogleAccountSetupPageState
 
       final String? message = error.message ?? globalError;
       if (message != null && message.trim().isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
-        );
+        context.showErrorSnackBar(message, source: error.failure);
       }
     } catch (error, stackTrace) {
       AppLogger.instance.error(
@@ -224,11 +233,8 @@ class _GoogleAccountSetupPageState
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.tr(AppLocaleKeys.authSignUpFailed)),
-          backgroundColor: Colors.red,
-        ),
+      context.showErrorSnackBar(
+        context.l10n.tr(AppLocaleKeys.authSignUpFailed),
       );
     } finally {
       if (mounted) {
@@ -237,6 +243,22 @@ class _GoogleAccountSetupPageState
         });
       }
     }
+  }
+
+  Future<MultipartFile?> _resolveProfilePictureFile(
+    ProfilePhoto profilePhoto,
+  ) async {
+    if (profilePhoto.isLocal) {
+      final File localFile = profilePhoto.localFile!;
+      return MultipartUploadUtil.createFromFile(localFile);
+    }
+
+    if (profilePhoto.isNetwork) {
+      final String networkUrl = profilePhoto.networkUrl!;
+      return MultipartUploadUtil.createFromUrl(networkUrl);
+    }
+
+    return null;
   }
 
   @override

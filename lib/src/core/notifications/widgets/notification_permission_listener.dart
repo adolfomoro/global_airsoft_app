@@ -11,6 +11,7 @@ import 'package:global_airsoft_app/src/core/notifications/notification_permissio
 import 'package:global_airsoft_app/src/core/notifications/notification_permission_service.dart';
 import 'package:global_airsoft_app/src/core/notifications/push_notification_service.dart';
 import 'package:global_airsoft_app/src/core/notifications/widgets/request_notification_permission_screen.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -127,9 +128,6 @@ class _NotificationPermissionListenerState
       return;
     }
 
-    final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
-      navigatorState.context,
-    );
     final String errorMessage = navigatorState.context.l10n.tr(
       AppLocaleKeys.notificationPermissionError,
     );
@@ -159,11 +157,7 @@ class _NotificationPermissionListenerState
         return;
       }
 
-      if (messenger == null) {
-        return;
-      }
-
-      messenger.showSnackBar(SnackBar(content: Text(errorMessage)));
+      navigatorState.context.showErrorSnackBar(errorMessage);
       return;
     }
 

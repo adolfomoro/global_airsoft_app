@@ -6,6 +6,7 @@ import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/api_exception_interceptor.dart';
+import 'package:global_airsoft_app/src/core/network/interceptors/auth_security_interceptor.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/device_sync_interceptor.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/language_sync_interceptor.dart';
 
@@ -26,7 +27,9 @@ final class AppDioService {
     Future<bool> Function()? ensureDeviceSynced,
     required String Function() getDeviceLanguage,
     required Future<void> Function(String? contentLanguage) onContentLanguage,
+    required Future<String> Function() badResponseFallbackMessageResolver,
     Set<String> deviceSyncSkipPaths = const <String>{},
+    bool enableAuthSecurityInterceptor = false,
   }) {
     final String versionedBaseUrl = _buildVersionedBaseUrl(config);
     final BaseOptions options = BaseOptions(
@@ -58,7 +61,15 @@ final class AppDioService {
       );
     }
 
-    dio.interceptors.add(ApiExceptionInterceptor());
+    if (enableAuthSecurityInterceptor) {
+      dio.interceptors.add(AuthSecurityInterceptor(dio: dio));
+    }
+
+    dio.interceptors.add(
+      ApiExceptionInterceptor(
+        badResponseFallbackMessageResolver: badResponseFallbackMessageResolver,
+      ),
+    );
 
     if (config.enableDebugLogs) {
       dio.interceptors.add(
@@ -210,8 +221,9 @@ final class AppDioService {
     try {
       return await future;
     } on DioException catch (err) {
-      if (err.error is ApiException) {
-        throw err.error as ApiException;
+      final Object? error = err.error;
+      if (error is ApiException) {
+        throw error as Object;
       }
       rethrow;
     }

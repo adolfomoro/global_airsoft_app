@@ -10,7 +10,7 @@ class AuthTokens {
   };
 
   factory AuthTokens.fromJson(Map<String, dynamic> json) => AuthTokens(
-    jwtToken: json['jwtToken'] as String? ?? '',
-    refreshToken: json['refreshToken'] as String? ?? '',
+    jwtToken: (json['jwtToken'] as String?)?.trim() ?? '',
+    refreshToken: (json['refreshToken'] as String?)?.trim() ?? '',
   );
 }

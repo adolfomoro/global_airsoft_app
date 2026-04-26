@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
@@ -80,9 +81,13 @@ AppDioService _buildAppDioService(
   String? Function()? getDeviceId,
   Future<bool> Function()? ensureDeviceSynced,
   Set<String> deviceSyncSkipPaths = const <String>{},
+  bool enableAuthSecurityInterceptor = false,
 }) {
   final AppConfig config = ref.watch(appConfigProvider);
   final String osLanguageTag = ref.watch(appOsLanguageTagProvider);
+  final AppLocalizationService localizationService = ref.watch(
+    appLocalizationServiceProvider,
+  );
   final localeController = ref.watch(appLocaleControllerProvider.notifier);
 
   return AppDioService.create(
@@ -94,7 +99,11 @@ AppDioService _buildAppDioService(
       return osLanguageTag;
     },
     onContentLanguage: localeController.syncFromServerContentLanguage,
+    badResponseFallbackMessageResolver: () {
+      return localizationService.tr(AppLocaleKeys.commonGenericApiErrorMessage);
+    },
     deviceSyncSkipPaths: deviceSyncSkipPaths,
+    enableAuthSecurityInterceptor: enableAuthSecurityInterceptor,
   );
 }
 
@@ -112,6 +121,7 @@ final Provider<AppDioService> appDioServiceProvider = Provider<AppDioService>((
           .ensureRegisteredBeforeRequest();
     },
     deviceSyncSkipPaths: const <String>{DeviceApiPaths.registerDevice},
+    enableAuthSecurityInterceptor: true,
   );
 });
 

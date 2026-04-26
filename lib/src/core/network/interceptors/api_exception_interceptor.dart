@@ -1,79 +1,59 @@
 import 'package:dio/dio.dart';
-import 'package:global_airsoft_app/src/core/network/abp_error_response.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
+import 'package:global_airsoft_app/src/core/network/api_exception_formatter.dart';
+import 'package:global_airsoft_app/src/core/network/auth_security_handled_exception.dart';
 
 final class ApiExceptionInterceptor extends Interceptor {
-  static const String _abpErrorHeaderName = '_abperrorformat';
-  static const String _abpErrorHeaderExpectedValue = 'true';
+  ApiExceptionInterceptor({
+    required Future<String> Function() badResponseFallbackMessageResolver,
+  }) : _badResponseFallbackMessageResolver = badResponseFallbackMessageResolver;
+
+  final Future<String> Function() _badResponseFallbackMessageResolver;
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler _) {
-    throw _toTypedApiException(err);
+  Future<void> onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    if (err.error is AuthSecurityHandledException ||
+        err.error is ApiException) {
+      handler.next(err);
+      return;
+    }
+
+    final String badResponseFallbackMessage =
+        err.type == DioExceptionType.badResponse
+        ? await _resolveBadResponseFallbackMessage()
+        : ApiException.defaultBadResponseFallbackMessage;
+
+    final ApiException apiException = ApiExceptionFormatter.toTypedException(
+      err,
+      badResponseFallbackMessage: badResponseFallbackMessage,
+    );
+
+    handler.reject(
+      DioException(
+        requestOptions: err.requestOptions,
+        response: err.response,
+        type: err.type,
+        error: apiException,
+        message: apiException.message,
+      ),
+    );
   }
 
-  ApiException _toTypedApiException(DioException err) {
-    final Response<dynamic>? response = err.response;
-    if (_isAbpFormatted(response)) {
-      final Map<String, dynamic>? normalized = _normalizeJsonMap(
-        response?.data,
-      );
-      if (normalized != null) {
-        try {
-          final AbpErrorResponse parsed = AbpErrorResponse.fromJson(normalized);
-          final AbpApiException exception = AbpApiException.fromAbpPayload(
-            payload: parsed.error,
-            statusCode: response?.statusCode,
-            cause: err,
-          );
-          return exception.toTypedException();
-        } on FormatException {
-          // Fall through and map to generic API exception.
-        }
+  Future<String> _resolveBadResponseFallbackMessage() async {
+    try {
+      final String localizedMessage =
+          await _badResponseFallbackMessageResolver();
+      final String normalizedMessage = localizedMessage.trim();
+      if (normalizedMessage.isNotEmpty) {
+        return normalizedMessage;
       }
+    } catch (_) {
+      // Fall back to the built-in English string below.
     }
 
-    return ApiException.fromDioException(err).toTypedException();
-  }
-
-  bool _isAbpFormatted(Response<dynamic>? response) {
-    if (response == null) {
-      return false;
-    }
-
-    final Headers headers = response.headers;
-    final Map<String, List<String>> headerMap = headers.map;
-
-    for (final MapEntry<String, List<String>> entry in headerMap.entries) {
-      final String normalizedKey = entry.key.toLowerCase();
-      if (normalizedKey == _abpErrorHeaderName) {
-        final bool hasExpectedValue = entry.value.any((String value) {
-          return value.trim().toLowerCase() == _abpErrorHeaderExpectedValue;
-        });
-        if (hasExpectedValue) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  Map<String, dynamic>? _normalizeJsonMap(Object? value) {
-    if (value is Map<String, dynamic>) {
-      return value;
-    }
-
-    if (value is Map) {
-      final Map<String, dynamic> normalized = <String, dynamic>{};
-      for (final MapEntry<Object?, Object?> entry in value.entries) {
-        final Object? key = entry.key;
-        if (key is String) {
-          normalized[key] = entry.value;
-        }
-      }
-      return normalized;
-    }
-
-    return null;
+    return ApiException.defaultBadResponseFallbackMessage;
   }
 }

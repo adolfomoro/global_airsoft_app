@@ -43,7 +43,7 @@ final class AbpErrorPayload {
       validationErrors = const <AbpValidationError>[];
     }
 
-    final String message = (json['message'] as String?)?.trim() ?? 'API error';
+    final String message = (json['message'] as String?)?.trim() ?? '';
     final Map<String, dynamic> additionalData = Map<String, dynamic>.from(json)
       ..remove('code')
       ..remove('message')

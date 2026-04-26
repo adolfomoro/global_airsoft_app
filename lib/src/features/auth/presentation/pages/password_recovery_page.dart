@@ -9,6 +9,7 @@ import 'package:global_airsoft_app/src/core/localization/app_localizations.dart'
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
@@ -140,9 +141,7 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
         AppLocaleKeys.authPasswordRecoveryFailed,
       );
       final String message = error.message ?? fallbackMessage;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
-      );
+      context.showErrorSnackBar(message, source: error.failure);
     } catch (error, stackTrace) {
       AppLogger.instance.error(
         'Unexpected password recovery failure.',
@@ -153,13 +152,8 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.l10n.tr(AppLocaleKeys.authPasswordRecoveryFailed),
-          ),
-          backgroundColor: Colors.red,
-        ),
+      context.showErrorSnackBar(
+        context.l10n.tr(AppLocaleKeys.authPasswordRecoveryFailed),
       );
     } finally {
       if (mounted) {

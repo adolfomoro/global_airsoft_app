@@ -16,12 +16,12 @@ import 'package:global_airsoft_app/src/core/localization/app_localizations.dart'
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/google_sign_in_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/google_sign_in_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/models/google_account_setup_arguments.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -173,9 +173,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           AppLocaleKeys.authLoginFailed,
         );
         final String message = error.message ?? fallbackMessage;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
-        );
+        context.showErrorSnackBar(message, source: error.failure);
       }
     } catch (error, stackTrace) {
       AppLogger.instance.error(
@@ -184,11 +182,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         stackTrace: stackTrace,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.tr(AppLocaleKeys.authLoginFailed)),
-            backgroundColor: Colors.red,
-          ),
+        context.showErrorSnackBar(
+          context.l10n.tr(AppLocaleKeys.authLoginFailed),
         );
       }
     } finally {
@@ -244,7 +239,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       await Navigator.of(context).pushNamed(
         AppRoutePaths.googleAccountSetup,
-        arguments: GoogleAccountSetupArguments(
+        arguments: (
           challengeToken: response.challengeToken ?? '',
           profilePictureUrl: suggestion.profilePictureUrl,
           profileName: suggestion.username,
@@ -266,19 +261,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           AppLocaleKeys.authGoogleSignInFailed,
         );
         final String message = error.message ?? globalError ?? fallbackMessage;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
-        );
+        context.showErrorSnackBar(message, source: error.failure);
       }
     } on GoogleSignInException catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.l10n.tr(AppLocaleKeys.authGoogleSignInFailed),
-            ),
-            backgroundColor: Colors.red,
-          ),
+        context.showErrorSnackBar(
+          context.l10n.tr(AppLocaleKeys.authGoogleSignInFailed),
         );
       }
     } catch (error, stackTrace) {
@@ -288,13 +276,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         stackTrace: stackTrace,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.l10n.tr(AppLocaleKeys.authGoogleSignInFailed),
-            ),
-            backgroundColor: Colors.red,
-          ),
+        context.showErrorSnackBar(
+          context.l10n.tr(AppLocaleKeys.authGoogleSignInFailed),
         );
       }
     } finally {

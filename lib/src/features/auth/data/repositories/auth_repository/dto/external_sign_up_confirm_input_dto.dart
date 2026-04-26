@@ -1,4 +1,6 @@
-import 'dart:io';
+import 'package:dio/dio.dart';
+
+import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 
 class ExternalSignUpConfirmInputDto {
   const ExternalSignUpConfirmInputDto({
@@ -13,14 +15,14 @@ class ExternalSignUpConfirmInputDto {
 
   final String challengeToken;
   final String username;
-  final File? profilePictureFile;
+  final MultipartFile? profilePictureFile;
 
-  bool get hasProfilePicture => profilePictureFile != null;
-
-  Map<String, dynamic> toJson() {
-    return <String, dynamic>{
+  FormData toJson() {
+    return MultipartUploadUtil.createFormData(<String, dynamic>{
       challengeTokenField: challengeToken,
       usernameField: username,
-    };
+      if (profilePictureFile != null)
+        profilePictureFileField: profilePictureFile,
+    });
   }
 }

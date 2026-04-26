@@ -2,6 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:global_airsoft_app/src/core/network/abp_error_response.dart';
 
 class ApiException implements Exception {
+  static const String defaultBadResponseFallbackMessage =
+      'An error occurred. Please try again later.';
+
   const ApiException({
     required this.message,
     this.statusCode,
@@ -10,6 +13,7 @@ class ApiException implements Exception {
     this.data,
     this.validationErrors = const <AbpValidationError>[],
     this.cause,
+    this.isFallbackMessage = false,
   });
 
   final String message;
@@ -19,13 +23,24 @@ class ApiException implements Exception {
   final Object? data;
   final List<AbpValidationError> validationErrors;
   final Object? cause;
+  final bool isFallbackMessage;
 
-  factory ApiException.fromDioException(DioException exception) {
+  factory ApiException.fromDioException(
+    DioException exception, {
+    String badResponseFallbackMessage = defaultBadResponseFallbackMessage,
+  }) {
     final int? statusCode = exception.response?.statusCode;
     final Object? responseData = exception.response?.data;
     final _ExtractedMessage extracted = _extractMessageFromResponse(
       responseData,
     );
+    final String normalizedFallbackMessage =
+        badResponseFallbackMessage.trim().isNotEmpty
+        ? badResponseFallbackMessage.trim()
+        : defaultBadResponseFallbackMessage;
+    final bool usedBadResponseFallback =
+        exception.type == DioExceptionType.badResponse &&
+        extracted.message == null;
 
     final String message = switch (exception.type) {
       DioExceptionType.connectionTimeout =>
@@ -34,7 +49,7 @@ class ApiException implements Exception {
       DioExceptionType.receiveTimeout => 'Receive timeout while calling API.',
       DioExceptionType.badCertificate => 'Bad certificate from API endpoint.',
       DioExceptionType.badResponse =>
-        extracted.message ?? 'API returned an invalid response.',
+        extracted.message ?? normalizedFallbackMessage,
       DioExceptionType.cancel => 'Request was cancelled.',
       DioExceptionType.connectionError => 'Connection error while calling API.',
       DioExceptionType.unknown => 'Unknown API error.',
@@ -50,6 +65,7 @@ class ApiException implements Exception {
       details: details,
       data: responseData,
       cause: exception,
+      isFallbackMessage: usedBadResponseFallback,
     );
   }
 
@@ -92,6 +108,7 @@ class ValidationApiException extends ApiException {
     super.data,
     required super.validationErrors,
     super.cause,
+    super.isFallbackMessage,
   });
 
   factory ValidationApiException.fromApiException(ApiException error) {
@@ -103,6 +120,7 @@ class ValidationApiException extends ApiException {
       data: error.data,
       validationErrors: error.validationErrors,
       cause: error.cause,
+      isFallbackMessage: error.isFallbackMessage,
     );
   }
 }
@@ -116,6 +134,7 @@ class UnauthorizedApiException extends ApiException {
     super.data,
     super.validationErrors,
     super.cause,
+    super.isFallbackMessage,
   });
 
   factory UnauthorizedApiException.fromApiException(ApiException error) {
@@ -127,6 +146,7 @@ class UnauthorizedApiException extends ApiException {
       data: error.data,
       validationErrors: error.validationErrors,
       cause: error.cause,
+      isFallbackMessage: error.isFallbackMessage,
     );
   }
 }
@@ -140,6 +160,7 @@ class ForbiddenApiException extends ApiException {
     super.data,
     super.validationErrors,
     super.cause,
+    super.isFallbackMessage,
   });
 
   factory ForbiddenApiException.fromApiException(ApiException error) {
@@ -151,6 +172,7 @@ class ForbiddenApiException extends ApiException {
       data: error.data,
       validationErrors: error.validationErrors,
       cause: error.cause,
+      isFallbackMessage: error.isFallbackMessage,
     );
   }
 }
@@ -164,6 +186,7 @@ class NotFoundApiException extends ApiException {
     super.data,
     super.validationErrors,
     super.cause,
+    super.isFallbackMessage,
   });
 
   factory NotFoundApiException.fromApiException(ApiException error) {
@@ -175,6 +198,7 @@ class NotFoundApiException extends ApiException {
       data: error.data,
       validationErrors: error.validationErrors,
       cause: error.cause,
+      isFallbackMessage: error.isFallbackMessage,
     );
   }
 }
@@ -188,6 +212,7 @@ class ConflictApiException extends ApiException {
     super.data,
     super.validationErrors,
     super.cause,
+    super.isFallbackMessage,
   });
 
   factory ConflictApiException.fromApiException(ApiException error) {
@@ -199,6 +224,7 @@ class ConflictApiException extends ApiException {
       data: error.data,
       validationErrors: error.validationErrors,
       cause: error.cause,
+      isFallbackMessage: error.isFallbackMessage,
     );
   }
 }
@@ -212,6 +238,7 @@ class NotImplementedApiException extends ApiException {
     super.data,
     super.validationErrors,
     super.cause,
+    super.isFallbackMessage,
   });
 
   factory NotImplementedApiException.fromApiException(ApiException error) {
@@ -223,6 +250,7 @@ class NotImplementedApiException extends ApiException {
       data: error.data,
       validationErrors: error.validationErrors,
       cause: error.cause,
+      isFallbackMessage: error.isFallbackMessage,
     );
   }
 }
@@ -236,6 +264,7 @@ class ServerApiException extends ApiException {
     super.data,
     super.validationErrors,
     super.cause,
+    super.isFallbackMessage,
   });
 
   factory ServerApiException.fromApiException(ApiException error) {
@@ -247,6 +276,7 @@ class ServerApiException extends ApiException {
       data: error.data,
       validationErrors: error.validationErrors,
       cause: error.cause,
+      isFallbackMessage: error.isFallbackMessage,
     );
   }
 }
@@ -260,6 +290,7 @@ class UnknownApiException extends ApiException {
     super.data,
     super.validationErrors,
     super.cause,
+    super.isFallbackMessage,
   });
 
   factory UnknownApiException.fromApiException(ApiException error) {
@@ -271,6 +302,7 @@ class UnknownApiException extends ApiException {
       data: error.data,
       validationErrors: error.validationErrors,
       cause: error.cause,
+      isFallbackMessage: error.isFallbackMessage,
     );
   }
 }
@@ -311,21 +343,34 @@ final class AbpApiException extends ApiException {
     super.data,
     super.validationErrors,
     super.cause,
+    super.isFallbackMessage,
   });
 
   factory AbpApiException.fromAbpPayload({
     required AbpErrorPayload payload,
     required int? statusCode,
     required Object? cause,
+    String badResponseFallbackMessage =
+        ApiException.defaultBadResponseFallbackMessage,
   }) {
+    final String normalizedFallbackMessage =
+        badResponseFallbackMessage.trim().isNotEmpty
+        ? badResponseFallbackMessage.trim()
+        : ApiException.defaultBadResponseFallbackMessage;
+    final String normalizedMessage = payload.message.trim();
+    final bool usedFallbackMessage = normalizedMessage.isEmpty;
+
     return AbpApiException(
-      message: payload.message,
+      message: usedFallbackMessage
+          ? normalizedFallbackMessage
+          : normalizedMessage,
       statusCode: statusCode,
       code: payload.code,
       details: payload.details,
       data: payload.data,
       validationErrors: payload.validationErrors,
       cause: cause,
+      isFallbackMessage: usedFallbackMessage,
     );
   }
 }
