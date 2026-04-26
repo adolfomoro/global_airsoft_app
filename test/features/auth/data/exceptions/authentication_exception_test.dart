@@ -49,6 +49,31 @@ void main() {
     expect(exception.message, 'Localized login failed message.');
   });
 
+  test('uses feature override for validation api exceptions', () {
+    final AuthenticationException exception =
+        AuthenticationException.fromApiException(
+          const ValidationApiException(
+            message: 'Server validation summary that should stay hidden.',
+            statusCode: 400,
+          ),
+          messageOverride: 'Localized login failed message.',
+        );
+
+    expect(exception.message, 'Localized login failed message.');
+  });
+
+  test('never surfaces backend validation summary without override', () {
+    final AuthenticationException exception =
+        AuthenticationException.fromApiException(
+          const ValidationApiException(
+            message: 'Server validation summary that should stay hidden.',
+            statusCode: 400,
+          ),
+        );
+
+    expect(exception.message, isNull);
+  });
+
   test('allows future features to explicitly prefer override messages', () {
     final AuthenticationException exception =
         AuthenticationException.fromApiException(

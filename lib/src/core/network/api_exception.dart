@@ -148,6 +148,20 @@ class ValidationApiException extends ApiException {
     super.isFallbackMessage,
   });
 
+  @override
+  String? resolveMessage({
+    String? overrideMessage,
+    MessageOverrideBehavior overrideBehavior =
+        MessageOverrideBehavior.useAsFallback,
+  }) {
+    return messageResolutionPolicy.resolve(
+      failureMessage: overrideMessage?.trim() ?? '',
+      isFailureFallbackMessage: isFallbackMessage,
+      overrideMessage: overrideMessage,
+      overrideBehavior: overrideBehavior,
+    );
+  }
+
   factory ValidationApiException.fromApiException(ApiException error) {
     return ValidationApiException(
       message: error.message,
