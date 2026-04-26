@@ -6,6 +6,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
+import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
 class HomePage extends ConsumerWidget {
@@ -27,9 +28,12 @@ class HomePage extends ConsumerWidget {
           return;
         }
 
-        final String logoutErrorMessage = context.l10n.tr(
+        final String fallbackMessage = context.l10n.tr(
           AppLocaleKeys.homeLogoutErrorMessage,
         );
+        final String logoutErrorMessage = error is AuthenticationException
+            ? (error.message ?? fallbackMessage)
+            : fallbackMessage;
         context.showErrorSnackBar(logoutErrorMessage, source: error);
       }
     }

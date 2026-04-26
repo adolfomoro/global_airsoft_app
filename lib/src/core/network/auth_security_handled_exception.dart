@@ -1,4 +1,5 @@
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
+import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
 
 final class AuthSecurityHandledException extends ApiException {
   const AuthSecurityHandledException({
@@ -13,6 +14,14 @@ final class AuthSecurityHandledException extends ApiException {
   });
 
   String get reason => code ?? '';
+
+  @override
+  MessageResolutionPolicy get messageResolutionPolicy =>
+      const MessageResolutionPolicy(
+        overrideProtection: MessageOverrideProtection.lockFailureMessage,
+        presentationBehavior:
+            MessagePresentationBehavior.alreadyPresentedUpstream,
+      );
 
   factory AuthSecurityHandledException.fromApiException(
     ApiException error, {

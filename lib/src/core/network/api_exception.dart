@@ -1,5 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:global_airsoft_app/src/core/network/abp_error_response.dart';
+import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
+
+abstract interface class ApiExceptionSource {
+  ApiException get apiException;
+}
 
 class ApiException implements Exception {
   static const String defaultBadResponseFallbackMessage =
@@ -25,6 +30,26 @@ class ApiException implements Exception {
   final Object? cause;
   final bool isFallbackMessage;
 
+  MessageResolutionPolicy get messageResolutionPolicy =>
+      const MessageResolutionPolicy();
+
+  bool get suppressesDuplicatePresentation {
+    return messageResolutionPolicy.suppressesDuplicatePresentation;
+  }
+
+  String? resolveMessage({
+    String? overrideMessage,
+    MessageOverrideBehavior overrideBehavior =
+        MessageOverrideBehavior.useAsFallback,
+  }) {
+    return messageResolutionPolicy.resolve(
+      failureMessage: message,
+      isFailureFallbackMessage: isFallbackMessage,
+      overrideMessage: overrideMessage,
+      overrideBehavior: overrideBehavior,
+    );
+  }
+
   factory ApiException.fromDioException(
     DioException exception, {
     String badResponseFallbackMessage = defaultBadResponseFallbackMessage,
@@ -38,9 +63,17 @@ class ApiException implements Exception {
         badResponseFallbackMessage.trim().isNotEmpty
         ? badResponseFallbackMessage.trim()
         : defaultBadResponseFallbackMessage;
-    final bool usedBadResponseFallback =
-        exception.type == DioExceptionType.badResponse &&
-        extracted.message == null;
+    final bool hasBackendMessage = extracted.message != null;
+    final bool isFallbackMessage = switch (exception.type) {
+      DioExceptionType.badResponse => !hasBackendMessage,
+      DioExceptionType.connectionTimeout => true,
+      DioExceptionType.sendTimeout => true,
+      DioExceptionType.receiveTimeout => true,
+      DioExceptionType.badCertificate => true,
+      DioExceptionType.cancel => true,
+      DioExceptionType.connectionError => true,
+      DioExceptionType.unknown => true,
+    };
 
     final String message = switch (exception.type) {
       DioExceptionType.connectionTimeout =>
@@ -65,7 +98,7 @@ class ApiException implements Exception {
       details: details,
       data: responseData,
       cause: exception,
-      isFallbackMessage: usedBadResponseFallback,
+      isFallbackMessage: isFallbackMessage,
     );
   }
 
@@ -75,6 +108,10 @@ class ApiException implements Exception {
   }
 
   ApiException toTypedException() {
+    if (this is! AbpApiException && runtimeType != ApiException) {
+      return this;
+    }
+
     if (statusCode == 400 && validationErrors.isNotEmpty) {
       return ValidationApiException.fromApiException(this);
     }

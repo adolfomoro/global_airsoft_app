@@ -1,0 +1,80 @@
+Fluxo simples de auth no Front (interceptors)
+
+Objetivo
+- Decidir quando tentar refresh em silencio.
+- Decidir quando deslogar.
+- Mostrar mensagem so quando realmente necessario.
+
+Pre-requisitos em toda request protegida
+1. Enviar Authorization com Bearer accessToken.
+2. Enviar X-Device-Id.
+
+Leitura padrao da resposta de erro
+- Ler status HTTP (401/403).
+- Ler error.code retornado pela API.
+
+Regras de decisao
+
+1) Access token expirou
+- Quando receber: 401 + GlobalAirsoft:Auth:AccessTokenExpired
+- Acao:
+  a) NAO deslogar agora.
+  b) Tentar refresh em silencio (auth/tokens/refresh) UMA vez.
+  c) NAO mostrar mensagem ao usuario.
+- Se refresh funcionar:
+  a) Atualizar accessToken e refreshToken.
+  b) Repetir a request original.
+- Se refresh falhar:
+  a) Deslogar.
+  b) Mostrar mensagem curta: "Sua sessao terminou por seguranca. Faca login novamente."
+
+2) Token invalido ou sessao invalida (seguranca)
+- Quando receber:
+  a) 401 + GlobalAirsoft:Auth:AccessTokenInvalid
+  b) 401 + GlobalAirsoft:Auth:SessionInvalid
+- Acao:
+  a) Deslogar imediatamente.
+  b) NAO tentar refresh.
+  c) Mostrar mensagem curta: "Detectamos uma mudanca de seguranca. Faca login novamente."
+
+3) Falha no refresh (token de refresh)
+- Quando receber no endpoint de refresh:
+  a) GlobalAirsoft:Auth:RefreshTokenInvalid
+  b) GlobalAirsoft:Auth:RefreshTokenExpired
+  c) GlobalAirsoft:Auth:SessionExpired
+  d) GlobalAirsoft:Auth:SessionInvalid
+- Acao:
+  a) Deslogar imediatamente.
+  b) Mostrar mensagem curta: "Sua sessao terminou por seguranca. Faca login novamente."
+
+4) Sem permissao (autorizacao)
+- Quando receber: 403 + GlobalAirsoft:Auth:AccessForbidden
+- Acao:
+  a) NAO deslogar.
+  b) NAO tentar refresh.
+  c) Mostrar mensagem: "Voce nao tem permissao para acessar este recurso."
+
+5) Outros erros
+- 429 (muitas tentativas): NAO deslogar. Mostrar "Muitas tentativas. Tente novamente em alguns minutos."
+- 5xx (servidor): NAO deslogar automatico. Mostrar "Nao foi possivel concluir agora. Tente novamente."
+
+Controle de concorrencia (importante)
+- Se varias requests falharem juntas com AccessTokenExpired:
+  1) Apenas 1 request chama refresh.
+  2) As outras aguardam.
+  3) Se refresh ok: todas repetem.
+  4) Se refresh falhar: todas encerram com logout.
+
+Regra de UX para usuario leigo
+- Nao mostrar mensagem durante refresh silencioso.
+- Mostrar mensagem somente quando:
+  1) Vai deslogar de verdade.
+  2) Nao tem permissao (403).
+- Evitar repeticao: exibir no maximo 1 mensagem igual por janela curta (ex: 10-15s).
+
+Checklist rapido para implementar
+1. Interceptor request: anexar Bearer + X-Device-Id.
+2. Interceptor response: tratar 401/403 por error.code.
+3. Implementar lock de refresh (single-flight).
+4. Implementar fila de retries da request original.
+5. Centralizar logout + limpeza de tokens + redirecionamento para login.

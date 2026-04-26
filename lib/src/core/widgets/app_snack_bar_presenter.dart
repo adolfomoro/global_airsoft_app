@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:global_airsoft_app/src/core/network/auth_security_handled_exception.dart';
+import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 
 enum AppSnackBarVariant { info, success, warning, error }
 
@@ -65,7 +65,8 @@ final class AppSnackBarPresenter {
     bool replaceCurrent = true,
     Object? source,
   }) {
-    if (source is AuthSecurityHandledException) {
+    final ApiException? apiException = _extractApiException(source);
+    if (apiException?.suppressesDuplicatePresentation ?? false) {
       return false;
     }
 
@@ -76,6 +77,18 @@ final class AppSnackBarPresenter {
       duration: duration,
       replaceCurrent: replaceCurrent,
     );
+  }
+
+  static ApiException? _extractApiException(Object? source) {
+    if (source is ApiException) {
+      return source;
+    }
+
+    if (source is ApiExceptionSource) {
+      return source.apiException;
+    }
+
+    return null;
   }
 
   static bool _show(

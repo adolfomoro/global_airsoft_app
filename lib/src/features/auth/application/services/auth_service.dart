@@ -71,17 +71,7 @@ final class AuthService {
   }
 
   Future<void> logout() async {
-    try {
-      await _authRepository.logout();
-    } catch (error, stackTrace) {
-      _logger.error(
-        'Remote logout failed.',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      rethrow;
-    }
-
+    await _authRepository.logout();
     await _clearLocalSession();
     _logger.info('User logged out');
   }
