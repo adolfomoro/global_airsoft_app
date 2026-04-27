@@ -61,6 +61,13 @@ final class AppTheme {
     final TextTheme robotoFlexTextTheme = baseTextTheme.apply(
       fontFamily: 'RobotoFlex',
     );
+    final Color appBarBackgroundColor = Color.alphaBlend(
+      colorScheme.onSurface.withValues(alpha: 0.03),
+      colorScheme.surface,
+    );
+    final Color appBarSeparatorColor = colorScheme.outlineVariant.withValues(
+      alpha: 0.36,
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -71,11 +78,15 @@ final class AppTheme {
       primaryTextTheme: robotoFlexTextTheme,
       appBarTheme: AppBarTheme(
         centerTitle: false,
-        backgroundColor: AppColors.transparent,
+        backgroundColor: appBarBackgroundColor,
         foregroundColor: colorScheme.onSurface,
         surfaceTintColor: AppColors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        shadowColor: AppColors.transparent,
+        shape: Border(
+          bottom: BorderSide(color: appBarSeparatorColor, width: 0),
+        ),
         systemOverlayStyle: overlayStyleFor(colorScheme.brightness),
       ),
       cardTheme: CardThemeData(

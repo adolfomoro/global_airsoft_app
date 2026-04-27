@@ -25,6 +25,8 @@ These notes collect reusable UX decisions for beginner-friendly mobile screens i
 - Preserve user input after errors. Do not make users re-enter information.
 - Make the next action obvious and reachable, especially on mobile when the keyboard is open.
 - Use visual hierarchy to show what matters first, but avoid decorative elements that add weight without helping the task.
+- Use subtle surface changes and hairline separators for app bars when content and chrome share a dark background.
+- Prefer platform-native top bars: Material top app bars on Android and Cupertino navigation bars on iOS/macOS.
 
 ## Applied To Google Account Setup
 
