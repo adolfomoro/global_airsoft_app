@@ -338,28 +338,44 @@ class _UsernameFeedback extends StatelessWidget {
         if (status == UsernameAvailabilityStatus.unavailable &&
             suggestions.isNotEmpty) ...<Widget>[
           const SizedBox(height: AppDimensions.spacingSm),
-          Text(
-            context.l10n.tr(AppLocaleKeys.authUsernameSuggestionsLabel),
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: AppDimensions.spacingXs),
-          Wrap(
-            spacing: AppDimensions.spacingXs,
-            runSpacing: AppDimensions.spacingXs,
-            children: suggestions
-                .map((String suggestion) {
-                  return ActionChip(
-                    label: Text(suggestion),
-                    onPressed: () => onSuggestionSelected(suggestion),
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: colorScheme.surfaceContainerHighest,
-                    side: BorderSide(color: colorScheme.outlineVariant),
-                  );
-                })
-                .toList(growable: false),
+          Row(
+            children: <Widget>[
+              Text(
+                context.l10n.tr(AppLocaleKeys.authUsernameSuggestionsLabel),
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: AppDimensions.spacingXs),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.none,
+                  child: Row(
+                    children: suggestions
+                        .map((String suggestion) {
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              right: AppDimensions.spacingXs,
+                            ),
+                            child: ActionChip(
+                              label: Text(suggestion),
+                              onPressed: () => onSuggestionSelected(suggestion),
+                              visualDensity: VisualDensity.compact,
+                              backgroundColor:
+                                  colorScheme.surfaceContainerHighest,
+                              side: BorderSide(
+                                color: colorScheme.outlineVariant,
+                              ),
+                            ),
+                          );
+                        })
+                        .toList(growable: false),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ],

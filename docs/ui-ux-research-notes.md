@@ -32,7 +32,8 @@ These notes collect reusable UX decisions for beginner-friendly mobile screens i
 - Added a Google connection status cue to reassure users why the screen appears.
 - Grouped profile photo and username into clear visual sections.
 - Added visible username rules and a positive ready state.
-- Moved username feedback into a reusable field with debounced availability checks and suggestion chips.
+- Moved username feedback into a reusable field with debounced availability checks and compact suggestion chips.
+- Kept unavailable-username suggestions in a single horizontal rail to avoid pushing long signup forms down.
 - Kept validation calm: no premature inline errors before the first submit attempt.
 - Show backend username errors directly on the username field and clear them as the user edits.
 - Kept the primary action available while the keyboard is open.

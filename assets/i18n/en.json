@@ -45,7 +45,7 @@
     "auth.usernameExampleHint": "e.g. squad.leader",
     "auth.usernameChecking": "Checking username...",
     "auth.usernameUnavailable": "This username is already in use.",
-    "auth.usernameSuggestionsLabel": "Try one of these:",
+    "auth.usernameSuggestionsLabel": "Suggestions:",
     "auth.usernameAvailabilityFailed": "We could not check this username right now. You can still continue.",
     "auth.confirmPasswordLabel": "Confirm password",
     "auth.confirmPasswordRequired": "Please confirm your password.",
