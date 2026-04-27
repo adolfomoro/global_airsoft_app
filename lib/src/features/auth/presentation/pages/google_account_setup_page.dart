@@ -298,7 +298,6 @@ class _GoogleAccountSetupPageState
         title: Text(context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupTitle)),
       ),
       body: AppFormWithBottomActions(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         body: Form(
           key: _formKey,
           autovalidateMode: _hasSubmitted

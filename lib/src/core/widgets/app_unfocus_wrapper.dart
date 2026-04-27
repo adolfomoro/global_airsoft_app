@@ -6,7 +6,7 @@ class AppUnfocusWrapper extends StatelessWidget {
 
   final Widget child;
 
-  void _handlePointerDown() {
+  void _handleTapOutside() {
     FocusManager.instance.primaryFocus?.unfocus();
     SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
   }
@@ -15,7 +15,7 @@ class AppUnfocusWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: _handlePointerDown,
+      onTap: _handleTapOutside,
       child: child,
     );
   }

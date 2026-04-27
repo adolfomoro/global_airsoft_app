@@ -15,7 +15,6 @@ final class AppFormWithBottomActions extends StatefulWidget {
     required this.bottomActions,
     super.key,
     this.scrollController,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.bottomActionsRevealKeyboardCloseProgress = 0.6,
     this.bodyPadding = const EdgeInsets.symmetric(
       horizontal: AppDimensions.spacing2xl,
@@ -36,7 +35,6 @@ final class AppFormWithBottomActions extends StatefulWidget {
   final Widget body;
   final List<AppFormBottomAction> bottomActions;
   final ScrollController? scrollController;
-  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
   final double bottomActionsRevealKeyboardCloseProgress;
   final EdgeInsetsGeometry bodyPadding;
   final EdgeInsetsGeometry bottomActionsPadding;
@@ -91,7 +89,9 @@ final class _AppFormWithBottomActionsState
           Expanded(
             child: SingleChildScrollView(
               controller: widget.scrollController,
-              keyboardDismissBehavior: widget.keyboardDismissBehavior,
+              // Keep focused inputs open while users scroll through forms.
+              // Keyboard dismissal is handled globally by AppUnfocusWrapper taps.
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               child: AppFormPadding(
                 padding: widget.bodyPadding,
                 child: Column(

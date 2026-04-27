@@ -297,7 +297,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       body: AppGradientBackground(
         child: SafeArea(
           child: SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Form(
               key: _formKey,
               child: AutofillGroup(
