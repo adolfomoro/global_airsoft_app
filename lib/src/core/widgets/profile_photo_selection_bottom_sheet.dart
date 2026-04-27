@@ -288,7 +288,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
   }
 }
 
-/// Individual option in the photo selection bottom sheet.
 class _PhotoOption extends StatelessWidget {
   const _PhotoOption({
     required this.icon,
@@ -351,7 +350,6 @@ class _PhotoOption extends StatelessWidget {
   }
 }
 
-/// Marker class to indicate that the user wants to delete the photo.
 class _DeletePhotoResult {
   const _DeletePhotoResult();
 }

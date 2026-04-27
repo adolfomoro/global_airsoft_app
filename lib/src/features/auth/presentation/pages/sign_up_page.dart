@@ -23,6 +23,172 @@ import 'package:global_airsoft_app/src/features/auth/domain/validation/user_name
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_requirements_hint.dart';
 
+final class SignUpFormState {
+  const SignUpFormState({
+    this.fullNameError,
+    this.usernameError,
+    this.emailError,
+    this.passwordError,
+    this.isLoading = false,
+    this.isPasswordFocused = false,
+    this.hasRevealedPasswordHint = false,
+  });
+  final String? fullNameError;
+
+  final String? usernameError;
+
+  final String? emailError;
+
+  final String? passwordError;
+
+  final bool isLoading;
+
+  final bool isPasswordFocused;
+
+  final bool hasRevealedPasswordHint;
+
+  SignUpFormState copyWith({
+    String? fullNameError,
+    String? usernameError,
+    String? emailError,
+    String? passwordError,
+    bool? isLoading,
+    bool? isPasswordFocused,
+    bool? hasRevealedPasswordHint,
+  }) {
+    return SignUpFormState(
+      fullNameError: fullNameError ?? this.fullNameError,
+      usernameError: usernameError ?? this.usernameError,
+      emailError: emailError ?? this.emailError,
+      passwordError: passwordError ?? this.passwordError,
+      isLoading: isLoading ?? this.isLoading,
+      isPasswordFocused: isPasswordFocused ?? this.isPasswordFocused,
+      hasRevealedPasswordHint:
+          hasRevealedPasswordHint ?? this.hasRevealedPasswordHint,
+    );
+  }
+
+  SignUpFormState clearErrors() {
+    return copyWith(
+      fullNameError: null,
+      usernameError: null,
+      emailError: null,
+      passwordError: null,
+    );
+  }
+}
+
+enum SignUpFieldType { fullName, username, email, password }
+
+final Provider<TextEditingController> signUpFullNameControllerProvider =
+    Provider<TextEditingController>((Ref ref) => TextEditingController());
+
+final Provider<TextEditingController> signUpUsernameControllerProvider =
+    Provider<TextEditingController>((Ref ref) => TextEditingController());
+
+final Provider<TextEditingController> signUpEmailControllerProvider =
+    Provider<TextEditingController>((Ref ref) => TextEditingController());
+
+final Provider<TextEditingController> signUpPasswordControllerProvider =
+    Provider<TextEditingController>((Ref ref) => TextEditingController());
+
+final Provider<TextEditingController> signUpConfirmPasswordControllerProvider =
+    Provider<TextEditingController>((Ref ref) => TextEditingController());
+
+final Provider<FocusNode> signUpPasswordFocusNodeProvider = Provider<FocusNode>(
+  (Ref ref) => FocusNode(),
+);
+
+final Provider<ScrollController> signUpScrollControllerProvider =
+    Provider<ScrollController>((Ref ref) => ScrollController());
+
+final class SignUpFormNotifier extends Notifier<SignUpFormState> {
+  static const BackendValidationErrorMapper _validationErrorMapper =
+      BackendValidationErrorMapper();
+
+  @override
+  SignUpFormState build() {
+    return const SignUpFormState();
+  }
+
+  void clearErrors() {
+    state = state.clearErrors();
+  }
+
+  void setPasswordFocused(bool isFocused) {
+    state = state.copyWith(
+      isPasswordFocused: isFocused,
+      hasRevealedPasswordHint: isFocused
+          ? state.hasRevealedPasswordHint
+          : false,
+    );
+  }
+
+  void markPasswordHintRevealed() {
+    state = state.copyWith(hasRevealedPasswordHint: true);
+  }
+
+  void clearFieldError(SignUpFieldType fieldType) {
+    switch (fieldType) {
+      case SignUpFieldType.fullName:
+        state = state.copyWith(fullNameError: null);
+      case SignUpFieldType.username:
+        state = state.copyWith(usernameError: null);
+      case SignUpFieldType.email:
+        state = state.copyWith(emailError: null);
+      case SignUpFieldType.password:
+        state = state.copyWith(passwordError: null);
+    }
+  }
+
+  void setLoading(bool isLoading) {
+    state = state.copyWith(isLoading: isLoading);
+  }
+
+  void setFieldError(SignUpFieldType fieldType, String? error) {
+    switch (fieldType) {
+      case SignUpFieldType.fullName:
+        state = state.copyWith(fullNameError: error);
+      case SignUpFieldType.username:
+        state = state.copyWith(usernameError: error);
+      case SignUpFieldType.email:
+        state = state.copyWith(emailError: error);
+      case SignUpFieldType.password:
+        state = state.copyWith(passwordError: error);
+    }
+  }
+
+  void handleBackendValidationErrors(AuthenticationException error) {
+    final ValidationMappingResult mappedErrors = _validationErrorMapper.map(
+      exception: error.failure,
+      targetFields: const <String>{
+        CreateUserInputDto.fullNameField,
+        CreateUserInputDto.usernameField,
+        CreateUserInputDto.emailField,
+        CreateUserInputDto.passwordField,
+      },
+    );
+
+    state = state.copyWith(
+      fullNameError: mappedErrors.fieldErrors[CreateUserInputDto.fullNameField],
+      usernameError: mappedErrors.fieldErrors[CreateUserInputDto.usernameField],
+      emailError: mappedErrors.fieldErrors[CreateUserInputDto.emailField],
+      passwordError:
+          (mappedErrors.fieldErrors[CreateUserInputDto.passwordField]
+                  ?.trim()
+                  .isNotEmpty ??
+              false)
+          ? mappedErrors.fieldErrors[CreateUserInputDto.passwordField]
+          : null,
+    );
+  }
+}
+
+final NotifierProvider<SignUpFormNotifier, SignUpFormState>
+signUpFormStateProvider = NotifierProvider<SignUpFormNotifier, SignUpFormState>(
+  SignUpFormNotifier.new,
+);
+
 class SignUpPage extends ConsumerStatefulWidget {
   const SignUpPage({super.key});
 
@@ -32,8 +198,6 @@ class SignUpPage extends ConsumerStatefulWidget {
 
 class _SignUpPageState extends ConsumerState<SignUpPage>
     with WidgetsBindingObserver {
-  static const BackendValidationErrorMapper _validationErrorMapper =
-      BackendValidationErrorMapper();
   static final ValidationRuleSet _fullNameValidationRules =
       FullNameValidation.rules;
   static final ValidationRuleSet _usernameValidationRules =
@@ -41,44 +205,49 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
   static final ValidationRuleSet _passwordValidationRules =
       PasswordValidationPolicy.rules;
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final FocusNode _passwordFocusNode = FocusNode();
   final GlobalKey _passwordFieldKey = GlobalKey();
   final GlobalKey _passwordHintKey = GlobalKey();
-  String? _fullNameError;
-  String? _usernameError;
-  String? _emailError;
-  String? _passwordError;
-  bool _isLoading = false;
-  bool _isPasswordFocused = false;
-  bool _hasRevealedPasswordHint = false;
-  late final FocusAwareScrollCoordinator _passwordHintScrollCoordinator =
-      FocusAwareScrollCoordinator(
-        focusNode: _passwordFocusNode,
+  late final FocusAwareScrollCoordinator _passwordHintScrollCoordinator;
+  late final FocusNode _passwordFocus;
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      _passwordFocus = ref.read(signUpPasswordFocusNodeProvider);
+      _scrollController = ref.read(signUpScrollControllerProvider);
+
+      _passwordHintScrollCoordinator = FocusAwareScrollCoordinator(
+        focusNode: _passwordFocus,
         scrollController: _scrollController,
         focusedFieldKey: _passwordFieldKey,
         revealTargetKey: _passwordHintKey,
         desiredRevealRatio: 1.0,
       );
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _passwordFocusNode.addListener(_handlePasswordFocusChanged);
+      _passwordFocus.addListener(_handlePasswordFocusChanged);
+    });
   }
 
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
-    if (_hasRevealedPasswordHint && _shouldShowPasswordHint()) {
+    final signUpState = ref.read(signUpFormStateProvider);
+    final passwordText = _scrollController.hasClients
+        ? ref.read(signUpPasswordControllerProvider).text
+        : '';
+
+    if (signUpState.hasRevealedPasswordHint &&
+        _shouldShowPasswordHint(passwordText)) {
       _passwordHintScrollCoordinator.onMetricsChanged(context);
     }
   }
@@ -86,91 +255,56 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _passwordFocusNode.removeListener(_handlePasswordFocusChanged);
-    _passwordFocusNode.dispose();
-    _scrollController.dispose();
-    _passwordHintScrollCoordinator.dispose();
-    _fullNameController.dispose();
-    _usernameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
+    _passwordFocus.removeListener(_handlePasswordFocusChanged);
     super.dispose();
   }
 
-  void _handleFullNameChanged(String _) {
-    if (_fullNameError == null) {
-      return;
-    }
-
-    setState(() {
-      _fullNameError = null;
-    });
-  }
-
-  void _handleUsernameChanged(String _) {
-    if (_usernameError == null) {
-      return;
-    }
-
-    setState(() {
-      _usernameError = null;
-    });
-  }
-
-  void _handleEmailChanged(String _) {
-    if (_emailError == null) {
-      return;
-    }
-
-    setState(() {
-      _emailError = null;
-    });
-  }
-
-  void _handlePasswordChanged(String _) {
-    setState(() {
-      _passwordError = null;
-    });
-
-    _requestPasswordHintRevealIfNeeded();
-  }
-
   void _handlePasswordFocusChanged() {
-    if (_isPasswordFocused == _passwordFocusNode.hasFocus) {
+    final isFocused = _passwordFocus.hasFocus;
+    final currentFocusState = ref
+        .read(signUpFormStateProvider)
+        .isPasswordFocused;
+
+    if (isFocused == currentFocusState) {
       return;
     }
 
-    setState(() {
-      _isPasswordFocused = _passwordFocusNode.hasFocus;
-      if (!_isPasswordFocused) {
-        _hasRevealedPasswordHint = false;
-      }
-    });
-
+    ref.read(signUpFormStateProvider.notifier).setPasswordFocused(isFocused);
     _requestPasswordHintRevealIfNeeded();
   }
 
-  bool _shouldShowPasswordHint() {
-    return _passwordValidationRules.validate(_passwordController.text) !=
-            null &&
-        (_isPasswordFocused || _passwordController.text.isNotEmpty);
+  void _handleFieldChanged(SignUpFieldType fieldType) {
+    ref.read(signUpFormStateProvider.notifier).clearFieldError(fieldType);
   }
 
-  bool _shouldRevealPasswordHintNow() {
-    return _isPasswordFocused &&
-        _shouldShowPasswordHint() &&
-        !_hasRevealedPasswordHint;
+  void _handlePasswordChanged() {
+    _handleFieldChanged(SignUpFieldType.password);
+    _requestPasswordHintRevealIfNeeded();
+  }
+
+  bool _shouldShowPasswordHint(String passwordText) {
+    return _passwordValidationRules.validate(passwordText) != null &&
+        (ref.read(signUpFormStateProvider).isPasswordFocused ||
+            passwordText.isNotEmpty);
+  }
+
+  bool _shouldRevealPasswordHintNow(String passwordText) {
+    final signUpState = ref.read(signUpFormStateProvider);
+    return signUpState.isPasswordFocused &&
+        _shouldShowPasswordHint(passwordText) &&
+        !signUpState.hasRevealedPasswordHint;
   }
 
   void _requestPasswordHintRevealIfNeeded() {
-    if (!_shouldRevealPasswordHintNow()) {
+    final passwordText = ref.read(signUpPasswordControllerProvider).text;
+
+    if (!_shouldRevealPasswordHintNow(passwordText)) {
       return;
     }
 
-    _hasRevealedPasswordHint = true;
+    ref.read(signUpFormStateProvider.notifier).markPasswordHintRevealed();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_shouldShowPasswordHint()) {
+      if (!mounted || !_shouldShowPasswordHint(passwordText)) {
         return;
       }
 
@@ -221,7 +355,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
       return context.l10n.tr(AppLocaleKeys.authConfirmPasswordRequired);
     }
 
-    if (normalizedValue != _passwordController.text) {
+    final passwordText = ref.read(signUpPasswordControllerProvider).text;
+    if (normalizedValue != passwordText) {
       return context.l10n.tr(AppLocaleKeys.authConfirmPasswordMismatch);
     }
 
@@ -230,31 +365,29 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
 
   Future<void> _handleSignUp() async {
     FocusScope.of(context).unfocus();
-
-    setState(() {
-      _fullNameError = null;
-      _usernameError = null;
-      _emailError = null;
-      _passwordError = null;
-    });
+    ref.read(signUpFormStateProvider.notifier).clearErrors();
 
     final FormState? formState = _formKey.currentState;
     if (!(formState?.validate() ?? false)) {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    ref.read(signUpFormStateProvider.notifier).setLoading(true);
 
     try {
+      final fullNameController = ref.read(signUpFullNameControllerProvider);
+      final usernameController = ref.read(signUpUsernameControllerProvider);
+      final emailController = ref.read(signUpEmailControllerProvider);
+      final passwordController = ref.read(signUpPasswordControllerProvider);
+
       final AuthService authService = ref.read(authServiceProvider);
       await authService.signUp(
-        username: _usernameController.text.trim().toLowerCase(),
-        fullName: _fullNameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+        username: usernameController.text.trim().toLowerCase(),
+        fullName: fullNameController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text,
       );
+
       await ref
           .read(appLocaleControllerProvider.notifier)
           .forceApplyServerLocaleIfPending();
@@ -269,38 +402,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
         return;
       }
 
-      final ValidationMappingResult mappedErrors = _validationErrorMapper.map(
-        exception: error.failure,
-        targetFields: const <String>{
-          CreateUserInputDto.fullNameField,
-          CreateUserInputDto.usernameField,
-          CreateUserInputDto.emailField,
-          CreateUserInputDto.passwordField,
-        },
+      ref
+          .read(signUpFormStateProvider.notifier)
+          .handleBackendValidationErrors(error);
+
+      final String fallbackMessage = context.l10n.tr(
+        AppLocaleKeys.authSignUpFailed,
       );
-
-      setState(() {
-        _fullNameError =
-            mappedErrors.fieldErrors[CreateUserInputDto.fullNameField];
-        _usernameError =
-            mappedErrors.fieldErrors[CreateUserInputDto.usernameField];
-        _emailError = mappedErrors.fieldErrors[CreateUserInputDto.emailField];
-        _passwordError =
-            mappedErrors.fieldErrors[CreateUserInputDto.passwordField]
-                    ?.trim()
-                    .isNotEmpty ==
-                true
-            ? mappedErrors.fieldErrors[CreateUserInputDto.passwordField]
-            : null;
-      });
-
-      final String? globalError = mappedErrors.globalErrors
-          .where((String e) => e.trim().isNotEmpty)
-          .cast<String?>()
-          .firstWhere((String? e) => e != null, orElse: () => null);
-
-      final String? message = error.message ?? globalError;
-      if (message != null && message.trim().isNotEmpty) {
+      final String message = error.message ?? fallbackMessage;
+      if (message.trim().isNotEmpty) {
         context.showErrorSnackBar(message, source: error.failure);
       }
     } catch (error, stackTrace) {
@@ -318,17 +428,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
       );
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        ref.read(signUpFormStateProvider.notifier).setLoading(false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final ValidationRuleSet passwordValidationRules = _passwordValidationRules;
-    final bool canSubmit = !_isLoading;
+    final signUpState = ref.watch(signUpFormStateProvider);
+    final scrollController = ref.watch(signUpScrollControllerProvider);
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
@@ -337,91 +445,25 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
       body: Form(
         key: _formKey,
         child: AppFormWithBottomActions(
-          scrollController: _scrollController,
+          scrollController: scrollController,
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               const SizedBox(height: 20),
-              Text(
-                context.l10n.tr(AppLocaleKeys.authSignUpHeading),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.tr(AppLocaleKeys.authSignUpSubtitle),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              _SignUpFormHeader(),
               const SizedBox(height: 24),
-              AppTextField(
-                labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
-                controller: _usernameController,
-                onChanged: _handleUsernameChanged,
-                errorText: _usernameError,
-                isRequired: _usernameValidationRules.hasRequiredRule,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.next,
-                validator: _usernameValidationRules.asValidator(
-                  _resolveValidationMessage,
-                ),
-              ),
-              const SizedBox(height: 16),
-              AppTextField(
-                labelText: context.l10n.tr(AppLocaleKeys.authFullNameLabel),
-                controller: _fullNameController,
-                onChanged: _handleFullNameChanged,
-                errorText: _fullNameError,
-                isRequired: _fullNameValidationRules.hasRequiredRule,
-                keyboardType: TextInputType.name,
-                textInputAction: TextInputAction.next,
-                validator: _fullNameValidationRules.asValidator(
-                  _resolveValidationMessage,
-                ),
-              ),
-              const SizedBox(height: 16),
-              AppTextField(
-                labelText: context.l10n.tr(AppLocaleKeys.authEmailLabel),
-                controller: _emailController,
-                onChanged: _handleEmailChanged,
-                errorText: _emailError,
-                isRequired: _emailValidationRules.hasRequiredRule,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                validator: _emailValidationRules.asValidator(
-                  _resolveValidationMessage,
-                ),
-              ),
-              const SizedBox(height: 16),
-              AppPasswordField(
-                key: _passwordFieldKey,
-                labelText: context.l10n.tr(AppLocaleKeys.authPasswordLabel),
-                controller: _passwordController,
-                focusNode: _passwordFocusNode,
-                onChanged: _handlePasswordChanged,
-                errorText: _passwordError,
-                isRequired: passwordValidationRules.hasRequiredRule,
-                textInputAction: TextInputAction.done,
-                validator: passwordValidationRules.asValidator(
-                  _resolveValidationMessage,
-                ),
-              ),
-              SizedBox(
-                key: _passwordHintKey,
-                child: PasswordRequirementsHint(
-                  currentPassword: _passwordController.text,
-                  isFocused: _isPasswordFocused,
-                ),
-              ),
-              const SizedBox(height: 16),
-              AppPasswordField(
-                controller: _confirmPasswordController,
-                labelText: context.l10n.tr(
-                  AppLocaleKeys.authConfirmPasswordLabel,
-                ),
-                isRequired: true,
-                textInputAction: TextInputAction.done,
-                validator: _validateConfirmPassword,
+              _SignUpFormFields(
+                fullNameValidationRules: _fullNameValidationRules,
+                usernameValidationRules: _usernameValidationRules,
+                emailValidationRules: _emailValidationRules,
+                passwordValidationRules: _passwordValidationRules,
+                onFieldChanged: _handleFieldChanged,
+                onPasswordChanged: _handlePasswordChanged,
+                resolveValidationMessage: _resolveValidationMessage,
+                validateConfirmPassword: _validateConfirmPassword,
+                passwordFieldKey: _passwordFieldKey,
+                passwordHintKey: _passwordHintKey,
+                signUpState: signUpState,
               ),
               const SizedBox(height: 24),
             ],
@@ -431,15 +473,15 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
               showWhenKeyboardOpen: true,
               child: AppButton(
                 label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
-                isLoading: _isLoading,
-                onPressed: canSubmit ? _handleSignUp : null,
+                isLoading: signUpState.isLoading,
+                onPressed: !signUpState.isLoading ? _handleSignUp : null,
               ),
             ),
             AppFormBottomAction(child: const SizedBox(height: 8)),
             AppFormBottomAction(
               showWhenKeyboardOpen: false,
               child: TextButton(
-                onPressed: _isLoading
+                onPressed: signUpState.isLoading
                     ? null
                     : () => Navigator.of(context).pop(),
                 child: Text(
@@ -450,6 +492,140 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SignUpFormHeader extends ConsumerWidget {
+  const _SignUpFormHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: <Widget>[
+        Text(
+          context.l10n.tr(AppLocaleKeys.authSignUpHeading),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          context.l10n.tr(AppLocaleKeys.authSignUpSubtitle),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    );
+  }
+}
+
+class _SignUpFormFields extends ConsumerWidget {
+  const _SignUpFormFields({
+    required this.fullNameValidationRules,
+    required this.usernameValidationRules,
+    required this.emailValidationRules,
+    required this.passwordValidationRules,
+    required this.onFieldChanged,
+    required this.onPasswordChanged,
+    required this.resolveValidationMessage,
+    required this.validateConfirmPassword,
+    required this.passwordFieldKey,
+    required this.passwordHintKey,
+    required this.signUpState,
+  });
+
+  final ValidationRuleSet fullNameValidationRules;
+  final ValidationRuleSet usernameValidationRules;
+  final ValidationRuleSet emailValidationRules;
+  final ValidationRuleSet passwordValidationRules;
+  final void Function(SignUpFieldType) onFieldChanged;
+  final VoidCallback onPasswordChanged;
+  final String Function(ValidationFailure) resolveValidationMessage;
+  final String? Function(String?) validateConfirmPassword;
+  final GlobalKey passwordFieldKey;
+  final GlobalKey passwordHintKey;
+  final SignUpFormState signUpState;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final usernameController = ref.watch(signUpUsernameControllerProvider);
+    final fullNameController = ref.watch(signUpFullNameControllerProvider);
+    final emailController = ref.watch(signUpEmailControllerProvider);
+    final passwordController = ref.watch(signUpPasswordControllerProvider);
+    final confirmPasswordController = ref.watch(
+      signUpConfirmPasswordControllerProvider,
+    );
+    final passwordFocusNode = ref.watch(signUpPasswordFocusNodeProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        AppTextField(
+          labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
+          controller: usernameController,
+          onChanged: (_) => onFieldChanged(SignUpFieldType.username),
+          errorText: signUpState.usernameError,
+          isRequired: usernameValidationRules.hasRequiredRule,
+          keyboardType: TextInputType.text,
+          textInputAction: TextInputAction.next,
+          validator: usernameValidationRules.asValidator(
+            resolveValidationMessage,
+          ),
+        ),
+        const SizedBox(height: 16),
+        AppTextField(
+          labelText: context.l10n.tr(AppLocaleKeys.authFullNameLabel),
+          controller: fullNameController,
+          onChanged: (_) => onFieldChanged(SignUpFieldType.fullName),
+          errorText: signUpState.fullNameError,
+          isRequired: fullNameValidationRules.hasRequiredRule,
+          keyboardType: TextInputType.name,
+          textInputAction: TextInputAction.next,
+          validator: fullNameValidationRules.asValidator(
+            resolveValidationMessage,
+          ),
+        ),
+        const SizedBox(height: 16),
+        AppTextField(
+          labelText: context.l10n.tr(AppLocaleKeys.authEmailLabel),
+          controller: emailController,
+          onChanged: (_) => onFieldChanged(SignUpFieldType.email),
+          errorText: signUpState.emailError,
+          isRequired: emailValidationRules.hasRequiredRule,
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.next,
+          validator: emailValidationRules.asValidator(resolveValidationMessage),
+        ),
+        const SizedBox(height: 16),
+        AppPasswordField(
+          key: passwordFieldKey,
+          labelText: context.l10n.tr(AppLocaleKeys.authPasswordLabel),
+          controller: passwordController,
+          focusNode: passwordFocusNode,
+          onChanged: (_) => onPasswordChanged(),
+          errorText: signUpState.passwordError,
+          isRequired: passwordValidationRules.hasRequiredRule,
+          textInputAction: TextInputAction.done,
+          validator: passwordValidationRules.asValidator(
+            resolveValidationMessage,
+          ),
+        ),
+        SizedBox(
+          key: passwordHintKey,
+          child: PasswordRequirementsHint(
+            currentPassword: passwordController.text,
+            isFocused: signUpState.isPasswordFocused,
+          ),
+        ),
+        const SizedBox(height: 16),
+        AppPasswordField(
+          controller: confirmPasswordController,
+          labelText: context.l10n.tr(AppLocaleKeys.authConfirmPasswordLabel),
+          isRequired: true,
+          textInputAction: TextInputAction.done,
+          validator: validateConfirmPassword,
+        ),
+      ],
     );
   }
 }
