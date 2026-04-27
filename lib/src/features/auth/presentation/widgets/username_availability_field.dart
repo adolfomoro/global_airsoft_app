@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
+import 'package:global_airsoft_app/src/app/widgets/app_field_loading_indicator.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
@@ -240,6 +241,7 @@ class _UsernameAvailabilityFieldState
   @override
   Widget build(BuildContext context) {
     final bool hasExternalError = widget.errorText?.trim().isNotEmpty == true;
+    final bool isChecking = _status == UsernameAvailabilityStatus.checking;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -255,10 +257,17 @@ class _UsernameAvailabilityFieldState
           autocorrect: false,
           enableSuggestions: false,
           enableIMEPersonalizedLearning: false,
+          suffixIcon: isChecking
+              ? AppFieldLoadingIndicator(
+                  semanticsLabel: context.l10n.tr(
+                    AppLocaleKeys.authUsernameChecking,
+                  ),
+                )
+              : null,
           onFieldSubmitted: widget.onFieldSubmitted,
           validator: _validateUsername,
         ),
-        if (!hasExternalError) ...<Widget>[
+        if (!hasExternalError && !isChecking) ...<Widget>[
           const SizedBox(height: AppDimensions.spacingSm),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 180),
