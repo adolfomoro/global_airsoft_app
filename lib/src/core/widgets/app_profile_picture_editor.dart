@@ -64,7 +64,6 @@ class AppProfilePictureEditor extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    // Handle ProfilePhoto
     if (_profilePhoto != null) {
       if (_profilePhoto.isLocal) {
         final File localFile = _profilePhoto.localFile!;
@@ -116,7 +115,6 @@ class AppProfilePictureEditor extends StatelessWidget {
       return _buildPlaceholder();
     }
 
-    // Handle ImageProvider
     if (_imageProvider != null) {
       final ImageProvider imageProvider = _imageProvider;
 
@@ -143,7 +141,6 @@ class AppProfilePictureEditor extends StatelessWidget {
       );
     }
 
-    // Handle network URL
     return Image.network(
       _imageUrl!,
       fit: BoxFit.cover,

@@ -50,7 +50,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
       imageCropServiceProvider,
     );
 
-    // Check and request camera permission
     final bool isGranted = await cameraPermissionService.isGranted();
 
     if (!isGranted) {
@@ -104,7 +103,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
       imageCropServiceProvider,
     );
 
-    // Check and request gallery permission
     final bool isGranted = await galleryPermissionService.isGranted();
 
     if (!isGranted) {
@@ -123,7 +121,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
       }
     }
 
-    // Pick image from gallery
     final ImagePickerResult result = await imagePickerService.pickFromGallery(
       maxWidth: 1024,
       maxHeight: 1024,
@@ -205,7 +202,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          // Drag handle
           const SizedBox(height: 6),
           Center(
             child: Container(
@@ -219,7 +215,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
 
-          // Title
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
@@ -231,7 +226,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
-          // Take photo option
           _PhotoOption(
             icon: Icons.camera_alt_rounded,
             label: context.l10n.tr(AppLocaleKeys.profilePhotoTakePhoto),
@@ -242,7 +236,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
 
           const SizedBox(height: 4),
 
-          // Select from gallery option
           _PhotoOption(
             icon: Icons.photo_library_rounded,
             label: context.l10n.tr(AppLocaleKeys.profilePhotoSelectFromGallery),
@@ -251,7 +244,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
             onTap: () => _handleSelectFromGallery(context, ref),
           ),
 
-          // Delete photo option (only if there's a current photo)
           if (hasCurrentPhoto) ...<Widget>[
             const SizedBox(height: 4),
             _PhotoOption(
@@ -264,7 +256,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
             ),
           ],
 
-          // Cancel button
           const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),

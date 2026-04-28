@@ -89,8 +89,6 @@ final class _AppFormWithBottomActionsState
           Expanded(
             child: SingleChildScrollView(
               controller: widget.scrollController,
-              // Keep focused inputs open while users scroll through forms.
-              // Keyboard dismissal is handled globally by AppUnfocusWrapper taps.
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               child: AppFormPadding(
                 padding: widget.bodyPadding,
