@@ -19,9 +19,9 @@ import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repo
 import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/full_name_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/password_validation_policy.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/validation/user_name_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_requirements_hint.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
 final class SignUpFormState {
   const SignUpFormState({
@@ -29,6 +29,7 @@ final class SignUpFormState {
     this.usernameError,
     this.emailError,
     this.passwordError,
+    this.usernameAvailabilityStatus = UsernameAvailabilityStatus.idle,
     this.isLoading = false,
     this.isPasswordFocused = false,
     this.hasRevealedPasswordHint = false,
@@ -41,6 +42,8 @@ final class SignUpFormState {
 
   final String? passwordError;
 
+  final UsernameAvailabilityStatus usernameAvailabilityStatus;
+
   final bool isLoading;
 
   final bool isPasswordFocused;
@@ -52,6 +55,7 @@ final class SignUpFormState {
     String? usernameError,
     String? emailError,
     String? passwordError,
+    UsernameAvailabilityStatus? usernameAvailabilityStatus,
     bool? isLoading,
     bool? isPasswordFocused,
     bool? hasRevealedPasswordHint,
@@ -61,6 +65,8 @@ final class SignUpFormState {
       usernameError: usernameError ?? this.usernameError,
       emailError: emailError ?? this.emailError,
       passwordError: passwordError ?? this.passwordError,
+      usernameAvailabilityStatus:
+          usernameAvailabilityStatus ?? this.usernameAvailabilityStatus,
       isLoading: isLoading ?? this.isLoading,
       isPasswordFocused: isPasswordFocused ?? this.isPasswordFocused,
       hasRevealedPasswordHint:
@@ -145,6 +151,14 @@ final class SignUpFormNotifier extends Notifier<SignUpFormState> {
     state = state.copyWith(isLoading: isLoading);
   }
 
+  void setUsernameAvailabilityStatus(UsernameAvailabilityStatus status) {
+    if (state.usernameAvailabilityStatus == status) {
+      return;
+    }
+
+    state = state.copyWith(usernameAvailabilityStatus: status);
+  }
+
   void setFieldError(SignUpFieldType fieldType, String? error) {
     switch (fieldType) {
       case SignUpFieldType.fullName:
@@ -200,8 +214,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     with WidgetsBindingObserver {
   static final ValidationRuleSet _fullNameValidationRules =
       FullNameValidation.rules;
-  static final ValidationRuleSet _usernameValidationRules =
-      UsernameValidation.rules;
   static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
   static final ValidationRuleSet _passwordValidationRules =
       PasswordValidationPolicy.rules;
@@ -280,6 +292,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   void _handlePasswordChanged() {
     _handleFieldChanged(SignUpFieldType.password);
     _requestPasswordHintRevealIfNeeded();
+  }
+
+  void _handleUsernameAvailabilityChanged(UsernameAvailabilityStatus status) {
+    ref
+        .read(signUpFormStateProvider.notifier)
+        .setUsernameAvailabilityStatus(status);
   }
 
   bool _shouldShowPasswordHint(String passwordText) {
@@ -437,6 +455,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   Widget build(BuildContext context) {
     final signUpState = ref.watch(signUpFormStateProvider);
     final scrollController = ref.watch(signUpScrollControllerProvider);
+    final bool canSubmit =
+        !signUpState.isLoading &&
+        signUpState.usernameAvailabilityStatus !=
+            UsernameAvailabilityStatus.waiting &&
+        signUpState.usernameAvailabilityStatus !=
+            UsernameAvailabilityStatus.checking &&
+        signUpState.usernameAvailabilityStatus !=
+            UsernameAvailabilityStatus.unavailable;
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
@@ -454,11 +480,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
               const SizedBox(height: 24),
               _SignUpFormFields(
                 fullNameValidationRules: _fullNameValidationRules,
-                usernameValidationRules: _usernameValidationRules,
                 emailValidationRules: _emailValidationRules,
                 passwordValidationRules: _passwordValidationRules,
                 onFieldChanged: _handleFieldChanged,
                 onPasswordChanged: _handlePasswordChanged,
+                onUsernameAvailabilityChanged:
+                    _handleUsernameAvailabilityChanged,
                 resolveValidationMessage: _resolveValidationMessage,
                 validateConfirmPassword: _validateConfirmPassword,
                 passwordFieldKey: _passwordFieldKey,
@@ -474,7 +501,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
               child: AppButton(
                 label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
                 isLoading: signUpState.isLoading,
-                onPressed: !signUpState.isLoading ? _handleSignUp : null,
+                onPressed: canSubmit ? _handleSignUp : null,
               ),
             ),
             AppFormBottomAction(child: const SizedBox(height: 8)),
@@ -522,11 +549,11 @@ class _SignUpFormHeader extends ConsumerWidget {
 class _SignUpFormFields extends ConsumerWidget {
   const _SignUpFormFields({
     required this.fullNameValidationRules,
-    required this.usernameValidationRules,
     required this.emailValidationRules,
     required this.passwordValidationRules,
     required this.onFieldChanged,
     required this.onPasswordChanged,
+    required this.onUsernameAvailabilityChanged,
     required this.resolveValidationMessage,
     required this.validateConfirmPassword,
     required this.passwordFieldKey,
@@ -535,11 +562,11 @@ class _SignUpFormFields extends ConsumerWidget {
   });
 
   final ValidationRuleSet fullNameValidationRules;
-  final ValidationRuleSet usernameValidationRules;
   final ValidationRuleSet emailValidationRules;
   final ValidationRuleSet passwordValidationRules;
   final void Function(SignUpFieldType) onFieldChanged;
   final VoidCallback onPasswordChanged;
+  final ValueChanged<UsernameAvailabilityStatus> onUsernameAvailabilityChanged;
   final String Function(ValidationFailure) resolveValidationMessage;
   final String? Function(String?) validateConfirmPassword;
   final GlobalKey passwordFieldKey;
@@ -560,17 +587,11 @@ class _SignUpFormFields extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        AppTextField(
-          labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
+        UsernameAvailabilityField(
           controller: usernameController,
           onChanged: (_) => onFieldChanged(SignUpFieldType.username),
           errorText: signUpState.usernameError,
-          isRequired: usernameValidationRules.hasRequiredRule,
-          keyboardType: TextInputType.text,
-          textInputAction: TextInputAction.next,
-          validator: usernameValidationRules.asValidator(
-            resolveValidationMessage,
-          ),
+          onAvailabilityChanged: onUsernameAvailabilityChanged,
         ),
         const SizedBox(height: 16),
         AppTextField(
