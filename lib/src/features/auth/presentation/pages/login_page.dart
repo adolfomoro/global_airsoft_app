@@ -13,6 +13,7 @@ import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/localization/app_validation_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
@@ -23,6 +24,7 @@ import 'package:global_airsoft_app/src/features/auth/data/exceptions/authenticat
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/google_sign_in_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/auth_page_header.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -76,43 +78,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     setState(() {
       _passwordError = null;
     });
-  }
-
-  String _resolveValidationMessage(ValidationFailure failure) {
-    final String selectedKey = switch (failure.messageKey) {
-      AppLocaleKeys.validationMinLength => _pluralizedValidationKey(
-        baseKey: AppLocaleKeys.validationMinLength,
-        value: failure.arguments['min'],
-      ),
-      AppLocaleKeys.validationMaxLength => _pluralizedValidationKey(
-        baseKey: AppLocaleKeys.validationMaxLength,
-        value: failure.arguments['max'],
-      ),
-      _ => failure.messageKey,
-    };
-
-    return context.l10n.trArgs(selectedKey, args: failure.arguments);
-  }
-
-  String _pluralizedValidationKey({
-    required String baseKey,
-    required Object? value,
-  }) {
-    final int? numericValue;
-    if (value is int) {
-      numericValue = value;
-    } else if (value is num) {
-      numericValue = value.toInt();
-    } else if (value is String) {
-      numericValue = int.tryParse(value);
-    } else {
-      numericValue = null;
-    }
-
-    return AppLocaleKeys.withPluralSuffix(
-      baseKey: baseKey,
-      isSingular: numericValue == 1,
-    );
   }
 
   Future<void> _handleLogin() async {
@@ -309,63 +274,55 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           const SizedBox(height: 40),
-                          Container(
-                            width: 58,
-                            height: 58,
-                            decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(
-                                AppDimensions.radiusLg,
-                              ),
+                          AuthPageHeader(
+                            title: context.l10n.tr(AppLocaleKeys.appTitle),
+                            subtitle: context.l10n.tr(
+                              AppLocaleKeys.authLoginSubtitle,
                             ),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: <Widget>[
-                                Icon(
-                                  Icons.track_changes_rounded,
-                                  color: colorScheme.primary,
-                                  size: 30,
+                            titleStyle: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w700),
+                            leading: Container(
+                              width: 58,
+                              height: 58,
+                              decoration: BoxDecoration(
+                                color: colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(
+                                  AppDimensions.radiusLg,
                                 ),
-                                Positioned(
-                                  bottom: 6,
-                                  right: 6,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primary,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Text(
-                                      'GA',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelSmall
-                                          ?.copyWith(
-                                            color: colorScheme.onPrimary,
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                              ),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.track_changes_rounded,
+                                    color: colorScheme.primary,
+                                    size: 30,
+                                  ),
+                                  Positioned(
+                                    bottom: 6,
+                                    right: 6,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.primary,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'GA',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: colorScheme.onPrimary,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            context.l10n.tr(AppLocaleKeys.appTitle),
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                          const SizedBox(height: 8),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 480),
-                            child: Text(
-                              context.l10n.tr(AppLocaleKeys.authLoginSubtitle),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodyMedium,
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -380,7 +337,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         },
                         isRequired: _loginValidationRules.hasRequiredRule,
                         validator: _loginValidationRules.asValidator(
-                          _resolveValidationMessage,
+                          context.resolveValidationMessage,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -400,7 +357,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         },
                         isRequired: _passwordValidationRules.hasRequiredRule,
                         validator: _passwordValidationRules.asValidator(
-                          _resolveValidationMessage,
+                          context.resolveValidationMessage,
                         ),
                       ),
                       Align(

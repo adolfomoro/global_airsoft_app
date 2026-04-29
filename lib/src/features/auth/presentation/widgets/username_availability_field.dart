@@ -7,6 +7,7 @@ import 'package:global_airsoft_app/src/app/widgets/app_field_loading_indicator.d
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/localization/app_validation_localizations.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/check_username_availability_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/user_name_validation.dart';
@@ -186,7 +187,7 @@ class _UsernameAvailabilityFieldState
       username,
     );
     if (failure != null) {
-      return _resolveValidationMessage(failure);
+      return context.resolveValidationMessage(failure);
     }
 
     if (_status == UsernameAvailabilityStatus.unavailable &&
@@ -195,43 +196,6 @@ class _UsernameAvailabilityFieldState
     }
 
     return null;
-  }
-
-  String _resolveValidationMessage(ValidationFailure failure) {
-    final String selectedKey = switch (failure.messageKey) {
-      AppLocaleKeys.validationMinLength => _pluralizedValidationKey(
-        baseKey: AppLocaleKeys.validationMinLength,
-        value: failure.arguments['min'],
-      ),
-      AppLocaleKeys.validationMaxLength => _pluralizedValidationKey(
-        baseKey: AppLocaleKeys.validationMaxLength,
-        value: failure.arguments['max'],
-      ),
-      _ => failure.messageKey,
-    };
-
-    return context.l10n.trArgs(selectedKey, args: failure.arguments);
-  }
-
-  String _pluralizedValidationKey({
-    required String baseKey,
-    required Object? value,
-  }) {
-    final int? numericValue;
-    if (value is int) {
-      numericValue = value;
-    } else if (value is num) {
-      numericValue = value.toInt();
-    } else if (value is String) {
-      numericValue = int.tryParse(value);
-    } else {
-      numericValue = null;
-    }
-
-    return AppLocaleKeys.withPluralSuffix(
-      baseKey: baseKey,
-      isSingular: numericValue == 1,
-    );
   }
 
   String _normalizeUsername(String value) {

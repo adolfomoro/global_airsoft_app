@@ -9,6 +9,7 @@ import 'package:global_airsoft_app/src/app/widgets/focus_aware_scroll_coordinato
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/localization/app_validation_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
@@ -20,6 +21,7 @@ import 'package:global_airsoft_app/src/features/auth/domain/validation/email_val
 import 'package:global_airsoft_app/src/features/auth/domain/validation/full_name_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/password_validation_policy.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/auth_page_header.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_requirements_hint.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
@@ -330,43 +332,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     });
   }
 
-  String _resolveValidationMessage(ValidationFailure failure) {
-    final String selectedKey = switch (failure.messageKey) {
-      AppLocaleKeys.validationMinLength => _pluralizedValidationKey(
-        baseKey: AppLocaleKeys.validationMinLength,
-        value: failure.arguments['min'],
-      ),
-      AppLocaleKeys.validationMaxLength => _pluralizedValidationKey(
-        baseKey: AppLocaleKeys.validationMaxLength,
-        value: failure.arguments['max'],
-      ),
-      _ => failure.messageKey,
-    };
-
-    return context.l10n.trArgs(selectedKey, args: failure.arguments);
-  }
-
-  String _pluralizedValidationKey({
-    required String baseKey,
-    required Object? value,
-  }) {
-    final int? numericValue;
-    if (value is int) {
-      numericValue = value;
-    } else if (value is num) {
-      numericValue = value.toInt();
-    } else if (value is String) {
-      numericValue = int.tryParse(value);
-    } else {
-      numericValue = null;
-    }
-
-    return AppLocaleKeys.withPluralSuffix(
-      baseKey: baseKey,
-      isSingular: numericValue == 1,
-    );
-  }
-
   String? _validateConfirmPassword(String? value) {
     final String normalizedValue = value?.trim() ?? '';
     if (normalizedValue.isEmpty) {
@@ -486,7 +451,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                 onPasswordChanged: _handlePasswordChanged,
                 onUsernameAvailabilityChanged:
                     _handleUsernameAvailabilityChanged,
-                resolveValidationMessage: _resolveValidationMessage,
+                resolveValidationMessage: context.resolveValidationMessage,
                 validateConfirmPassword: _validateConfirmPassword,
                 passwordFieldKey: _passwordFieldKey,
                 passwordHintKey: _passwordHintKey,
@@ -528,20 +493,9 @@ class _SignUpFormHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: <Widget>[
-        Text(
-          context.l10n.tr(AppLocaleKeys.authSignUpHeading),
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          context.l10n.tr(AppLocaleKeys.authSignUpSubtitle),
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ],
+    return AuthPageHeader(
+      title: context.l10n.tr(AppLocaleKeys.authSignUpHeading),
+      subtitle: context.l10n.tr(AppLocaleKeys.authSignUpSubtitle),
     );
   }
 }
