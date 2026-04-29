@@ -5,10 +5,12 @@ import 'package:global_airsoft_app/src/core/network/auth_security_handled_except
 
 final class ApiExceptionInterceptor extends Interceptor {
   ApiExceptionInterceptor({
-    required Future<String> Function() badResponseFallbackMessageResolver,
-  }) : _badResponseFallbackMessageResolver = badResponseFallbackMessageResolver;
+    required Future<ApiExceptionLocalizedMessages> Function()
+    localizedMessagesResolver,
+  }) : _localizedMessagesResolver = localizedMessagesResolver;
 
-  final Future<String> Function() _badResponseFallbackMessageResolver;
+  final Future<ApiExceptionLocalizedMessages> Function()
+  _localizedMessagesResolver;
 
   @override
   Future<void> onError(
@@ -21,14 +23,12 @@ final class ApiExceptionInterceptor extends Interceptor {
       return;
     }
 
-    final String badResponseFallbackMessage =
-        err.type == DioExceptionType.badResponse
-        ? await _resolveBadResponseFallbackMessage()
-        : ApiException.defaultBadResponseFallbackMessage;
+    final ApiExceptionLocalizedMessages localizedMessages =
+        await _resolveLocalizedMessages();
 
     final ApiException apiException = ApiExceptionFormatter.toTypedException(
       err,
-      badResponseFallbackMessage: badResponseFallbackMessage,
+      localizedMessages: localizedMessages,
     );
 
     handler.reject(
@@ -42,18 +42,11 @@ final class ApiExceptionInterceptor extends Interceptor {
     );
   }
 
-  Future<String> _resolveBadResponseFallbackMessage() async {
+  Future<ApiExceptionLocalizedMessages> _resolveLocalizedMessages() async {
     try {
-      final String localizedMessage =
-          await _badResponseFallbackMessageResolver();
-      final String normalizedMessage = localizedMessage.trim();
-      if (normalizedMessage.isNotEmpty) {
-        return normalizedMessage;
-      }
+      return await _localizedMessagesResolver();
     } catch (_) {
-      // Fall back to the built-in English string below.
+      return const ApiExceptionLocalizedMessages();
     }
-
-    return ApiException.defaultBadResponseFallbackMessage;
   }
 }

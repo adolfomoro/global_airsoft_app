@@ -4,6 +4,7 @@ import 'package:global_airsoft_app/src/core/localization/app_localization_servic
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/network/http_status_code_extensions.dart';
+import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
 import 'package:global_airsoft_app/src/features/auth/data/constants/auth_api_paths.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/check_username_availability_input_dto.dart';
@@ -75,17 +76,23 @@ final class AuthRepository {
     required ApiException error,
   }) async {
     final String localizedFailureMessage = await failureMessageProvider();
+    final MessageOverrideBehavior overrideBehavior =
+        error is ValidationApiException
+        ? MessageOverrideBehavior.useAsFallback
+        : MessageOverrideBehavior.preferOverride;
 
     if (error is AbpApiException) {
       throw AuthenticationException.fromAbpException(
         error,
         messageOverride: localizedFailureMessage,
+        messageOverrideBehavior: overrideBehavior,
       );
     }
 
     throw AuthenticationException.fromApiException(
       error,
       messageOverride: localizedFailureMessage,
+      messageOverrideBehavior: overrideBehavior,
     );
   }
 

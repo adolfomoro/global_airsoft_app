@@ -109,7 +109,10 @@ Future<AuthService> _buildAuthService({
     logger: AppLogger.instance,
     getDeviceLanguage: () => 'en',
     onContentLanguage: (_) async {},
-    badResponseFallbackMessageResolver: () {
+    apiExceptionMessagesResolver: () {
+      return buildLocalizedApiExceptionMessages(localizationService);
+    },
+    deviceSyncRequiredMessageResolver: () {
       return localizationService.tr(AppLocaleKeys.commonGenericApiErrorMessage);
     },
   );

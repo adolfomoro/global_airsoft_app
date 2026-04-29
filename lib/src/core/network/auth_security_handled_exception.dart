@@ -26,10 +26,13 @@ final class AuthSecurityHandledException extends ApiException {
   factory AuthSecurityHandledException.fromApiException(
     ApiException error, {
     required String fallbackMessage,
+    bool preferFallbackMessage = false,
   }) {
     final String backendMessage = error.message.trim();
     final bool hasBackendMessage =
-        !error.isFallbackMessage && backendMessage.isNotEmpty;
+        !preferFallbackMessage &&
+        !error.isFallbackMessage &&
+        backendMessage.isNotEmpty;
 
     return AuthSecurityHandledException(
       message: hasBackendMessage ? backendMessage : fallbackMessage,

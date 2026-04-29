@@ -7,8 +7,8 @@ final class ApiExceptionFormatter {
 
   static ApiException toTypedException(
     DioException err, {
-    String badResponseFallbackMessage =
-        ApiException.defaultBadResponseFallbackMessage,
+    ApiExceptionLocalizedMessages localizedMessages =
+        const ApiExceptionLocalizedMessages(),
   }) {
     final Response<dynamic>? response = err.response;
     if (_isAbpFormatted(response)) {
@@ -17,12 +17,17 @@ final class ApiExceptionFormatter {
       );
       if (normalized != null) {
         try {
-          final AbpErrorResponse parsed = AbpErrorResponse.fromJson(normalized);
+          final AbpErrorResponse parsed = AbpErrorResponse.fromJson(
+            normalized,
+            validationErrorFallbackMessage:
+                localizedMessages.validationErrorMessage,
+          );
           final AbpApiException exception = AbpApiException.fromAbpPayload(
             payload: parsed.error,
             statusCode: response?.statusCode,
             cause: err,
-            badResponseFallbackMessage: badResponseFallbackMessage,
+            badResponseFallbackMessage:
+                localizedMessages.badResponseFallbackMessage,
           );
           return exception.toTypedException();
         } on FormatException {
@@ -33,7 +38,7 @@ final class ApiExceptionFormatter {
 
     return ApiException.fromDioException(
       err,
-      badResponseFallbackMessage: badResponseFallbackMessage,
+      localizedMessages: localizedMessages,
     ).toTypedException();
   }
 

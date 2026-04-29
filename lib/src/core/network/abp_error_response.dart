@@ -3,13 +3,21 @@ final class AbpErrorResponse {
 
   final AbpErrorPayload error;
 
-  factory AbpErrorResponse.fromJson(Map<String, dynamic> json) {
+  factory AbpErrorResponse.fromJson(
+    Map<String, dynamic> json, {
+    String validationErrorFallbackMessage = 'Validation error',
+  }) {
     final Object? errorObject = json['error'];
     if (errorObject is! Map<String, dynamic>) {
       throw const FormatException('ABP error payload is missing "error".');
     }
 
-    return AbpErrorResponse(error: AbpErrorPayload.fromJson(errorObject));
+    return AbpErrorResponse(
+      error: AbpErrorPayload.fromJson(
+        errorObject,
+        validationErrorFallbackMessage: validationErrorFallbackMessage,
+      ),
+    );
   }
 }
 
@@ -30,14 +38,24 @@ final class AbpErrorPayload {
   final List<AbpValidationError> validationErrors;
   final Map<String, dynamic> additionalData;
 
-  factory AbpErrorPayload.fromJson(Map<String, dynamic> json) {
+  factory AbpErrorPayload.fromJson(
+    Map<String, dynamic> json, {
+    String validationErrorFallbackMessage = 'Validation error',
+  }) {
     final Object? rawValidationErrors = json['validationErrors'];
     final List<AbpValidationError> validationErrors;
 
     if (rawValidationErrors is List) {
       validationErrors = rawValidationErrors
           .whereType<Map<String, dynamic>>()
-          .map(AbpValidationError.fromJson)
+          .map(
+            (Map<String, dynamic> validationError) =>
+                AbpValidationError.fromJson(
+                  validationError,
+                  validationErrorFallbackMessage:
+                      validationErrorFallbackMessage,
+                ),
+          )
           .toList(growable: false);
     } else {
       validationErrors = const <AbpValidationError>[];
@@ -68,7 +86,10 @@ final class AbpValidationError {
   final String message;
   final List<String> members;
 
-  factory AbpValidationError.fromJson(Map<String, dynamic> json) {
+  factory AbpValidationError.fromJson(
+    Map<String, dynamic> json, {
+    String validationErrorFallbackMessage = 'Validation error',
+  }) {
     final Object? rawMembers = json['members'];
     final List<String> members;
 
@@ -79,7 +100,9 @@ final class AbpValidationError {
     }
 
     return AbpValidationError(
-      message: (json['message'] as String?)?.trim() ?? 'Validation error',
+      message:
+          (json['message'] as String?)?.trim() ??
+          validationErrorFallbackMessage,
       members: members,
     );
   }

@@ -120,7 +120,10 @@ Future<AppDioService> _buildService(
     ensureDeviceSynced: () async => true,
     getDeviceLanguage: () => 'en',
     onContentLanguage: (_) async {},
-    badResponseFallbackMessageResolver: () {
+    apiExceptionMessagesResolver: () {
+      return buildLocalizedApiExceptionMessages(localizationService);
+    },
+    deviceSyncRequiredMessageResolver: () {
       return localizationService.tr(AppLocaleKeys.commonGenericApiErrorMessage);
     },
     enableAuthSecurityInterceptor: enableAuthSecurityInterceptor,
@@ -327,7 +330,7 @@ void main() {
             .having(
               (AuthSecurityHandledException error) => error.message,
               'message',
-              'Backend security change message.',
+              'We detected a security change. Please sign in again.',
             ),
       ),
     );
@@ -336,7 +339,9 @@ void main() {
     expect(clearCalls, 1);
     expect(currentTokens.jwtToken, isEmpty);
     expect(currentTokens.refreshToken, isEmpty);
-    expect(messages, <String>['Backend security change message.']);
+    expect(messages, <String>[
+      'We detected a security change. Please sign in again.',
+    ]);
   });
 
   test('logs out when token refresh fails', () async {

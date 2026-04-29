@@ -77,7 +77,10 @@ Future<AuthRepository> _buildRepository(
     logger: AppLogger.instance,
     getDeviceLanguage: () => 'en',
     onContentLanguage: (_) async {},
-    badResponseFallbackMessageResolver: () async {
+    apiExceptionMessagesResolver: () {
+      return buildLocalizedApiExceptionMessages(localizationService);
+    },
+    deviceSyncRequiredMessageResolver: () async {
       return localizationService.tr(AppLocaleKeys.commonGenericApiErrorMessage);
     },
   );

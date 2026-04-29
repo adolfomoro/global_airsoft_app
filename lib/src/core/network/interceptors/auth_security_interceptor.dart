@@ -404,6 +404,7 @@ final class AuthSecurityInterceptor extends Interceptor {
               fallbackMessage: fallbackMessage.isNotEmpty
                   ? fallbackMessage
                   : _handledCancellationMessage,
+              preferFallbackMessage: true,
             )
           : AuthSecurityHandledException(
               message: fallbackMessage.isNotEmpty
@@ -493,6 +494,7 @@ final class AuthSecurityInterceptor extends Interceptor {
       fallbackMessage: fallbackMessage.isNotEmpty
           ? fallbackMessage
           : _handledCancellationMessage,
+      preferFallbackMessage: true,
     );
   }
 
@@ -604,6 +606,7 @@ final class AuthSecurityInterceptor extends Interceptor {
         fallbackMessage: fallbackMessage.isNotEmpty
             ? fallbackMessage
             : _handledCancellationMessage,
+        preferFallbackMessage: true,
       );
     } catch (_) {
       final String fallbackMessage = await _coordinator.translateMessage(

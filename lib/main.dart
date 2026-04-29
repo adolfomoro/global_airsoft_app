@@ -42,8 +42,6 @@ Future<void> main() async {
       );
       final AppLocaleBootstrapData localeBootstrapData = await appLocaleService
           .initializeFromDevice();
-      final AppLocalizationService appLocalizationService =
-          AppLocalizationService(locale: localeBootstrapData.initialUiLocale);
       final NotificationPermissionService notificationPermissionService =
           NotificationPermissionService(store: keyValueStore);
       final AuthStorageService authStorageService = AuthStorageService(
@@ -53,7 +51,12 @@ Future<void> main() async {
       final AuthTokens? tokens = await authStorageService.getTokens();
       final bool isAuthenticated = tokens != null && tokens.jwtToken.isNotEmpty;
 
-      final ProviderContainer container = ProviderContainer(
+      late final ProviderContainer container;
+      final AppLocalizationService appLocalizationService =
+          AppLocalizationService(
+            localeResolver: () => container.read(appLocaleControllerProvider),
+          );
+      container = ProviderContainer(
         overrides: [
           appConfigProvider.overrideWithValue(appConfig),
           secureStorageServiceProvider.overrideWithValue(secureStorageService),
@@ -90,7 +93,10 @@ Future<void> main() async {
         onContentLanguage: container
             .read(appLocaleControllerProvider.notifier)
             .syncFromServerContentLanguage,
-        badResponseFallbackMessageResolver: () {
+        apiExceptionMessagesResolver: () {
+          return buildLocalizedApiExceptionMessages(appLocalizationService);
+        },
+        deviceSyncRequiredMessageResolver: () {
           return appLocalizationService.tr(
             AppLocaleKeys.commonGenericApiErrorMessage,
           );

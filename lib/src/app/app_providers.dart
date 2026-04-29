@@ -99,7 +99,10 @@ AppDioService _buildAppDioService(
       return osLanguageTag;
     },
     onContentLanguage: localeController.syncFromServerContentLanguage,
-    badResponseFallbackMessageResolver: () {
+    apiExceptionMessagesResolver: () {
+      return buildLocalizedApiExceptionMessages(localizationService);
+    },
+    deviceSyncRequiredMessageResolver: () {
       return localizationService.tr(AppLocaleKeys.commonGenericApiErrorMessage);
     },
     deviceSyncSkipPaths: deviceSyncSkipPaths,

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/media/captured_image_mirror_service.dart';
 
 class ProfilePhotoCameraCapturePage extends StatefulWidget {
@@ -23,7 +25,7 @@ class _ProfilePhotoCameraCapturePageState
   int _selectedCameraIndex = 0;
   bool _isInitializing = true;
   bool _isCapturing = false;
-  String? _errorMessage;
+  String? _errorMessageKey;
 
   @override
   void initState() {
@@ -64,7 +66,7 @@ class _ProfilePhotoCameraCapturePageState
   Future<void> _initializeCamera() async {
     setState(() {
       _isInitializing = true;
-      _errorMessage = null;
+      _errorMessageKey = null;
     });
 
     try {
@@ -75,7 +77,7 @@ class _ProfilePhotoCameraCapturePageState
 
       if (cameras.isEmpty) {
         setState(() {
-          _errorMessage = 'No camera available on this device.';
+          _errorMessageKey = AppLocaleKeys.profilePhotoNoCameraAvailable;
           _isInitializing = false;
         });
         return;
@@ -90,7 +92,7 @@ class _ProfilePhotoCameraCapturePageState
       }
 
       setState(() {
-        _errorMessage = 'Unable to open the camera.';
+        _errorMessageKey = AppLocaleKeys.profilePhotoCameraOpenFailed;
       });
     } finally {
       if (mounted) {
@@ -132,7 +134,7 @@ class _ProfilePhotoCameraCapturePageState
       setState(() {
         _controller = controller;
         _selectedCameraIndex = index;
-        _errorMessage = null;
+        _errorMessageKey = null;
       });
     } catch (_) {
       await controller.dispose();
@@ -141,7 +143,7 @@ class _ProfilePhotoCameraCapturePageState
       }
 
       setState(() {
-        _errorMessage = 'Unable to start the camera preview.';
+        _errorMessageKey = AppLocaleKeys.profilePhotoCameraPreviewFailed;
       });
     }
   }
@@ -208,7 +210,7 @@ class _ProfilePhotoCameraCapturePageState
       }
 
       setState(() {
-        _errorMessage = 'Unable to capture the photo.';
+        _errorMessageKey = AppLocaleKeys.profilePhotoCameraCaptureFailed;
       });
     } finally {
       if (mounted) {
@@ -224,6 +226,8 @@ class _ProfilePhotoCameraCapturePageState
   }
 
   Widget _buildErrorState(BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -237,7 +241,9 @@ class _ProfilePhotoCameraCapturePageState
             ),
             const SizedBox(height: 12),
             Text(
-              _errorMessage ?? 'Camera unavailable.',
+              l10n.tr(
+                _errorMessageKey ?? AppLocaleKeys.profilePhotoCameraUnavailable,
+              ),
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -248,7 +254,7 @@ class _ProfilePhotoCameraCapturePageState
               onPressed: () {
                 _initializeCamera();
               },
-              child: const Text('Try again'),
+              child: Text(l10n.tr(AppLocaleKeys.profilePhotoTryAgain)),
             ),
           ],
         ),
@@ -258,7 +264,7 @@ class _ProfilePhotoCameraCapturePageState
 
   Widget _buildPreview(BuildContext context) {
     final CameraController? controller = _controller;
-    if (_errorMessage != null) {
+    if (_errorMessageKey != null) {
       return _buildErrorState(context);
     }
 
@@ -340,7 +346,7 @@ class _ProfilePhotoCameraCapturePageState
                   ? null
                   : () => Navigator.of(context).pop(),
               icon: const Icon(Icons.close_rounded),
-              label: const Text('Cancel'),
+              label: Text(context.l10n.tr(AppLocaleKeys.profilePhotoCancel)),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.black.withValues(alpha: 0.18),
@@ -351,7 +357,9 @@ class _ProfilePhotoCameraCapturePageState
               IconButton.filledTonal(
                 onPressed: _isCapturing ? null : _switchCamera,
                 icon: const Icon(Icons.cameraswitch_rounded),
-                tooltip: 'Switch camera',
+                tooltip: context.l10n.tr(
+                  AppLocaleKeys.profilePhotoSwitchCamera,
+                ),
               ),
           ],
         ),

@@ -149,6 +149,7 @@ abstract final class AppLocaleKeys {
   static const String commonHidePassword = 'common.hidePassword';
   static const String commonGenericApiErrorMessage =
       'common.genericApiErrorMessage';
+  static const String commonValidationError = 'common.validationError';
   static const String profilePhotoSelectPhotoTitle =
       'profilePhoto.selectPhotoTitle';
   static const String profilePhotoCropTitle = 'profilePhoto.cropTitle';
@@ -157,6 +158,18 @@ abstract final class AppLocaleKeys {
       'profilePhoto.selectFromGallery';
   static const String profilePhotoDeletePhoto = 'profilePhoto.deletePhoto';
   static const String profilePhotoCancel = 'profilePhoto.cancel';
+  static const String profilePhotoCameraUnavailable =
+      'profilePhoto.cameraUnavailable';
+  static const String profilePhotoNoCameraAvailable =
+      'profilePhoto.noCameraAvailable';
+  static const String profilePhotoCameraOpenFailed =
+      'profilePhoto.cameraOpenFailed';
+  static const String profilePhotoCameraPreviewFailed =
+      'profilePhoto.cameraPreviewFailed';
+  static const String profilePhotoCameraCaptureFailed =
+      'profilePhoto.cameraCaptureFailed';
+  static const String profilePhotoTryAgain = 'profilePhoto.tryAgain';
+  static const String profilePhotoSwitchCamera = 'profilePhoto.switchCamera';
   static const String profilePhotoCameraPermissionDeniedTitle =
       'profilePhoto.cameraPermissionDeniedTitle';
   static const String profilePhotoCameraPermissionDeniedMessage =

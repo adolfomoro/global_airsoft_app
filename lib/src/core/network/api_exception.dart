@@ -6,6 +6,34 @@ abstract interface class ApiExceptionSource {
   ApiException get apiException;
 }
 
+final class ApiExceptionLocalizedMessages {
+  static const String _defaultGenericMessage =
+      ApiException.defaultBadResponseFallbackMessage;
+
+  const ApiExceptionLocalizedMessages({
+    this.badResponseFallbackMessage =
+        ApiException.defaultBadResponseFallbackMessage,
+    this.connectionTimeoutMessage = _defaultGenericMessage,
+    this.sendTimeoutMessage = _defaultGenericMessage,
+    this.receiveTimeoutMessage = _defaultGenericMessage,
+    this.badCertificateMessage = _defaultGenericMessage,
+    this.requestCancelledMessage = _defaultGenericMessage,
+    this.connectionErrorMessage = _defaultGenericMessage,
+    this.unknownErrorMessage = _defaultGenericMessage,
+    this.validationErrorMessage = 'Validation error',
+  });
+
+  final String badResponseFallbackMessage;
+  final String connectionTimeoutMessage;
+  final String sendTimeoutMessage;
+  final String receiveTimeoutMessage;
+  final String badCertificateMessage;
+  final String requestCancelledMessage;
+  final String connectionErrorMessage;
+  final String unknownErrorMessage;
+  final String validationErrorMessage;
+}
+
 class ApiException implements Exception {
   static const String defaultBadResponseFallbackMessage =
       'An error occurred. Please try again later.';
@@ -52,7 +80,8 @@ class ApiException implements Exception {
 
   factory ApiException.fromDioException(
     DioException exception, {
-    String badResponseFallbackMessage = defaultBadResponseFallbackMessage,
+    ApiExceptionLocalizedMessages localizedMessages =
+        const ApiExceptionLocalizedMessages(),
   }) {
     final int? statusCode = exception.response?.statusCode;
     final Object? responseData = exception.response?.data;
@@ -60,8 +89,8 @@ class ApiException implements Exception {
       responseData,
     );
     final String normalizedFallbackMessage =
-        badResponseFallbackMessage.trim().isNotEmpty
-        ? badResponseFallbackMessage.trim()
+        localizedMessages.badResponseFallbackMessage.trim().isNotEmpty
+        ? localizedMessages.badResponseFallbackMessage.trim()
         : defaultBadResponseFallbackMessage;
     final bool hasBackendMessage = extracted.message != null;
     final bool isFallbackMessage = switch (exception.type) {
@@ -77,15 +106,18 @@ class ApiException implements Exception {
 
     final String message = switch (exception.type) {
       DioExceptionType.connectionTimeout =>
-        'Connection timeout while calling API.',
-      DioExceptionType.sendTimeout => 'Send timeout while calling API.',
-      DioExceptionType.receiveTimeout => 'Receive timeout while calling API.',
-      DioExceptionType.badCertificate => 'Bad certificate from API endpoint.',
+        localizedMessages.connectionTimeoutMessage,
+      DioExceptionType.sendTimeout => localizedMessages.sendTimeoutMessage,
+      DioExceptionType.receiveTimeout =>
+        localizedMessages.receiveTimeoutMessage,
+      DioExceptionType.badCertificate =>
+        localizedMessages.badCertificateMessage,
       DioExceptionType.badResponse =>
         extracted.message ?? normalizedFallbackMessage,
-      DioExceptionType.cancel => 'Request was cancelled.',
-      DioExceptionType.connectionError => 'Connection error while calling API.',
-      DioExceptionType.unknown => 'Unknown API error.',
+      DioExceptionType.cancel => localizedMessages.requestCancelledMessage,
+      DioExceptionType.connectionError =>
+        localizedMessages.connectionErrorMessage,
+      DioExceptionType.unknown => localizedMessages.unknownErrorMessage,
     };
 
     final String? details = exception.type == DioExceptionType.badResponse

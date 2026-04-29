@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/api_exception_interceptor.dart';
@@ -27,7 +29,9 @@ final class AppDioService {
     Future<bool> Function()? ensureDeviceSynced,
     required String Function() getDeviceLanguage,
     required Future<void> Function(String? contentLanguage) onContentLanguage,
-    required Future<String> Function() badResponseFallbackMessageResolver,
+    required Future<ApiExceptionLocalizedMessages> Function()
+    apiExceptionMessagesResolver,
+    required Future<String> Function() deviceSyncRequiredMessageResolver,
     Set<String> deviceSyncSkipPaths = const <String>{},
     bool enableAuthSecurityInterceptor = false,
   }) {
@@ -56,6 +60,7 @@ final class AppDioService {
         DeviceSyncInterceptor(
           getDeviceId: getDeviceId,
           ensureDeviceSynced: ensureDeviceSynced,
+          deviceSyncRequiredMessageResolver: deviceSyncRequiredMessageResolver,
           skipPaths: deviceSyncSkipPaths,
         ),
       );
@@ -67,7 +72,7 @@ final class AppDioService {
 
     dio.interceptors.add(
       ApiExceptionInterceptor(
-        badResponseFallbackMessageResolver: badResponseFallbackMessageResolver,
+        localizedMessagesResolver: apiExceptionMessagesResolver,
       ),
     );
 
@@ -228,4 +233,28 @@ final class AppDioService {
       rethrow;
     }
   }
+}
+
+Future<ApiExceptionLocalizedMessages> buildLocalizedApiExceptionMessages(
+  AppLocalizationService localizationService,
+) async {
+  final List<String> localizedValues =
+      await Future.wait<String>(<Future<String>>[
+        localizationService.tr(AppLocaleKeys.commonGenericApiErrorMessage),
+        localizationService.tr(AppLocaleKeys.commonValidationError),
+      ]);
+
+  final String genericMessage = localizedValues[0];
+
+  return ApiExceptionLocalizedMessages(
+    badResponseFallbackMessage: genericMessage,
+    connectionTimeoutMessage: genericMessage,
+    sendTimeoutMessage: genericMessage,
+    receiveTimeoutMessage: genericMessage,
+    badCertificateMessage: genericMessage,
+    requestCancelledMessage: genericMessage,
+    connectionErrorMessage: genericMessage,
+    unknownErrorMessage: genericMessage,
+    validationErrorMessage: localizedValues[1],
+  );
 }
