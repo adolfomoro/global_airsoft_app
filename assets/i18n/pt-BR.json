@@ -82,7 +82,7 @@
     "common.showPassword": "Mostrar senha",
     "common.hidePassword": "Ocultar senha",
     "common.genericApiErrorMessage": "Ocorreu um erro. Tente novamente mais tarde.",
-    "common.validationError": "Erro de validacao",
+    "common.validationError": "Revise as informacoes preenchidas.",
     "validation.required": "Este campo é obrigatório.",
     "validation.minLength": "Use pelo menos {min} caracteres.",
     "validation.minLength.one": "Use pelo menos {min} caractere.",
