@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
+import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
@@ -22,12 +23,12 @@ class PasswordRecoverySuccessPage extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppDimensions.spacing2xl),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                const SizedBox(height: 24),
+                const SizedBox(height: AppDimensions.spacing2xl),
                 Container(
                   width: 120,
                   height: 120,
@@ -37,7 +38,7 @@ class PasswordRecoverySuccessPage extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                         color: colorScheme.primary.withValues(alpha: 0.10),
-                        blurRadius: 24,
+                        blurRadius: AppDimensions.spacing2xl,
                         offset: const Offset(0, 8),
                       ),
                     ],
@@ -60,7 +61,7 @@ class PasswordRecoverySuccessPage extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppDimensions.spacingLg),
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final message = context.l10n.tr(
@@ -108,7 +109,7 @@ class PasswordRecoverySuccessPage extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppDimensions.spacing2xl),
               ],
             ),
           ),

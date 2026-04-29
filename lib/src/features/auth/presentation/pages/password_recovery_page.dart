@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
+import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
@@ -140,11 +141,11 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
           child: Form(
             key: _formKey,
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppDimensions.spacing2xl),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppDimensions.spacingXl),
                   AuthPageHeader(
                     title: context.l10n.tr(
                       AppLocaleKeys.authPasswordRecoveryHeading,
@@ -153,7 +154,7 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
                       AppLocaleKeys.authPasswordRecoverySubtitle,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppDimensions.spacing2xl),
                   AppTextField(
                     labelText: context.l10n.tr(AppLocaleKeys.authEmailLabel),
                     controller: _emailController,
@@ -167,7 +168,7 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
                       context.resolveValidationMessage,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppDimensions.spacing2xl),
                   AppButton(
                     label: context.l10n.tr(
                       AppLocaleKeys.authPasswordRecoverySendAction,

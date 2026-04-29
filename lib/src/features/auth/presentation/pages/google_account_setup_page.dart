@@ -24,6 +24,7 @@ import 'package:global_airsoft_app/src/features/auth/data/exceptions/authenticat
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/external_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/auth_page_header.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
 class _GoogleSetupProfilePhotoNotifier extends Notifier<ProfilePhoto> {
@@ -309,18 +310,17 @@ class _GoogleAccountSetupPageState
               const SizedBox(height: AppDimensions.spacingXl),
               const Center(child: _GoogleConnectedPill()),
               const SizedBox(height: AppDimensions.spacingLg),
-              Text(
-                context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupTitle),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(
+              AuthPageHeader(
+                title: context.l10n.tr(
+                  AppLocaleKeys.authGoogleAccountSetupTitle,
+                ),
+                subtitle: context.l10n.tr(
+                  AppLocaleKeys.authGoogleAccountSetupSubtitle,
+                ),
+                titleStyle: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
-              ),
-              const SizedBox(height: AppDimensions.spacingXs),
-              Text(
-                context.l10n.tr(AppLocaleKeys.authGoogleAccountSetupSubtitle),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
+                subtitleStyle: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   height: 1.35,
                 ),
