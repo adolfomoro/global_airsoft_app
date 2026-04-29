@@ -17,6 +17,7 @@ import 'package:global_airsoft_app/src/core/localization/app_validation_localiza
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_page_header.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/google_sign_in_service.dart';
@@ -24,7 +25,6 @@ import 'package:global_airsoft_app/src/features/auth/data/exceptions/authenticat
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/google_sign_in_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/widgets/auth_page_header.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -274,7 +274,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           const SizedBox(height: 40),
-                          AuthPageHeader(
+                          AppPageHeader(
                             title: context.l10n.tr(AppLocaleKeys.appTitle),
                             subtitle: context.l10n.tr(
                               AppLocaleKeys.authLoginSubtitle,

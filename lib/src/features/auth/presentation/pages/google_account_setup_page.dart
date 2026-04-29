@@ -15,6 +15,7 @@ import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
 import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_page_header.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_profile_image_zoom_viewer.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_profile_picture_editor.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
@@ -24,7 +25,6 @@ import 'package:global_airsoft_app/src/features/auth/data/exceptions/authenticat
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/external_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/widgets/auth_page_header.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
 class _GoogleSetupProfilePhotoNotifier extends Notifier<ProfilePhoto> {
@@ -310,7 +310,7 @@ class _GoogleAccountSetupPageState
               const SizedBox(height: AppDimensions.spacingXl),
               const Center(child: _GoogleConnectedPill()),
               const SizedBox(height: AppDimensions.spacingLg),
-              AuthPageHeader(
+              AppPageHeader(
                 title: context.l10n.tr(
                   AppLocaleKeys.authGoogleAccountSetupTitle,
                 ),

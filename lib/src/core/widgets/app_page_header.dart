@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AuthPageHeader extends StatelessWidget {
-  const AuthPageHeader({
+class AppPageHeader extends StatelessWidget {
+  const AppPageHeader({
     required this.title,
     required this.subtitle,
     super.key,

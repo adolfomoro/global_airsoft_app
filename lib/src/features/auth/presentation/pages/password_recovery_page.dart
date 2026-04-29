@@ -11,13 +11,13 @@ import 'package:global_airsoft_app/src/core/localization/app_validation_localiza
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_page_header.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/widgets/auth_page_header.dart';
 
 class PasswordRecoveryPage extends ConsumerStatefulWidget {
   const PasswordRecoveryPage({super.key});
@@ -146,7 +146,7 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   const SizedBox(height: AppDimensions.spacingXl),
-                  AuthPageHeader(
+                  AppPageHeader(
                     title: context.l10n.tr(
                       AppLocaleKeys.authPasswordRecoveryHeading,
                     ),
