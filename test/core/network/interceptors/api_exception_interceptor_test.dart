@@ -1,7 +1,6 @@
 import 'dart:io';
-import 'dart:ui';
 import 'dart:typed_data';
-
+import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
@@ -53,7 +52,8 @@ void main() {
   });
 
   test('logs correlation id for unexpected backend failures', () async {
-    final List<Map<String, Object?>> loggedAttributes = <Map<String, Object?>>[];
+    final List<Map<String, Object?>> loggedAttributes =
+        <Map<String, Object?>>[];
     final List<String> loggedMessages = <String>[];
 
     AppLogger.instance.setRemoteErrorReporter((
@@ -98,14 +98,27 @@ void main() {
       service.get<dynamic>('/failure'),
       throwsA(
         isA<ServerApiException>()
-            .having((ServerApiException error) => error.correlationId, 'correlationId', 'corr-log-123')
-            .having((ServerApiException error) => error.isUnexpectedFailure, 'isUnexpectedFailure', isTrue),
+            .having(
+              (ServerApiException error) => error.correlationId,
+              'correlationId',
+              'corr-log-123',
+            )
+            .having(
+              (ServerApiException error) => error.isUnexpectedFailure,
+              'isUnexpectedFailure',
+              isTrue,
+            ),
       ),
     );
 
-    expect(loggedMessages, <String>['Unexpected API failure returned by backend.']);
+    expect(loggedMessages, <String>[
+      'Unexpected API failure returned by backend.',
+    ]);
     expect(loggedAttributes.single['correlation_id'], 'corr-log-123');
-    expect(loggedAttributes.single['http_status_code'], HttpStatus.internalServerError);
+    expect(
+      loggedAttributes.single['http_status_code'],
+      HttpStatus.internalServerError,
+    );
     expect(loggedAttributes.single['http_path'], '/failure');
     expect(loggedAttributes.single['api_exception_type'], 'ServerApiException');
   });
