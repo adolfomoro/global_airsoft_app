@@ -11,7 +11,6 @@ import 'package:global_airsoft_app/src/app/widgets/app_gradient_background.dart'
 import 'package:global_airsoft_app/src/app/widgets/app_login_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
-import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/localization/app_validation_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
@@ -25,6 +24,8 @@ import 'package:global_airsoft_app/src/features/auth/data/exceptions/authenticat
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/google_sign_in_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/user_login_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_form_submission_mixin.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_presentation_extensions.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -33,7 +34,8 @@ class LoginPage extends ConsumerStatefulWidget {
   ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage>
+    with AuthFormSubmissionMixin<LoginPage> {
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
   static final ValidationRuleSet _loginValidationRules = ValidationRuleSet(
@@ -48,7 +50,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   String? _loginError;
   String? _passwordError;
-  bool _hasSubmitted = false;
   bool _isLoginLoading = false;
   bool _isGoogleLoading = false;
 
@@ -89,13 +90,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     FocusScope.of(context).unfocus();
 
     setState(() {
-      _hasSubmitted = true;
       _loginError = null;
       _passwordError = null;
     });
 
-    final FormState? formState = _formKey.currentState;
-    if (!(formState?.validate() ?? false)) {
+    if (!validateSubmittedForm(_formKey)) {
       return;
     }
 
@@ -109,9 +108,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         _loginController.text.trim(),
         _passwordController.text,
       );
-      await ref
-          .read(appLocaleControllerProvider.notifier)
-          .forceApplyServerLocaleIfPending();
+      await ref.applyPendingAuthLocale();
 
       if (mounted) {
         ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
@@ -193,9 +190,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
 
       if (response.userExists) {
-        await ref
-            .read(appLocaleControllerProvider.notifier)
-            .forceApplyServerLocaleIfPending();
+        await ref.applyPendingAuthLocale();
         ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
         return;
       }
@@ -222,10 +217,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           targetFields: const <String>{},
         );
 
-        final String? globalError = mappedErrors.globalErrors
-            .where((String e) => e.trim().isNotEmpty)
-            .cast<String?>()
-            .firstWhere((String? e) => e != null, orElse: () => null);
+        final String? globalError = mappedErrors.firstMeaningfulGlobalError;
 
         final String fallbackMessage = context.l10n.tr(
           AppLocaleKeys.authGoogleSignInFailed,
@@ -269,9 +261,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
-              autovalidateMode: _hasSubmitted
-                  ? AutovalidateMode.onUserInteraction
-                  : AutovalidateMode.disabled,
+              autovalidateMode: formAutovalidateMode,
               child: AutofillGroup(
                 child: AppFormPadding(
                   child: Column(

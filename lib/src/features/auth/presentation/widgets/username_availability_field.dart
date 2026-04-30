@@ -22,6 +22,19 @@ enum UsernameAvailabilityStatus {
   failed,
 }
 
+extension UsernameAvailabilityStatusX on UsernameAvailabilityStatus {
+  bool get blocksSubmission => switch (this) {
+    UsernameAvailabilityStatus.waiting ||
+    UsernameAvailabilityStatus.checking ||
+    UsernameAvailabilityStatus.unavailable => true,
+    UsernameAvailabilityStatus.idle ||
+    UsernameAvailabilityStatus.available ||
+    UsernameAvailabilityStatus.failed => false,
+  };
+
+  bool get showsLoadingIndicator => this == UsernameAvailabilityStatus.checking;
+}
+
 final class UsernameAvailabilityField extends ConsumerStatefulWidget {
   const UsernameAvailabilityField({
     required this.controller,
@@ -205,7 +218,7 @@ class _UsernameAvailabilityFieldState
   @override
   Widget build(BuildContext context) {
     final bool hasExternalError = widget.errorText?.trim().isNotEmpty == true;
-    final bool isChecking = _status == UsernameAvailabilityStatus.checking;
+    final bool isChecking = _status.showsLoadingIndicator;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

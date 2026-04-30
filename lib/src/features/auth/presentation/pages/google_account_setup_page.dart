@@ -10,7 +10,6 @@ import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_button.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_form_with_bottom_actions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
-import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
@@ -26,6 +25,8 @@ import 'package:global_airsoft_app/src/features/auth/data/exceptions/authenticat
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/external_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/google_sign_up_confirm_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_form_submission_mixin.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_presentation_extensions.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
 class _GoogleSetupProfilePhotoNotifier extends Notifier<ProfilePhoto> {
@@ -71,7 +72,8 @@ class GoogleAccountSetupPage extends ConsumerStatefulWidget {
 }
 
 class _GoogleAccountSetupPageState
-    extends ConsumerState<GoogleAccountSetupPage> {
+    extends ConsumerState<GoogleAccountSetupPage>
+    with AuthFormSubmissionMixin<GoogleAccountSetupPage> {
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
 
@@ -82,7 +84,6 @@ class _GoogleAccountSetupPageState
       );
 
   bool _isLoading = false;
-  bool _hasSubmitted = false;
   String? _usernameError;
   UsernameAvailabilityStatus _usernameAvailabilityStatus =
       UsernameAvailabilityStatus.idle;
@@ -175,12 +176,10 @@ class _GoogleAccountSetupPageState
     FocusScope.of(context).unfocus();
 
     setState(() {
-      _hasSubmitted = true;
       _usernameError = null;
     });
 
-    final FormState? formState = _formKey.currentState;
-    if (!(formState?.validate() ?? false)) {
+    if (!validateSubmittedForm(_formKey)) {
       return;
     }
 
@@ -204,9 +203,7 @@ class _GoogleAccountSetupPageState
 
       final AuthService authService = ref.read(authServiceProvider);
       await authService.signUpWithGoogle(input);
-      await ref
-          .read(appLocaleControllerProvider.notifier)
-          .forceApplyServerLocaleIfPending();
+      await ref.applyPendingAuthLocale();
 
       if (!mounted) {
         return;
@@ -230,10 +227,7 @@ class _GoogleAccountSetupPageState
             .fieldErrors[ExternalSignUpConfirmInputDto.usernameField];
       });
 
-      final String? globalError = mappedErrors.globalErrors
-          .where((String e) => e.trim().isNotEmpty)
-          .cast<String?>()
-          .firstWhere((String? e) => e != null, orElse: () => null);
+      final String? globalError = mappedErrors.firstMeaningfulGlobalError;
 
       final String? message = error.message ?? globalError;
       if (message != null && message.trim().isNotEmpty) {
@@ -290,10 +284,7 @@ class _GoogleAccountSetupPageState
       _googleSetupProfilePhotoProvider,
     );
     final bool canSubmit =
-        !_isLoading &&
-        _usernameAvailabilityStatus != UsernameAvailabilityStatus.waiting &&
-        _usernameAvailabilityStatus != UsernameAvailabilityStatus.checking &&
-        _usernameAvailabilityStatus != UsernameAvailabilityStatus.unavailable;
+        !_isLoading && !_usernameAvailabilityStatus.blocksSubmission;
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
@@ -302,9 +293,7 @@ class _GoogleAccountSetupPageState
       body: AppFormWithBottomActions(
         body: Form(
           key: _formKey,
-          autovalidateMode: _hasSubmitted
-              ? AutovalidateMode.onUserInteraction
-              : AutovalidateMode.disabled,
+          autovalidateMode: formAutovalidateMode,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[

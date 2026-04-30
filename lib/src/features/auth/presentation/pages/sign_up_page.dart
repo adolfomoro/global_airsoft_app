@@ -9,7 +9,6 @@ import 'package:global_airsoft_app/src/app/widgets/app_password_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
 import 'package:global_airsoft_app/src/app/widgets/focus_aware_scroll_coordinator.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
-import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/localization/app_validation_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
@@ -24,6 +23,8 @@ import 'package:global_airsoft_app/src/features/auth/domain/validation/email_val
 import 'package:global_airsoft_app/src/features/auth/domain/validation/full_name_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/password_validation_policy.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_form_submission_mixin.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_presentation_extensions.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_requirements_hint.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
@@ -252,7 +253,7 @@ class SignUpPage extends ConsumerStatefulWidget {
 }
 
 class _SignUpPageState extends ConsumerState<SignUpPage>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, AuthFormSubmissionMixin<SignUpPage> {
   static final ValidationRuleSet _fullNameValidationRules =
       FullNameValidation.rules;
   static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
@@ -265,7 +266,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   late final FocusAwareScrollCoordinator _passwordHintScrollCoordinator;
   late final FocusNode _passwordFocus;
   late final ScrollController _scrollController;
-  bool _hasSubmitted = false;
 
   @override
   void initState() {
@@ -386,13 +386,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
 
   Future<void> _submitSignUp() async {
     FocusScope.of(context).unfocus();
-    setState(() {
-      _hasSubmitted = true;
-    });
     ref.read(signUpFormStateProvider.notifier).clearErrors();
 
-    final FormState? formState = _formKey.currentState;
-    if (!(formState?.validate() ?? false)) {
+    if (!validateSubmittedForm(_formKey)) {
       return;
     }
 
@@ -412,9 +408,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
         password: passwordController.text,
       );
 
-      await ref
-          .read(appLocaleControllerProvider.notifier)
-          .forceApplyServerLocaleIfPending();
+      await ref.applyPendingAuthLocale();
 
       if (!mounted) {
         return;
@@ -463,12 +457,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     final scrollController = ref.watch(signUpScrollControllerProvider);
     final bool canSubmit =
         !signUpState.isLoading &&
-        signUpState.usernameAvailabilityStatus !=
-            UsernameAvailabilityStatus.waiting &&
-        signUpState.usernameAvailabilityStatus !=
-            UsernameAvailabilityStatus.checking &&
-        signUpState.usernameAvailabilityStatus !=
-            UsernameAvailabilityStatus.unavailable;
+        !signUpState.usernameAvailabilityStatus.blocksSubmission;
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
@@ -476,9 +465,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
       ),
       body: Form(
         key: _formKey,
-        autovalidateMode: _hasSubmitted
-            ? AutovalidateMode.onUserInteraction
-            : AutovalidateMode.disabled,
+        autovalidateMode: formAutovalidateMode,
         child: AppFormWithBottomActions(
           scrollController: scrollController,
           body: Column(

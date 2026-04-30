@@ -20,6 +20,7 @@ import 'package:global_airsoft_app/src/features/auth/data/exceptions/authenticat
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_form_submission_mixin.dart';
 
 class PasswordRecoveryPage extends ConsumerStatefulWidget {
   const PasswordRecoveryPage({super.key});
@@ -29,7 +30,8 @@ class PasswordRecoveryPage extends ConsumerStatefulWidget {
       _PasswordRecoveryPageState();
 }
 
-class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
+class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage>
+    with AuthFormSubmissionMixin<PasswordRecoveryPage> {
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
   static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
@@ -37,7 +39,6 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   String? _emailError;
-  bool _hasSubmitted = false;
   bool _isLoading = false;
 
   @override
@@ -60,12 +61,10 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
     FocusScope.of(context).unfocus();
 
     setState(() {
-      _hasSubmitted = true;
       _emailError = null;
     });
 
-    final FormState? formState = _formKey.currentState;
-    if (!(formState?.validate() ?? false)) {
+    if (!validateSubmittedForm(_formKey)) {
       return;
     }
 
@@ -144,9 +143,7 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
-            autovalidateMode: _hasSubmitted
-                ? AutovalidateMode.onUserInteraction
-                : AutovalidateMode.disabled,
+            autovalidateMode: formAutovalidateMode,
             child: Padding(
               padding: const EdgeInsets.all(AppDimensions.spacing2xl),
               child: Column(
