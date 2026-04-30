@@ -72,6 +72,7 @@ final class AppDioService {
 
     dio.interceptors.add(
       ApiExceptionInterceptor(
+        logger: logger,
         localizedMessagesResolver: apiExceptionMessagesResolver,
       ),
     );

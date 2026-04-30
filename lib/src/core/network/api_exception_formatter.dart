@@ -26,6 +26,9 @@ final class ApiExceptionFormatter {
             payload: parsed.error,
             statusCode: response?.statusCode,
             cause: err,
+            correlationId: ApiException.extractCorrelationIdFromHeaders(
+              response?.headers,
+            ),
             badResponseFallbackMessage:
                 localizedMessages.badResponseFallbackMessage,
           );

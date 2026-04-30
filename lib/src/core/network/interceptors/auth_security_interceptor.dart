@@ -506,7 +506,7 @@ final class AuthSecurityInterceptor extends Interceptor {
   }) async {
     final String message = handledException.message.trim();
     if (message.isNotEmpty) {
-      await _coordinator.showMessage(message);
+      await _coordinator.showMessage(message, source: handledException);
     }
 
     handler.reject(

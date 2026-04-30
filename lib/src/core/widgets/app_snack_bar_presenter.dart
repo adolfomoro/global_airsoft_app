@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
-import 'package:global_airsoft_app/src/core/network/api_exception.dart';
+import 'package:global_airsoft_app/src/core/network/api_exception_diagnostics.dart';
 
 enum AppSnackBarVariant { info, success, warning, error }
 
@@ -74,30 +74,18 @@ final class AppSnackBarPresenter {
     bool replaceCurrent = true,
     Object? source,
   }) {
-    final ApiException? apiException = _extractApiException(source);
+    final apiException = ApiExceptionDiagnostics.extractApiException(source);
     if (apiException?.suppressesDuplicatePresentation ?? false) {
       return false;
     }
 
     return _show(
       context,
-      message,
+      ApiExceptionDiagnostics.formatMessageForDisplay(message, source: source),
       variant: AppSnackBarVariant.error,
       duration: duration,
       replaceCurrent: replaceCurrent,
     );
-  }
-
-  static ApiException? _extractApiException(Object? source) {
-    if (source is ApiException) {
-      return source;
-    }
-
-    if (source is ApiExceptionSource) {
-      return source.apiException;
-    }
-
-    return null;
   }
 
   static bool _show(

@@ -96,6 +96,7 @@ final class AppTelemetry {
     String message, {
     Object? error,
     StackTrace? stackTrace,
+    Map<String, Object?> attributes = const <String, Object?>{},
   }) {
     if (!_enabled) {
       return;
@@ -106,6 +107,7 @@ final class AppTelemetry {
       errorMessage: error?.toString(),
       errorKind: error?.runtimeType.toString(),
       errorStackTrace: stackTrace,
+      attributes: attributes,
     );
   }
 

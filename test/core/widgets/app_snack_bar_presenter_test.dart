@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
+import 'package:global_airsoft_app/src/core/network/api_exception_diagnostics.dart';
 import 'package:global_airsoft_app/src/core/network/auth_security_handled_exception.dart';
 import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
@@ -119,5 +120,46 @@ void main() {
     expect(shown, isTrue);
     expect(find.text('Profile updated successfully.'), findsOneWidget);
     expect(find.byType(SnackBar), findsNothing);
+  });
+
+  testWidgets('appends correlation id for unexpected api failures', (
+    WidgetTester tester,
+  ) async {
+    late BuildContext capturedContext;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+
+    final bool shown = AppSnackBarPresenter.showError(
+      capturedContext,
+      'Something went wrong on the server.',
+      source: const ServerApiException(
+        message: 'Something went wrong on the server.',
+        correlationId: 'corr-123',
+        isUnexpectedFailure: true,
+      ),
+    );
+
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    expect(shown, isTrue);
+    expect(
+      find.text(
+        'Something went wrong on the server.\n'
+        '${ApiExceptionDiagnostics.correlationIdLabel}: corr-123',
+      ),
+      findsOneWidget,
+    );
   });
 }

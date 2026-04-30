@@ -172,7 +172,7 @@ void main() {
           return refreshCompleter.future;
         },
         translateMessage: (String key) async => key,
-        showMessage: (String message) async {
+        showMessage: (String message, {Object? source}) async {
           messages.add(message);
         },
       );
@@ -296,9 +296,9 @@ void main() {
           _ => key,
         };
       },
-      showMessage: (String message) async {
-        messages.add(message);
-      },
+        showMessage: (String message, {Object? source}) async {
+          messages.add(message);
+        },
     );
 
     final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
@@ -373,9 +373,9 @@ void main() {
           _ => key,
         };
       },
-      showMessage: (String message) async {
-        messages.add(message);
-      },
+        showMessage: (String message, {Object? source}) async {
+          messages.add(message);
+        },
     );
 
     final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
@@ -438,9 +438,9 @@ void main() {
           _ => key,
         };
       },
-      showMessage: (String message) async {
-        messages.add(message);
-      },
+        showMessage: (String message, {Object? source}) async {
+          messages.add(message);
+        },
     );
 
     final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
@@ -522,4 +522,69 @@ void main() {
       );
     },
   );
+
+  test('preserves correlation id when auth security wraps server failures', () async {
+    final List<Object?> sources = <Object?>[];
+    AuthTokens currentTokens = const AuthTokens(
+      jwtToken: 'old-access-token',
+      refreshToken: 'old-refresh-token',
+    );
+
+    AuthSecurityCoordinator.instance.configure(
+      getTokens: () async => currentTokens,
+      saveTokens: (AuthTokens tokens) async {
+        currentTokens = tokens;
+      },
+      clearSession: () async {},
+      refreshTokens: (String refreshToken) {
+        return Future<AuthTokens>.value(
+          const AuthTokens(jwtToken: 'unexpected', refreshToken: 'unexpected'),
+        );
+      },
+      translateMessage: (String key) async => 'Server unavailable.',
+      showMessage: (String message, {Object? source}) async {
+        sources.add(source);
+      },
+    );
+
+    final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
+      respond: (RequestOptions options) async {
+        return ResponseBody.fromString(
+          jsonEncode(
+            <String, Object?>{
+              'error': <String, Object?>{'code': 'GlobalAirsoft:ServerError'},
+            },
+          ),
+          HttpStatus.internalServerError,
+          headers: <String, List<String>>{
+            Headers.contentTypeHeader: <String>[Headers.jsonContentType],
+            '_abperrorformat': <String>['true'],
+            'X-Correlation-Id': <String>['corr-auth-500'],
+          },
+        );
+      },
+    );
+
+    final AppDioService service = await _buildService(adapter);
+
+    await expectLater(
+      service.get<dynamic>('/protected'),
+      throwsA(
+        isA<AuthSecurityHandledException>().having(
+          (AuthSecurityHandledException error) => error.correlationId,
+          'correlationId',
+          'corr-auth-500',
+        ),
+      ),
+    );
+
+    expect(
+      sources.single,
+      isA<AuthSecurityHandledException>().having(
+        (AuthSecurityHandledException error) => error.correlationId,
+        'correlationId',
+        'corr-auth-500',
+      ),
+    );
+  });
 }

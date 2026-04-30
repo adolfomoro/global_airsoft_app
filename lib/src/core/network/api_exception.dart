@@ -37,6 +37,7 @@ final class ApiExceptionLocalizedMessages {
 class ApiException implements Exception {
   static const String defaultBadResponseFallbackMessage =
       'An error occurred. Please try again later.';
+  static const String correlationIdHeaderName = 'x-correlation-id';
 
   const ApiException({
     required this.message,
@@ -47,6 +48,8 @@ class ApiException implements Exception {
     this.validationErrors = const <AbpValidationError>[],
     this.cause,
     this.isFallbackMessage = false,
+    this.correlationId,
+    this.isUnexpectedFailure = false,
   });
 
   final String message;
@@ -57,6 +60,8 @@ class ApiException implements Exception {
   final List<AbpValidationError> validationErrors;
   final Object? cause;
   final bool isFallbackMessage;
+  final String? correlationId;
+  final bool isUnexpectedFailure;
 
   MessageResolutionPolicy get messageResolutionPolicy =>
       const MessageResolutionPolicy();
@@ -123,6 +128,9 @@ class ApiException implements Exception {
     final String? details = exception.type == DioExceptionType.badResponse
         ? extracted.details
         : null;
+    final String? correlationId = extractCorrelationIdFromHeaders(
+      exception.response?.headers,
+    );
 
     return ApiException(
       message: message,
@@ -131,7 +139,29 @@ class ApiException implements Exception {
       data: responseData,
       cause: exception,
       isFallbackMessage: isFallbackMessage,
+      correlationId: correlationId,
     );
+  }
+
+  static String? extractCorrelationIdFromHeaders(Headers? headers) {
+    if (headers == null) {
+      return null;
+    }
+
+    for (final MapEntry<String, List<String>> entry in headers.map.entries) {
+      if (entry.key.trim().toLowerCase() != correlationIdHeaderName) {
+        continue;
+      }
+
+      for (final String value in entry.value) {
+        final String normalized = value.trim();
+        if (normalized.isNotEmpty) {
+          return normalized;
+        }
+      }
+    }
+
+    return null;
   }
 
   @override
@@ -178,6 +208,8 @@ class ValidationApiException extends ApiException {
     required super.validationErrors,
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   @override
@@ -204,6 +236,8 @@ class ValidationApiException extends ApiException {
       validationErrors: error.validationErrors,
       cause: error.cause,
       isFallbackMessage: error.isFallbackMessage,
+      correlationId: error.correlationId,
+      isUnexpectedFailure: error.isUnexpectedFailure,
     );
   }
 }
@@ -218,6 +252,8 @@ class UnauthorizedApiException extends ApiException {
     super.validationErrors,
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   factory UnauthorizedApiException.fromApiException(ApiException error) {
@@ -230,6 +266,8 @@ class UnauthorizedApiException extends ApiException {
       validationErrors: error.validationErrors,
       cause: error.cause,
       isFallbackMessage: error.isFallbackMessage,
+      correlationId: error.correlationId,
+      isUnexpectedFailure: error.isUnexpectedFailure,
     );
   }
 }
@@ -244,6 +282,8 @@ class ForbiddenApiException extends ApiException {
     super.validationErrors,
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   factory ForbiddenApiException.fromApiException(ApiException error) {
@@ -256,6 +296,8 @@ class ForbiddenApiException extends ApiException {
       validationErrors: error.validationErrors,
       cause: error.cause,
       isFallbackMessage: error.isFallbackMessage,
+      correlationId: error.correlationId,
+      isUnexpectedFailure: error.isUnexpectedFailure,
     );
   }
 }
@@ -270,6 +312,8 @@ class NotFoundApiException extends ApiException {
     super.validationErrors,
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   factory NotFoundApiException.fromApiException(ApiException error) {
@@ -282,6 +326,8 @@ class NotFoundApiException extends ApiException {
       validationErrors: error.validationErrors,
       cause: error.cause,
       isFallbackMessage: error.isFallbackMessage,
+      correlationId: error.correlationId,
+      isUnexpectedFailure: error.isUnexpectedFailure,
     );
   }
 }
@@ -296,6 +342,8 @@ class UserFriendlyApiException extends ApiException {
     super.validationErrors,
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   factory UserFriendlyApiException.fromApiException(ApiException error) {
@@ -308,6 +356,8 @@ class UserFriendlyApiException extends ApiException {
       validationErrors: error.validationErrors,
       cause: error.cause,
       isFallbackMessage: error.isFallbackMessage,
+      correlationId: error.correlationId,
+      isUnexpectedFailure: error.isUnexpectedFailure,
     );
   }
 }
@@ -322,6 +372,8 @@ class NotImplementedApiException extends ApiException {
     super.validationErrors,
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   factory NotImplementedApiException.fromApiException(ApiException error) {
@@ -334,6 +386,8 @@ class NotImplementedApiException extends ApiException {
       validationErrors: error.validationErrors,
       cause: error.cause,
       isFallbackMessage: error.isFallbackMessage,
+      correlationId: error.correlationId,
+      isUnexpectedFailure: true,
     );
   }
 }
@@ -348,6 +402,8 @@ class ServerApiException extends ApiException {
     super.validationErrors,
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   factory ServerApiException.fromApiException(ApiException error) {
@@ -360,6 +416,8 @@ class ServerApiException extends ApiException {
       validationErrors: error.validationErrors,
       cause: error.cause,
       isFallbackMessage: error.isFallbackMessage,
+      correlationId: error.correlationId,
+      isUnexpectedFailure: true,
     );
   }
 }
@@ -374,6 +432,8 @@ class UnknownApiException extends ApiException {
     super.validationErrors,
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   factory UnknownApiException.fromApiException(ApiException error) {
@@ -386,6 +446,8 @@ class UnknownApiException extends ApiException {
       validationErrors: error.validationErrors,
       cause: error.cause,
       isFallbackMessage: error.isFallbackMessage,
+      correlationId: error.correlationId,
+      isUnexpectedFailure: true,
     );
   }
 }
@@ -427,12 +489,15 @@ final class AbpApiException extends ApiException {
     super.validationErrors,
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   factory AbpApiException.fromAbpPayload({
     required AbpErrorPayload payload,
     required int? statusCode,
     required Object? cause,
+    String? correlationId,
     String badResponseFallbackMessage =
         ApiException.defaultBadResponseFallbackMessage,
   }) {
@@ -454,6 +519,7 @@ final class AbpApiException extends ApiException {
       validationErrors: payload.validationErrors,
       cause: cause,
       isFallbackMessage: usedFallbackMessage,
+      correlationId: correlationId,
     );
   }
 }

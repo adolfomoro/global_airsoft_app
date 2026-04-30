@@ -5,7 +5,8 @@ typedef AuthTokensWriter = Future<void> Function(AuthTokens tokens);
 typedef AuthSessionClearer = Future<void> Function();
 typedef AuthTokensRefresher = Future<AuthTokens> Function(String refreshToken);
 typedef AuthMessageTranslator = Future<String> Function(String key);
-typedef AuthMessagePresenter = Future<void> Function(String message);
+typedef AuthMessagePresenter =
+    Future<void> Function(String message, {Object? source});
 
 final class AuthSecurityCoordinator {
   AuthSecurityCoordinator._();
@@ -157,7 +158,7 @@ final class AuthSecurityCoordinator {
     return (await translator(key)).trim();
   }
 
-  Future<void> showMessage(String message) async {
+  Future<void> showMessage(String message, {Object? source}) async {
     final String normalizedMessage = message.trim();
     if (normalizedMessage.isEmpty) {
       return;
@@ -179,7 +180,7 @@ final class AuthSecurityCoordinator {
       return;
     }
 
-    await presenter(normalizedMessage);
+    await presenter(normalizedMessage, source: source);
   }
 
   void _pruneExpiredMessages() {

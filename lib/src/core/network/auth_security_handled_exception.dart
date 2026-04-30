@@ -11,6 +11,8 @@ final class AuthSecurityHandledException extends ApiException {
     super.validationErrors = const [],
     super.cause,
     super.isFallbackMessage,
+    super.correlationId,
+    super.isUnexpectedFailure,
   });
 
   String get reason => code ?? '';
@@ -43,6 +45,8 @@ final class AuthSecurityHandledException extends ApiException {
       validationErrors: error.validationErrors,
       cause: error.cause,
       isFallbackMessage: !hasBackendMessage,
+      correlationId: error.correlationId,
+      isUnexpectedFailure: error.isUnexpectedFailure,
     );
   }
 }

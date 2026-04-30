@@ -117,14 +117,14 @@ Future<void> main() async {
         },
         refreshTokens: authTokenRefreshService.refreshTokens,
         translateMessage: appLocalizationService.tr,
-        showMessage: (String message) async {
+        showMessage: (String message, {Object? source}) async {
           final NavigatorState? navigatorState = appNavigatorKey.currentState;
           final BuildContext? context = navigatorState?.context;
           if (context == null || !context.mounted) {
             return;
           }
 
-          context.showErrorSnackBar(message);
+          context.showErrorSnackBar(message, source: source);
         },
       );
 

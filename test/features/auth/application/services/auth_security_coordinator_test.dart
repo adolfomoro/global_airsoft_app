@@ -25,7 +25,7 @@ void main() {
         return bootTokens;
       },
       translateMessage: (String key) async => key,
-      showMessage: (String message) async {},
+      showMessage: (String message, {Object? source}) async {},
       initialTokens: bootTokens,
       cacheInitialTokens: true,
     );
