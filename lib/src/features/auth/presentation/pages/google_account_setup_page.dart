@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -75,7 +76,7 @@ class _GoogleAccountSetupPageState
       BackendValidationErrorMapper();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late final TextEditingController _profileNameController =
+  late final TextEditingController _usernameController =
       TextEditingController(
         text: _suggestUsernameFromProfileName(widget.profileName),
       );
@@ -170,7 +171,7 @@ class _GoogleAccountSetupPageState
     });
   }
 
-  Future<void> _handleGoogleSignUp() async {
+  Future<void> _submitGoogleSignUp() async {
     FocusScope.of(context).unfocus();
 
     setState(() {
@@ -197,7 +198,7 @@ class _GoogleAccountSetupPageState
 
       final GoogleSignUpConfirmInputDto input = GoogleSignUpConfirmInputDto(
         challengeToken: widget.challengeToken,
-        username: _profileNameController.text.trim().toLowerCase(),
+        username: _usernameController.text.trim().toLowerCase(),
         profilePictureFile: profilePictureFile,
       );
 
@@ -278,7 +279,7 @@ class _GoogleAccountSetupPageState
 
   @override
   void dispose() {
-    _profileNameController.dispose();
+    _usernameController.dispose();
     super.dispose();
   }
 
@@ -333,7 +334,7 @@ class _GoogleAccountSetupPageState
               ),
               const SizedBox(height: AppDimensions.spacing2xl),
               UsernameAvailabilityField(
-                controller: _profileNameController,
+                controller: _usernameController,
                 onChanged: _handleUsernameChanged,
                 errorText: _usernameError,
                 textInputAction: TextInputAction.done,
@@ -343,7 +344,7 @@ class _GoogleAccountSetupPageState
                     return;
                   }
 
-                  _handleGoogleSignUp();
+                  unawaited(_submitGoogleSignUp());
                 },
               ),
               const SizedBox(height: AppDimensions.spacing2xl),
@@ -355,7 +356,7 @@ class _GoogleAccountSetupPageState
             showWhenKeyboardOpen: true,
             child: AppButton(
               label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
-              onPressed: canSubmit ? _handleGoogleSignUp : null,
+              onPressed: canSubmit ? _submitGoogleSignUp : null,
               isLoading: _isLoading,
             ),
           ),

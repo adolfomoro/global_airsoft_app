@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/widgets/app_adaptive_app_bar.dart';
@@ -263,6 +265,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   late final FocusAwareScrollCoordinator _passwordHintScrollCoordinator;
   late final FocusNode _passwordFocus;
   late final ScrollController _scrollController;
+  bool _hasSubmitted = false;
 
   @override
   void initState() {
@@ -381,8 +384,11 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
     return null;
   }
 
-  Future<void> _handleSignUp() async {
+  Future<void> _submitSignUp() async {
     FocusScope.of(context).unfocus();
+    setState(() {
+      _hasSubmitted = true;
+    });
     ref.read(signUpFormStateProvider.notifier).clearErrors();
 
     final FormState? formState = _formKey.currentState;
@@ -470,6 +476,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
       ),
       body: Form(
         key: _formKey,
+        autovalidateMode: _hasSubmitted
+            ? AutovalidateMode.onUserInteraction
+            : AutovalidateMode.disabled,
         child: AppFormWithBottomActions(
           scrollController: scrollController,
           body: Column(
@@ -486,6 +495,13 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
                 onPasswordChanged: _handlePasswordChanged,
                 onUsernameAvailabilityChanged:
                     _handleUsernameAvailabilityChanged,
+                onSubmit: () {
+                  if (!canSubmit) {
+                    return;
+                  }
+
+                  unawaited(_submitSignUp());
+                },
                 resolveValidationMessage: context.resolveValidationMessage,
                 validateConfirmPassword: _validateConfirmPassword,
                 passwordFieldKey: _passwordFieldKey,
@@ -501,7 +517,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
               child: AppButton(
                 label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
                 isLoading: signUpState.isLoading,
-                onPressed: canSubmit ? _handleSignUp : null,
+                onPressed: canSubmit ? _submitSignUp : null,
               ),
             ),
             AppFormBottomAction(child: const SizedBox(height: 8)),
@@ -543,6 +559,7 @@ class _SignUpFormFields extends ConsumerWidget {
     required this.onFieldChanged,
     required this.onPasswordChanged,
     required this.onUsernameAvailabilityChanged,
+    required this.onSubmit,
     required this.resolveValidationMessage,
     required this.validateConfirmPassword,
     required this.passwordFieldKey,
@@ -556,6 +573,7 @@ class _SignUpFormFields extends ConsumerWidget {
   final void Function(SignUpFieldType) onFieldChanged;
   final VoidCallback onPasswordChanged;
   final ValueChanged<UsernameAvailabilityStatus> onUsernameAvailabilityChanged;
+  final VoidCallback onSubmit;
   final String Function(ValidationFailure) resolveValidationMessage;
   final String? Function(String?) validateConfirmPassword;
   final GlobalKey passwordFieldKey;
@@ -633,6 +651,7 @@ class _SignUpFormFields extends ConsumerWidget {
           labelText: context.l10n.tr(AppLocaleKeys.authConfirmPasswordLabel),
           isRequired: true,
           textInputAction: TextInputAction.done,
+          onFieldSubmitted: (_) => onSubmit(),
           validator: validateConfirmPassword,
         ),
       ],

@@ -11,10 +11,16 @@ class PasswordRecoverySuccessPage extends StatelessWidget {
 
   final String email;
 
+  void _navigateBackToLogin(BuildContext context) {
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(AppRoutePaths.login, (_) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
@@ -102,12 +108,7 @@ class PasswordRecoverySuccessPage extends StatelessWidget {
                 const SizedBox(height: 40),
                 AppButton(
                   label: context.l10n.tr(AppLocaleKeys.authBackToLoginAction),
-                  onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      AppRoutePaths.login,
-                      (_) => false,
-                    );
-                  },
+                  onPressed: () => _navigateBackToLogin(context),
                 ),
                 const SizedBox(height: AppDimensions.spacing2xl),
               ],

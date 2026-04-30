@@ -48,6 +48,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   String? _loginError;
   String? _passwordError;
+  bool _hasSubmitted = false;
   bool _isLoginLoading = false;
   bool _isGoogleLoading = false;
 
@@ -80,7 +81,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _submitLogin() async {
     if (_isAnyAuthLoading) {
       return;
     }
@@ -88,6 +89,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     FocusScope.of(context).unfocus();
 
     setState(() {
+      _hasSubmitted = true;
       _loginError = null;
       _passwordError = null;
     });
@@ -163,7 +165,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
-  Future<void> _handleGoogleAuthentication() async {
+  Future<void> _submitGoogleSignIn() async {
     if (_isAnyAuthLoading) {
       return;
     }
@@ -267,6 +269,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
+              autovalidateMode: _hasSubmitted
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               child: AutofillGroup(
                 child: AppFormPadding(
                   child: Column(
@@ -356,7 +361,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             return;
                           }
 
-                          unawaited(_handleLogin());
+                          unawaited(_submitLogin());
                         },
                         isRequired: _passwordValidationRules.hasRequiredRule,
                         validator: _passwordValidationRules.asValidator(
@@ -383,7 +388,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       const SizedBox(height: 20),
                       AppButton(
                         label: context.l10n.tr(AppLocaleKeys.authSignInAction),
-                        onPressed: _isAnyAuthLoading ? null : _handleLogin,
+                        onPressed: _isAnyAuthLoading ? null : _submitLogin,
                         isLoading: _isLoginLoading,
                       ),
                       const SizedBox(height: 12),
@@ -393,7 +398,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         onPressed: _isAnyAuthLoading
                             ? null
-                            : _handleGoogleAuthentication,
+                            : _submitGoogleSignIn,
                         variant: AppButtonVariant.secondary,
                         icon: FontAwesomeIcons.google,
                         isLoading: _isGoogleLoading,

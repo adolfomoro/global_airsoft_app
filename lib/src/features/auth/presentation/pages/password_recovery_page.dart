@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
@@ -35,6 +37,7 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   String? _emailError;
+  bool _hasSubmitted = false;
   bool _isLoading = false;
 
   @override
@@ -53,10 +56,11 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
     });
   }
 
-  Future<void> _handleRequestRecovery() async {
+  Future<void> _submitPasswordRecovery() async {
     FocusScope.of(context).unfocus();
 
     setState(() {
+      _hasSubmitted = true;
       _emailError = null;
     });
 
@@ -140,6 +144,9 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
+            autovalidateMode: _hasSubmitted
+                ? AutovalidateMode.onUserInteraction
+                : AutovalidateMode.disabled,
             child: Padding(
               padding: const EdgeInsets.all(AppDimensions.spacing2xl),
               child: Column(
@@ -160,6 +167,13 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
                     controller: _emailController,
                     errorText: _emailError,
                     onChanged: _handleEmailChanged,
+                    onFieldSubmitted: (_) {
+                      if (_isLoading) {
+                        return;
+                      }
+
+                      unawaited(_submitPasswordRecovery());
+                    },
                     isRequired: _emailValidationRules.hasRequiredRule,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.done,
@@ -173,7 +187,7 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage> {
                     label: context.l10n.tr(
                       AppLocaleKeys.authPasswordRecoverySendAction,
                     ),
-                    onPressed: _isLoading ? null : _handleRequestRecovery,
+                    onPressed: _isLoading ? null : _submitPasswordRecovery,
                     isLoading: _isLoading,
                   ),
                 ],
