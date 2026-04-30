@@ -90,13 +90,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     setState(() {
       _loginError = null;
       _passwordError = null;
-      _isLoginLoading = true;
     });
 
     final FormState? formState = _formKey.currentState;
     if (!(formState?.validate() ?? false)) {
       return;
     }
+
+    setState(() {
+      _isLoginLoading = true;
+    });
 
     try {
       final AuthService authService = ref.read(authServiceProvider);

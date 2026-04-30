@@ -26,6 +26,8 @@ import 'package:global_airsoft_app/src/features/auth/presentation/widgets/passwo
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
 final class SignUpFormState {
+  static const Object _unset = Object();
+
   const SignUpFormState({
     this.fullNameError,
     this.usernameError,
@@ -53,20 +55,28 @@ final class SignUpFormState {
   final bool hasRevealedPasswordHint;
 
   SignUpFormState copyWith({
-    String? fullNameError,
-    String? usernameError,
-    String? emailError,
-    String? passwordError,
+    Object? fullNameError = _unset,
+    Object? usernameError = _unset,
+    Object? emailError = _unset,
+    Object? passwordError = _unset,
     UsernameAvailabilityStatus? usernameAvailabilityStatus,
     bool? isLoading,
     bool? isPasswordFocused,
     bool? hasRevealedPasswordHint,
   }) {
     return SignUpFormState(
-      fullNameError: fullNameError ?? this.fullNameError,
-      usernameError: usernameError ?? this.usernameError,
-      emailError: emailError ?? this.emailError,
-      passwordError: passwordError ?? this.passwordError,
+      fullNameError: identical(fullNameError, _unset)
+          ? this.fullNameError
+          : fullNameError as String?,
+      usernameError: identical(usernameError, _unset)
+          ? this.usernameError
+          : usernameError as String?,
+      emailError: identical(emailError, _unset)
+          ? this.emailError
+          : emailError as String?,
+      passwordError: identical(passwordError, _unset)
+          ? this.passwordError
+          : passwordError as String?,
       usernameAvailabilityStatus:
           usernameAvailabilityStatus ?? this.usernameAvailabilityStatus,
       isLoading: isLoading ?? this.isLoading,
@@ -89,26 +99,53 @@ final class SignUpFormState {
 enum SignUpFieldType { fullName, username, email, password }
 
 final Provider<TextEditingController> signUpFullNameControllerProvider =
-    Provider<TextEditingController>((Ref ref) => TextEditingController());
+    Provider.autoDispose<TextEditingController>((Ref ref) {
+      final TextEditingController controller = TextEditingController();
+      ref.onDispose(controller.dispose);
+      return controller;
+    });
 
 final Provider<TextEditingController> signUpUsernameControllerProvider =
-    Provider<TextEditingController>((Ref ref) => TextEditingController());
+    Provider.autoDispose<TextEditingController>((Ref ref) {
+      final TextEditingController controller = TextEditingController();
+      ref.onDispose(controller.dispose);
+      return controller;
+    });
 
 final Provider<TextEditingController> signUpEmailControllerProvider =
-    Provider<TextEditingController>((Ref ref) => TextEditingController());
+    Provider.autoDispose<TextEditingController>((Ref ref) {
+      final TextEditingController controller = TextEditingController();
+      ref.onDispose(controller.dispose);
+      return controller;
+    });
 
 final Provider<TextEditingController> signUpPasswordControllerProvider =
-    Provider<TextEditingController>((Ref ref) => TextEditingController());
+    Provider.autoDispose<TextEditingController>((Ref ref) {
+      final TextEditingController controller = TextEditingController();
+      ref.onDispose(controller.dispose);
+      return controller;
+    });
 
 final Provider<TextEditingController> signUpConfirmPasswordControllerProvider =
-    Provider<TextEditingController>((Ref ref) => TextEditingController());
+    Provider.autoDispose<TextEditingController>((Ref ref) {
+      final TextEditingController controller = TextEditingController();
+      ref.onDispose(controller.dispose);
+      return controller;
+    });
 
-final Provider<FocusNode> signUpPasswordFocusNodeProvider = Provider<FocusNode>(
-  (Ref ref) => FocusNode(),
-);
+final Provider<FocusNode> signUpPasswordFocusNodeProvider =
+    Provider.autoDispose<FocusNode>((Ref ref) {
+      final FocusNode focusNode = FocusNode();
+      ref.onDispose(focusNode.dispose);
+      return focusNode;
+    });
 
 final Provider<ScrollController> signUpScrollControllerProvider =
-    Provider<ScrollController>((Ref ref) => ScrollController());
+    Provider.autoDispose<ScrollController>((Ref ref) {
+      final ScrollController controller = ScrollController();
+      ref.onDispose(controller.dispose);
+      return controller;
+    });
 
 final class SignUpFormNotifier extends Notifier<SignUpFormState> {
   static const BackendValidationErrorMapper _validationErrorMapper =
@@ -231,24 +268,22 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _passwordFocus = ref.read(signUpPasswordFocusNodeProvider);
+    _scrollController = ref.read(signUpScrollControllerProvider);
+    _passwordHintScrollCoordinator = FocusAwareScrollCoordinator(
+      focusNode: _passwordFocus,
+      scrollController: _scrollController,
+      focusedFieldKey: _passwordFieldKey,
+      revealTargetKey: _passwordHintKey,
+      desiredRevealRatio: 1.0,
+    );
+    _passwordFocus.addListener(_handlePasswordFocusChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         return;
       }
-
-      _passwordFocus = ref.read(signUpPasswordFocusNodeProvider);
-      _scrollController = ref.read(signUpScrollControllerProvider);
-
-      _passwordHintScrollCoordinator = FocusAwareScrollCoordinator(
-        focusNode: _passwordFocus,
-        scrollController: _scrollController,
-        focusedFieldKey: _passwordFieldKey,
-        revealTargetKey: _passwordHintKey,
-        desiredRevealRatio: 1.0,
-      );
-
-      _passwordFocus.addListener(_handlePasswordFocusChanged);
+      _requestPasswordHintRevealIfNeeded();
     });
   }
 
