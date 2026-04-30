@@ -13,6 +13,7 @@ import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/network/auth_security_handled_exception.dart';
+import 'package:global_airsoft_app/src/core/network/constants/app_network_headers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_coordinator.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/models/auth_tokens.dart';
 
@@ -21,11 +22,13 @@ final class _RequestSnapshot {
     required this.path,
     required this.authorization,
     required this.deviceId,
+    required this.userAgent,
   });
 
   final String path;
   final String? authorization;
   final String? deviceId;
+  final String? userAgent;
 }
 
 final class _RecordingHttpClientAdapter implements HttpClientAdapter {
@@ -46,6 +49,7 @@ final class _RecordingHttpClientAdapter implements HttpClientAdapter {
         path: options.path,
         authorization: options.headers['Authorization'] as String?,
         deviceId: options.headers['X-Device-Id'] as String?,
+        userAgent: options.headers[AppNetworkHeaders.userAgentHeader] as String?,
       ),
     );
 
@@ -247,6 +251,16 @@ void main() {
             })
             .every((snapshot) {
               return snapshot.deviceId == 'device-123';
+            }),
+        isTrue,
+      );
+      expect(
+        adapter.snapshots
+            .where((snapshot) {
+              return snapshot.path == '/protected';
+            })
+            .every((snapshot) {
+              return snapshot.userAgent == AppNetworkHeaders.userAgentValue;
             }),
         isTrue,
       );

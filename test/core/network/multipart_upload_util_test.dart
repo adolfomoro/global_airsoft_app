@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:global_airsoft_app/src/core/network/constants/app_network_headers.dart';
 import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 
 void main() {
@@ -15,6 +16,10 @@ void main() {
 
     final List<int> expectedBytes = <int>[1, 2, 3, 4, 5, 6];
     server.listen((HttpRequest request) async {
+      expect(
+        request.headers.value(HttpHeaders.userAgentHeader),
+        AppNetworkHeaders.userAgentValue,
+      );
       request.response.statusCode = HttpStatus.ok;
       request.response.headers.contentType = ContentType('image', 'jpeg');
       request.response.add(expectedBytes);

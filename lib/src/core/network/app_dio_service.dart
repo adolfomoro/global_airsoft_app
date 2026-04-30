@@ -7,6 +7,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
+import 'package:global_airsoft_app/src/core/network/constants/app_network_headers.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/api_exception_interceptor.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/auth_security_interceptor.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/device_sync_interceptor.dart';
@@ -43,7 +44,10 @@ final class AppDioService {
       sendTimeout: Duration(milliseconds: config.sendTimeoutMs),
       contentType: Headers.jsonContentType,
       responseType: ResponseType.json,
-      headers: <String, Object>{Headers.acceptHeader: Headers.jsonContentType},
+      headers: <String, Object>{
+        Headers.acceptHeader: Headers.jsonContentType,
+        AppNetworkHeaders.userAgentHeader: AppNetworkHeaders.userAgentValue,
+      },
     );
 
     final Dio dio = Dio(options);
