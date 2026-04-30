@@ -203,13 +203,11 @@ class _GoogleAccountSetupPageState
 
       final AuthService authService = ref.read(authServiceProvider);
       await authService.signUpWithGoogle(input);
-      await ref.applyPendingAuthLocale();
-
       if (!mounted) {
         return;
       }
 
-      ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
+      await ref.completeAuthenticatedSession();
     } on AuthenticationException catch (error) {
       if (!mounted) {
         return;
@@ -243,9 +241,7 @@ class _GoogleAccountSetupPageState
         return;
       }
 
-      context.showErrorSnackBar(
-        context.l10n.tr(AppLocaleKeys.authSignUpFailed),
-      );
+      context.showLocalizedErrorSnackBar(AppLocaleKeys.authSignUpFailed);
     } finally {
       if (mounted) {
         setState(() {

@@ -21,6 +21,7 @@ import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repo
 import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_form_submission_mixin.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_presentation_extensions.dart';
 
 class PasswordRecoveryPage extends ConsumerStatefulWidget {
   const PasswordRecoveryPage({super.key});
@@ -121,8 +122,8 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage>
         return;
       }
 
-      context.showErrorSnackBar(
-        context.l10n.tr(AppLocaleKeys.authPasswordRecoveryFailed),
+      context.showLocalizedErrorSnackBar(
+        AppLocaleKeys.authPasswordRecoveryFailed,
       );
     } finally {
       if (mounted) {

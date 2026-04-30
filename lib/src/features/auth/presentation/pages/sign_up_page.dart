@@ -408,13 +408,11 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
         password: passwordController.text,
       );
 
-      await ref.applyPendingAuthLocale();
-
       if (!mounted) {
         return;
       }
 
-      ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
+      await ref.completeAuthenticatedSession();
     } on AuthenticationException catch (error) {
       if (!mounted) {
         return;
@@ -441,9 +439,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
         return;
       }
 
-      context.showErrorSnackBar(
-        context.l10n.tr(AppLocaleKeys.authSignUpFailed),
-      );
+      context.showLocalizedErrorSnackBar(AppLocaleKeys.authSignUpFailed);
     } finally {
       if (mounted) {
         ref.read(signUpFormStateProvider.notifier).setLoading(false);

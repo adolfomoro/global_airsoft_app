@@ -108,11 +108,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
         _loginController.text.trim(),
         _passwordController.text,
       );
-      await ref.applyPendingAuthLocale();
-
-      if (mounted) {
-        ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
+      if (!mounted) {
+        return;
       }
+
+      await ref.completeAuthenticatedSession();
     } on AuthenticationException catch (error) {
       if (mounted) {
         final ValidationMappingResult mappedErrors = _validationErrorMapper.map(
@@ -149,9 +149,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
         stackTrace: stackTrace,
       );
       if (mounted) {
-        context.showErrorSnackBar(
-          context.l10n.tr(AppLocaleKeys.authLoginFailed),
-        );
+        context.showLocalizedErrorSnackBar(AppLocaleKeys.authLoginFailed);
       }
     } finally {
       if (mounted) {
@@ -190,8 +188,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       }
 
       if (response.userExists) {
-        await ref.applyPendingAuthLocale();
-        ref.read(isAuthenticatedProvider.notifier).setAuthenticated();
+        await ref.completeAuthenticatedSession();
         return;
       }
 
@@ -227,8 +224,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
       }
     } on GoogleSignInException catch (_) {
       if (mounted) {
-        context.showErrorSnackBar(
-          context.l10n.tr(AppLocaleKeys.authGoogleSignInFailed),
+        context.showLocalizedErrorSnackBar(
+          AppLocaleKeys.authGoogleSignInFailed,
         );
       }
     } catch (error, stackTrace) {
@@ -238,8 +235,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
         stackTrace: stackTrace,
       );
       if (mounted) {
-        context.showErrorSnackBar(
-          context.l10n.tr(AppLocaleKeys.authGoogleSignInFailed),
+        context.showLocalizedErrorSnackBar(
+          AppLocaleKeys.authGoogleSignInFailed,
         );
       }
     } finally {
