@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
+import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

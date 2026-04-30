@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
@@ -60,7 +60,10 @@ void main() {
     expect(updatedState.usernameError, isNull);
     expect(updatedState.emailError, isNull);
     expect(updatedState.passwordError, isNull);
-    expect(updatedState.usernameAvailabilityStatus, initialState.usernameAvailabilityStatus);
+    expect(
+      updatedState.usernameAvailabilityStatus,
+      initialState.usernameAvailabilityStatus,
+    );
     expect(updatedState.isLoading, isFalse);
     expect(updatedState.isPasswordFocused, isFalse);
     expect(updatedState.hasRevealedPasswordHint, isFalse);

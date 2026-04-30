@@ -15,14 +15,14 @@ import 'package:global_airsoft_app/src/core/notifications/widgets/notification_p
 import 'package:global_airsoft_app/src/core/widgets/app_unfocus_wrapper.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 
-class App extends ConsumerStatefulWidget {
-  const App({super.key});
+class GlobalAirsoftApp extends ConsumerStatefulWidget {
+  const GlobalAirsoftApp({super.key});
 
   @override
-  ConsumerState<App> createState() => _AppState();
+  ConsumerState<GlobalAirsoftApp> createState() => _GlobalAirsoftAppState();
 }
 
-class _AppState extends ConsumerState<App> {
+class _GlobalAirsoftAppState extends ConsumerState<GlobalAirsoftApp> {
   ProviderSubscription<bool>? _authSubscription;
 
   @override

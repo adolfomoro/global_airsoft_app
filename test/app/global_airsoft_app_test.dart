@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:global_airsoft_app/src/app/app.dart';
+import 'package:global_airsoft_app/src/app/global_airsoft_app.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
 import 'package:global_airsoft_app/src/core/storage/key_value_store.dart';
@@ -38,7 +38,7 @@ void main() {
           appLocaleServiceProvider.overrideWithValue(localeService),
           initialIsAuthenticatedProvider.overrideWithValue(false),
         ],
-        child: const App(),
+        child: const GlobalAirsoftApp(),
       ),
     );
     await tester.pumpAndSettle();

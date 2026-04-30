@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
-import 'package:global_airsoft_app/src/features/auth/domain/validation/user_name_validation.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/validation/username_validation.dart';
 
 void main() {
   test('accepts lowercase usernames with digits, underscore, and dot', () {

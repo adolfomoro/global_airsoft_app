@@ -9,16 +9,19 @@ import 'package:global_airsoft_app/src/core/localization/app_localizations.dart'
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/monitoring/app_telemetry.dart';
 
-typedef AppBuilder = Future<BootstrapPayload> Function();
+typedef AppBootstrapBuilder = Future<AppBootstrapPayload> Function();
 
-final class BootstrapPayload {
-  const BootstrapPayload({required this.app, required this.initialBrightness});
+final class AppBootstrapPayload {
+  const AppBootstrapPayload({
+    required this.app,
+    required this.initialBrightness,
+  });
 
   final Widget app;
   final Brightness initialBrightness;
 }
 
-Future<void> bootstrap({required AppBuilder builder}) async {
+Future<void> bootstrapApp({required AppBootstrapBuilder builder}) async {
   await runZonedGuarded<Future<void>>(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +42,7 @@ Future<void> bootstrap({required AppBuilder builder}) async {
             return true;
           };
 
-      final BootstrapPayload payload;
+      final AppBootstrapPayload payload;
       try {
         payload = await builder();
       } catch (error, stackTrace) {

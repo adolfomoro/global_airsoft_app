@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:global_airsoft_app/src/app/app.dart';
+import 'package:global_airsoft_app/src/app/app_bootstrap.dart';
 import 'package:global_airsoft_app/src/app/app_navigator.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
-import 'package:global_airsoft_app/src/app/bootstrap.dart';
+import 'package:global_airsoft_app/src/app/global_airsoft_app.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
@@ -29,7 +29,7 @@ Future<void> main() async {
   final AppConfig appConfig = AppConfig.fromDartDefines();
   await AppTelemetry.instance.initialize(appConfig);
 
-  await bootstrap(
+  await bootstrapApp(
     builder: () async {
       PushNotificationService.registerBackgroundHandler();
 
@@ -128,11 +128,11 @@ Future<void> main() async {
         },
       );
 
-      return BootstrapPayload(
+      return AppBootstrapPayload(
         initialBrightness: Brightness.dark,
         app: UncontrolledProviderScope(
           container: container,
-          child: const App(),
+          child: const GlobalAirsoftApp(),
         ),
       );
     },
