@@ -1,6 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
@@ -47,6 +48,8 @@ AppConfig _buildTestConfig() {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   tearDown(() {
     AppLogger.instance.setRemoteErrorReporter(null);
   });
