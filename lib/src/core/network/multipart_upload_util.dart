@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:global_airsoft_app/src/core/network/constants/app_network_headers.dart';
+import 'package:global_airsoft_app/src/core/network/app_http_client_factory.dart';
 import 'package:path/path.dart' as path;
 
 class MultipartUploadUtil {
@@ -29,8 +29,7 @@ class MultipartUploadUtil {
       );
     }
 
-    final HttpClient httpClient = HttpClient();
-    httpClient.userAgent = AppNetworkHeaders.userAgentValue;
+    final HttpClient httpClient = AppHttpClientFactory.create();
     try {
       final HttpClientRequest request = await httpClient.getUrl(uri);
       final HttpClientResponse response = await request.close();

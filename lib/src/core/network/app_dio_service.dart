@@ -7,6 +7,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
+import 'package:global_airsoft_app/src/core/network/app_http_client_factory.dart';
 import 'package:global_airsoft_app/src/core/network/constants/app_network_headers.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/api_exception_interceptor.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/auth_security_interceptor.dart';
@@ -116,15 +117,14 @@ final class AppDioService {
     }
 
     adapter.createHttpClient = () {
-      final HttpClient client = HttpClient();
-      client
-          .badCertificateCallback = (X509Certificate cert, String host, int port) {
-        logger.debug(
-          'TLS certificate validation disabled for DEV environment: $host:$port',
-        );
-        return true;
-      };
-      return client;
+      return AppHttpClientFactory.create(
+        allowBadCertificates: true,
+        onBadCertificateAccepted: (String host, int port) {
+          logger.debug(
+            'TLS certificate validation disabled for DEV environment: $host:$port',
+          );
+        },
+      );
     };
   }
 
