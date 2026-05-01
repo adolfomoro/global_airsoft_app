@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_profile_image_placeholder.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_placeholder.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 
 class AppProfilePictureEditor extends StatelessWidget {

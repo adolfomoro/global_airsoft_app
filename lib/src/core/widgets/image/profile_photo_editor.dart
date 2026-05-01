@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_profile_picture_editor.dart';
-import 'package:global_airsoft_app/src/core/widgets/profile_photo_selection_bottom_sheet.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture_editor.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/profile_photo_selection_bottom_sheet.dart';
 
 class ProfilePhotoNotifier extends Notifier<ProfilePhoto> {
   @override

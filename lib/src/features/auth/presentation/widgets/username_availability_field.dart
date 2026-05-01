@@ -6,7 +6,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/localization/app_validation_localizations.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_text_field.dart';
+import 'package:global_airsoft_app/src/core/widgets/form/app_text_field.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/check_username_availability_output_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/username_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';

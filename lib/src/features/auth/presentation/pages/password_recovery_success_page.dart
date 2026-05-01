@@ -3,8 +3,8 @@ import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_adaptive_app_bar.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_button.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
+import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
 
 class PasswordRecoverySuccessPage extends StatelessWidget {
   const PasswordRecoverySuccessPage({required this.email, super.key});

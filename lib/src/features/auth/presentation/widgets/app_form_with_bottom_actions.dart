@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_form_padding.dart';
+import 'package:global_airsoft_app/src/core/widgets/form/app_form_padding.dart';
 
 final class AppFormBottomAction {
   const AppFormBottomAction({required this.child, this.showWhenKeyboardOpen});

@@ -9,11 +9,11 @@ import 'package:global_airsoft_app/src/core/localization/app_validation_localiza
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_adaptive_app_bar.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_button.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_page_header.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
+import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_bar/app_page_header.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_text_field.dart';
+import 'package:global_airsoft_app/src/core/widgets/form/app_text_field.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';

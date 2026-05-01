@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_image_zoom_viewer.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/app_image_zoom_viewer.dart';
 
 class AppProfileImageZoomViewer extends StatelessWidget {
   const AppProfileImageZoomViewer.network({required String imageUrl, super.key})

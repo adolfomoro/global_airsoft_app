@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_button.dart';
+import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
 
 class RequestNotificationPermissionScreen extends StatelessWidget {
   const RequestNotificationPermissionScreen({
