@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_text_field.dart';
 
 final class AppPasswordField extends StatelessWidget {
   const AppPasswordField({
@@ -42,3 +42,5 @@ final class AppPasswordField extends StatelessWidget {
     );
   }
 }
+
+

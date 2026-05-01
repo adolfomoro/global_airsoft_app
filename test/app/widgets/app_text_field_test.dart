@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_text_field.dart';
 
 void main() {
   testWidgets('wraps long error text on multiple lines', (
@@ -29,3 +29,5 @@ void main() {
     expect(errorTextWidget.maxLines, 4);
   });
 }
+
+

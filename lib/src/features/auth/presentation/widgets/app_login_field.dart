@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:global_airsoft_app/src/app/widgets/app_text_field.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_text_field.dart';
 
 final class AppLoginField extends StatelessWidget {
   const AppLoginField({
