@@ -1,8 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
-import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_placeholder.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_placeholder.dart';
 
 class AppProfilePictureEditor extends StatelessWidget {
   const AppProfilePictureEditor.network({
@@ -63,94 +64,18 @@ class AppProfilePictureEditor extends StatelessWidget {
     return AppSkeleton.circle(size: size);
   }
 
-  Widget _buildImage() {
-    if (_profilePhoto != null) {
-      if (_profilePhoto.isLocal) {
-        final File localFile = _profilePhoto.localFile!;
-        return Image.file(
-          localFile,
-          fit: BoxFit.cover,
-          frameBuilder:
-              (
-                BuildContext context,
-                Widget child,
-                int? frame,
-                bool wasSynchronouslyLoaded,
-              ) {
-                if (wasSynchronouslyLoaded || frame != null) {
-                  return child;
-                }
-
-                return _buildLoadingSkeleton();
-              },
-          errorBuilder:
-              (BuildContext context, Object error, StackTrace? stackTrace) {
-                return _buildPlaceholder();
-              },
-        );
-      } else if (_profilePhoto.isNetwork) {
-        final String networkUrl = _profilePhoto.networkUrl!;
-        return Image.network(
-          networkUrl,
-          fit: BoxFit.cover,
-          loadingBuilder:
-              (
-                BuildContext context,
-                Widget child,
-                ImageChunkEvent? loadingProgress,
-              ) {
-                if (loadingProgress == null) {
-                  return child;
-                }
-
-                return _buildLoadingSkeleton();
-              },
-          errorBuilder:
-              (BuildContext context, Object error, StackTrace? stackTrace) {
-                return _buildPlaceholder();
-              },
-        );
-      }
-
-      return _buildPlaceholder();
-    }
-
-    if (_imageProvider != null) {
-      final ImageProvider imageProvider = _imageProvider;
-
-      return Image(
-        image: imageProvider,
-        fit: BoxFit.cover,
-        frameBuilder:
-            (
-              BuildContext context,
-              Widget child,
-              int? frame,
-              bool wasSynchronouslyLoaded,
-            ) {
-              if (wasSynchronouslyLoaded || frame != null) {
-                return child;
-              }
-
-              return _buildLoadingSkeleton();
-            },
-        errorBuilder:
-            (BuildContext context, Object error, StackTrace? stackTrace) {
-              return _buildPlaceholder();
-            },
-      );
-    }
-
-    return Image.network(
-      _imageUrl!,
+  Widget _buildImageFromProvider(ImageProvider imageProvider) {
+    return Image(
+      image: imageProvider,
       fit: BoxFit.cover,
-      loadingBuilder:
+      frameBuilder:
           (
             BuildContext context,
             Widget child,
-            ImageChunkEvent? loadingProgress,
+            int? frame,
+            bool wasSynchronouslyLoaded,
           ) {
-            if (loadingProgress == null) {
+            if (wasSynchronouslyLoaded || frame != null) {
               return child;
             }
 
@@ -161,6 +86,26 @@ class AppProfilePictureEditor extends StatelessWidget {
             return _buildPlaceholder();
           },
     );
+  }
+
+  Widget _buildImage() {
+    if (_profilePhoto != null) {
+      if (_profilePhoto.isLocal) {
+        final File localFile = _profilePhoto.localFile!;
+        return _buildImageFromProvider(FileImage(localFile));
+      } else if (_profilePhoto.isNetwork) {
+        final String networkUrl = _profilePhoto.networkUrl!;
+        return _buildImageFromProvider(NetworkImage(networkUrl));
+      }
+
+      return _buildPlaceholder();
+    }
+
+    if (_imageProvider != null) {
+      return _buildImageFromProvider(_imageProvider);
+    }
+
+    return _buildImageFromProvider(NetworkImage(_imageUrl!));
   }
 
   @override
