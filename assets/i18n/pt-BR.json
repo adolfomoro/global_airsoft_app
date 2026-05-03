@@ -15,6 +15,9 @@
     "home.profileNameLabel": "Nome",
     "home.profileUsernameLabel": "Username",
     "home.profileBioLabel": "Bio",
+    "home.profileEmptyBioLabel": "Nenhuma bio adicionada ainda.",
+    "home.profileLoadFailedMessage": "Nao foi possivel carregar seu perfil agora.",
+    "home.profileRefreshHint": "Puxe para baixo para tentar novamente.",
     "home.logoutAction": "Sair",
     "home.logoutErrorMessage": "NÃ£o foi possÃ­vel sair agora. Tente novamente.",
     "device.registrationFailed": "NÃ£o foi possÃ­vel registrar o dispositivo.",
@@ -125,4 +128,3 @@
     "profilePhoto.galleryPermissionDeniedMessage": "Para selecionar fotos, permita o acesso Ã  galeria nas configuraÃ§Ãµes do aparelho.",
     "profilePhoto.permissionOpenSettings": "Abrir configuraÃ§Ãµes"
 }
-

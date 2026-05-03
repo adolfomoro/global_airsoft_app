@@ -7,6 +7,7 @@ import 'package:global_airsoft_app/src/features/home/presentation/providers/home
 import 'package:global_airsoft_app/src/features/home/presentation/widgets/home_bottom_navigation_bar.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/widgets/home_placeholder_tab.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/widgets/home_profile_tab.dart';
+import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -20,13 +21,13 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     ref.read(homeTabProvider.notifier).select(HomeTab.discovery);
+    ref.read(currentUserProfileProvider.future);
   }
 
   @override
   Widget build(BuildContext context) {
     final HomeTab currentTab = ref.watch(homeTabProvider);
     final homeTabNotifier = ref.read(homeTabProvider.notifier);
-    final profileViewData = ref.watch(homeProfileViewDataProvider);
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(title: Text(_resolveTitle(context, currentTab))),
@@ -47,7 +48,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               AppLocaleKeys.homeTimelinePlaceholderMessage,
             ),
           ),
-          HomeProfileTab(profile: profileViewData),
+          const HomeProfileTab(),
         ],
       ),
       bottomNavigationBar: HomeBottomNavigationBar(

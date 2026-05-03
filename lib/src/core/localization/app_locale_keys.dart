@@ -26,6 +26,10 @@ abstract final class AppLocaleKeys {
   static const String homeProfileNameLabel = 'home.profileNameLabel';
   static const String homeProfileUsernameLabel = 'home.profileUsernameLabel';
   static const String homeProfileBioLabel = 'home.profileBioLabel';
+  static const String homeProfileEmptyBioLabel = 'home.profileEmptyBioLabel';
+  static const String homeProfileLoadFailedMessage =
+      'home.profileLoadFailedMessage';
+  static const String homeProfileRefreshHint = 'home.profileRefreshHint';
   static const String homeLogoutAction = 'home.logoutAction';
   static const String homeLogoutErrorMessage = 'home.logoutErrorMessage';
   static const String deviceRegistrationFailed = 'device.registrationFailed';
