@@ -135,16 +135,19 @@ class _GoogleAccountSetupPageState extends ConsumerState<GoogleAccountSetupPage>
       _googleSetupProfilePhotoProvider,
     );
 
-    final Object? result = await ProfilePhotoSelectionBottomSheet.show(
-      context,
-      hasCurrentPhoto: currentPhoto.hasPhoto,
-    );
+    final ProfilePhotoSelectionResult? result =
+        await ProfilePhotoSelectionBottomSheet.showForResult(
+          context,
+          hasCurrentPhoto: currentPhoto.hasPhoto,
+        );
 
     if (!mounted) return;
     if (result == null) return;
 
-    if (result is File) {
-      ref.read(_googleSetupProfilePhotoProvider.notifier).setLocalPhoto(result);
+    if (result.hasSelectedFile) {
+      ref
+          .read(_googleSetupProfilePhotoProvider.notifier)
+          .setLocalPhoto(result.file!);
     } else {
       ref.read(_googleSetupProfilePhotoProvider.notifier).clearPhoto();
     }

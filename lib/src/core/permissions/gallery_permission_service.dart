@@ -27,7 +27,7 @@ class GalleryPermissionService {
         : _galleryPermission;
     final PermissionStatus status = await permission.status;
 
-    if (Platform.isAndroid && status.isLimited) {
+    if (status.isLimited) {
       return true;
     }
 
@@ -48,7 +48,7 @@ class GalleryPermissionService {
         : _galleryPermission;
     final PermissionStatus status = await permission.request();
 
-    if (Platform.isAndroid && status.isLimited) {
+    if (status.isLimited) {
       return true;
     }
 

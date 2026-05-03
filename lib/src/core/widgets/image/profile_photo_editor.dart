@@ -44,15 +44,16 @@ class ProfilePhotoEditor extends StatelessWidget {
   final double badgeSize;
 
   Future<void> _handleEditTap(BuildContext context) async {
-    final Object? result = await ProfilePhotoSelectionBottomSheet.show(
-      context,
-      hasCurrentPhoto: profilePhoto.hasPhoto,
-    );
+    final ProfilePhotoSelectionResult? result =
+        await ProfilePhotoSelectionBottomSheet.showForResult(
+          context,
+          hasCurrentPhoto: profilePhoto.hasPhoto,
+        );
 
     if (result == null) return;
 
-    if (result is File) {
-      onPhotoChanged(ProfilePhoto.local(result));
+    if (result.hasSelectedFile) {
+      onPhotoChanged(ProfilePhoto.local(result.file!));
     } else {
       onPhotoChanged(const ProfilePhoto.empty());
     }

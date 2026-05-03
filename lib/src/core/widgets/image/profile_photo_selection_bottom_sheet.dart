@@ -12,7 +12,27 @@ import 'package:global_airsoft_app/src/core/permissions/camera_permission_servic
 import 'package:global_airsoft_app/src/core/permissions/gallery_permission_service.dart';
 import 'package:global_airsoft_app/src/core/permissions/permission_providers.dart';
 
-class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
+enum ProfilePhotoSelectionAction { takePhoto, selectFromGallery, deletePhoto }
+
+class ProfilePhotoSelectionResult {
+  const ProfilePhotoSelectionResult._({
+    required this.file,
+    required this.shouldDelete,
+  });
+
+  const ProfilePhotoSelectionResult.selected(File file)
+    : this._(file: file, shouldDelete: false);
+
+  const ProfilePhotoSelectionResult.deleted()
+    : this._(file: null, shouldDelete: true);
+
+  final File? file;
+  final bool shouldDelete;
+
+  bool get hasSelectedFile => file != null;
+}
+
+class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
   const ProfilePhotoSelectionBottomSheet({
     required this.hasCurrentPhoto,
     super.key,
@@ -20,11 +40,11 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
 
   final bool hasCurrentPhoto;
 
-  static Future<Object?> show(
+  static Future<ProfilePhotoSelectionAction?> show(
     BuildContext context, {
     required bool hasCurrentPhoto,
   }) {
-    return showModalBottomSheet<Object?>(
+    return showModalBottomSheet<ProfilePhotoSelectionAction?>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -35,18 +55,47 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleTakePhoto(BuildContext context, WidgetRef ref) async {
+  static Future<ProfilePhotoSelectionResult?> showForResult(
+    BuildContext context, {
+    required bool hasCurrentPhoto,
+  }) async {
+    final ProfilePhotoSelectionAction? action = await show(
+      context,
+      hasCurrentPhoto: hasCurrentPhoto,
+    );
+
+    if (!context.mounted || action == null) {
+      return null;
+    }
+
+    switch (action) {
+      case ProfilePhotoSelectionAction.takePhoto:
+        return _takePhoto(context);
+      case ProfilePhotoSelectionAction.selectFromGallery:
+        return _selectFromGallery(context);
+      case ProfilePhotoSelectionAction.deletePhoto:
+        return const ProfilePhotoSelectionResult.deleted();
+    }
+  }
+
+  static Future<ProfilePhotoSelectionResult?> _takePhoto(
+    BuildContext context,
+  ) async {
+    final ProviderContainer container = ProviderScope.containerOf(
+      context,
+      listen: false,
+    );
     final NavigatorState navigator = Navigator.of(context, rootNavigator: true);
     final String cropTitle = context.l10n.tr(
       AppLocaleKeys.profilePhotoCropTitle,
     );
-    final CameraPermissionService cameraPermissionService = ref.read(
+    final CameraPermissionService cameraPermissionService = container.read(
       cameraPermissionServiceProvider,
     );
-    final ProfilePhotoCameraCaptureService cameraCaptureService = ref.read(
+    final ProfilePhotoCameraCaptureService cameraCaptureService = container.read(
       profilePhotoCameraCaptureServiceProvider,
     );
-    final ImageCropService imageCropService = ref.read(
+    final ImageCropService imageCropService = container.read(
       imageCropServiceProvider,
     );
 
@@ -56,7 +105,10 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
       final bool permissionGranted = await cameraPermissionService.request();
 
       if (!permissionGranted) {
-        if (!context.mounted) return;
+        if (!context.mounted) {
+          return null;
+        }
+
         await _showPermissionDeniedDialog(
           context,
           isCamera: true,
@@ -64,16 +116,14 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
             await cameraPermissionService.openSettings();
           },
         );
-        return;
+        return null;
       }
     }
 
     final File? capturedFile = await cameraCaptureService.capture(navigator);
 
-    if (!context.mounted) return;
-
-    if (capturedFile == null) {
-      return;
+    if (!context.mounted || capturedFile == null) {
+      return null;
     }
 
     final File? croppedFile = await imageCropService.cropProfilePhoto(
@@ -83,23 +133,26 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
     );
 
     if (!context.mounted || croppedFile == null) {
-      return;
+      return null;
     }
 
-    Navigator.of(context).pop(croppedFile);
+    return ProfilePhotoSelectionResult.selected(croppedFile);
   }
 
-  Future<void> _handleSelectFromGallery(
+  static Future<ProfilePhotoSelectionResult?> _selectFromGallery(
     BuildContext context,
-    WidgetRef ref,
   ) async {
-    final GalleryPermissionService galleryPermissionService = ref.read(
+    final ProviderContainer container = ProviderScope.containerOf(
+      context,
+      listen: false,
+    );
+    final GalleryPermissionService galleryPermissionService = container.read(
       galleryPermissionServiceProvider,
     );
-    final ImagePickerService imagePickerService = ref.read(
+    final ImagePickerService imagePickerService = container.read(
       imagePickerServiceProvider,
     );
-    final ImageCropService imageCropService = ref.read(
+    final ImageCropService imageCropService = container.read(
       imageCropServiceProvider,
     );
 
@@ -109,7 +162,10 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
       final bool permissionGranted = await galleryPermissionService.request();
 
       if (!permissionGranted) {
-        if (!context.mounted) return;
+        if (!context.mounted) {
+          return null;
+        }
+
         await _showPermissionDeniedDialog(
           context,
           isCamera: false,
@@ -117,7 +173,7 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
             await galleryPermissionService.openSettings();
           },
         );
-        return;
+        return null;
       }
     }
 
@@ -127,10 +183,8 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
       imageQuality: 85,
     );
 
-    if (!context.mounted) return;
-
-    if (!result.hasImage) {
-      return;
+    if (!context.mounted || !result.hasImage) {
+      return null;
     }
 
     final File? croppedFile = await imageCropService.cropProfilePhoto(
@@ -140,17 +194,13 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
     );
 
     if (!context.mounted || croppedFile == null) {
-      return;
+      return null;
     }
 
-    Navigator.of(context).pop(croppedFile);
+    return ProfilePhotoSelectionResult.selected(croppedFile);
   }
 
-  void _handleDeletePhoto(BuildContext context) {
-    Navigator.of(context).pop(const _DeletePhotoResult());
-  }
-
-  Future<void> _showPermissionDeniedDialog(
+  static Future<void> _showPermissionDeniedDialog(
     BuildContext context, {
     required bool isCamera,
     required VoidCallback onOpenSettings,
@@ -194,7 +244,7 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
@@ -214,7 +264,6 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
@@ -225,25 +274,25 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-
           _PhotoOption(
             icon: Icons.camera_alt_rounded,
             label: context.l10n.tr(AppLocaleKeys.profilePhotoTakePhoto),
             iconBackgroundColor: colorScheme.primaryContainer,
             iconColor: colorScheme.onPrimaryContainer,
-            onTap: () => _handleTakePhoto(context, ref),
+            onTap: () => Navigator.of(
+              context,
+            ).pop(ProfilePhotoSelectionAction.takePhoto),
           ),
-
           const SizedBox(height: 4),
-
           _PhotoOption(
             icon: Icons.photo_library_rounded,
             label: context.l10n.tr(AppLocaleKeys.profilePhotoSelectFromGallery),
             iconBackgroundColor: colorScheme.secondaryContainer,
             iconColor: colorScheme.onSecondaryContainer,
-            onTap: () => _handleSelectFromGallery(context, ref),
+            onTap: () => Navigator.of(
+              context,
+            ).pop(ProfilePhotoSelectionAction.selectFromGallery),
           ),
-
           if (hasCurrentPhoto) ...<Widget>[
             const SizedBox(height: 4),
             _PhotoOption(
@@ -252,10 +301,11 @@ class ProfilePhotoSelectionBottomSheet extends ConsumerWidget {
               iconBackgroundColor: colorScheme.errorContainer,
               iconColor: colorScheme.onErrorContainer,
               isDestructive: true,
-              onTap: () => _handleDeletePhoto(context),
+              onTap: () => Navigator.of(
+                context,
+              ).pop(ProfilePhotoSelectionAction.deletePhoto),
             ),
           ],
-
           const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
@@ -339,8 +389,4 @@ class _PhotoOption extends StatelessWidget {
       ),
     );
   }
-}
-
-class _DeletePhotoResult {
-  const _DeletePhotoResult();
 }
