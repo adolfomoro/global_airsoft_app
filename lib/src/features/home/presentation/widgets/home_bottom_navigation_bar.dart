@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/providers/home_providers.dart';
@@ -15,26 +16,50 @@ class HomeBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationBar(
-      selectedIndex: currentTab.index,
-      onDestinationSelected: onDestinationSelected,
-      destinations: <NavigationDestination>[
-        NavigationDestination(
-          icon: const Icon(Icons.explore_outlined),
-          selectedIcon: const Icon(Icons.explore_rounded),
-          label: context.l10n.tr(AppLocaleKeys.homeDiscoveryTabLabel),
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundMid,
+        border: Border(
+          top: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.34),
+          ),
         ),
-        NavigationDestination(
-          icon: const Icon(Icons.dynamic_feed_outlined),
-          selectedIcon: const Icon(Icons.dynamic_feed_rounded),
-          label: context.l10n.tr(AppLocaleKeys.homeTimelineTabLabel),
+      ),
+      child: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          backgroundColor: AppColors.backgroundMid,
+          indicatorColor: colorScheme.primaryContainer.withValues(alpha: 0.88),
+          labelTextStyle: WidgetStatePropertyAll(
+            theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
         ),
-        NavigationDestination(
-          icon: const Icon(Icons.person_outline_rounded),
-          selectedIcon: const Icon(Icons.person_rounded),
-          label: context.l10n.tr(AppLocaleKeys.homeProfileTabLabel),
+        child: NavigationBar(
+          height: 68,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          selectedIndex: currentTab.index,
+          onDestinationSelected: onDestinationSelected,
+          destinations: <NavigationDestination>[
+            NavigationDestination(
+              icon: const Icon(Icons.explore_outlined),
+              selectedIcon: const Icon(Icons.explore_rounded),
+              label: context.l10n.tr(AppLocaleKeys.homeDiscoveryTabLabel),
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.dynamic_feed_outlined),
+              selectedIcon: const Icon(Icons.dynamic_feed_rounded),
+              label: context.l10n.tr(AppLocaleKeys.homeTimelineTabLabel),
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.person_outline_rounded),
+              selectedIcon: const Icon(Icons.person_rounded),
+              label: context.l10n.tr(AppLocaleKeys.homeProfileTabLabel),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

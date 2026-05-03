@@ -11,8 +11,9 @@ final NotifierProvider<HomeTabNotifier, HomeTab> homeTabProvider =
 final Provider<HomeProfileViewData> homeProfileViewDataProvider =
     Provider<HomeProfileViewData>((Ref ref) {
       return const HomeProfileViewData(
-        displayName: 'Marcus Kane',
         username: 'marcus.kane',
+        fullName: 'Marcus Kane',
+        bio: 'CQB-focused player who also enjoys long-form weekend milsim events.',
         profilePhoto: ProfilePhoto.empty(),
       );
     });

@@ -28,9 +28,15 @@ void main() {
     await tester.tap(find.byIcon(Icons.person_outline_rounded));
     await tester.pumpAndSettle();
 
+    expect(find.text('@marcus.kane'), findsOneWidget);
     expect(find.text('Marcus Kane'), findsOneWidget);
-    expect(find.text('@marcus.kane'), findsNWidgets(2));
-    expect(find.text('Current account'), findsOneWidget);
-    expect(find.widgetWithText(ElevatedButton, 'Logout'), findsOneWidget);
+    expect(
+      find.text(
+        'CQB-focused player who also enjoys long-form weekend milsim events.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Bio'), findsOneWidget);
+    expect(find.text('Logout'), findsNothing);
   });
 }

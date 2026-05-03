@@ -3,21 +3,13 @@ import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
-import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture_editor.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/view_data/home_profile_view_data.dart';
 
 class HomeProfileTab extends StatelessWidget {
-  const HomeProfileTab({
-    required this.profile,
-    required this.isLogoutLoading,
-    required this.onLogoutPressed,
-    super.key,
-  });
+  const HomeProfileTab({required this.profile, super.key});
 
   final HomeProfileViewData profile;
-  final bool isLogoutLoading;
-  final VoidCallback onLogoutPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -32,117 +24,66 @@ class HomeProfileTab extends StatelessWidget {
             maxWidth: AppDimensions.maxContentWidth,
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Container(
-                padding: const EdgeInsets.all(AppDimensions.spacing2xl),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: <Color>[
-                      colorScheme.primaryContainer,
-                      colorScheme.surfaceContainerLow,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant.withValues(alpha: 0.7),
-                  ),
-                ),
-                child: Column(
-                  children: <Widget>[
-                    AppProfilePictureEditor.profilePhoto(
-                      profilePhoto: profile.profilePhoto,
-                      size: 110,
-                      badgeSize: 0,
-                      showEditBadge: false,
-                    ),
-                    const SizedBox(height: AppDimensions.spacingLg),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppDimensions.spacingMd,
-                        vertical: AppDimensions.spacingXs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface.withValues(alpha: 0.54),
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.radiusPill,
-                        ),
-                      ),
-                      child: Text(
-                        context.l10n.tr(AppLocaleKeys.homeProfilePreviewBadge),
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: AppColors.secondaryLight,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.spacingLg),
-                    Text(
-                      profile.displayName,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppDimensions.spacingXs),
-                    Text(
-                      '@${profile.username}',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: AppColors.secondaryLight,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppDimensions.spacingLg),
-                    Text(
-                      context.l10n.tr(
-                        AppLocaleKeys.homeProfilePreviewDescription,
-                      ),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+              const SizedBox(height: AppDimensions.spacing2xl),
+              AppProfilePictureEditor.profilePhoto(
+                profilePhoto: profile.profilePhoto,
+                size: 124,
+                badgeSize: 0,
+                showEditBadge: false,
+              ),
+              const SizedBox(height: AppDimensions.spacingXl),
+              _ProfileHeadline(
+                label: context.l10n.tr(AppLocaleKeys.homeProfileUsernameLabel),
+                value: '@${profile.username}',
+                valueStyle: theme.textTheme.headlineSmall?.copyWith(
+                  color: AppColors.secondaryLight,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
                 ),
               ),
               const SizedBox(height: AppDimensions.spacingLg),
+              _ProfileHeadline(
+                label: context.l10n.tr(AppLocaleKeys.homeProfileFullNameLabel),
+                value: profile.fullName,
+                valueStyle: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spacing2xl),
               Container(
-                padding: const EdgeInsets.all(AppDimensions.spacingLg),
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppDimensions.spacingXl),
                 decoration: BoxDecoration(
                   color: colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                  border: Border.all(color: colorScheme.outlineVariant),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.78),
+                  ),
                 ),
                 child: Column(
                   children: <Widget>[
-                    _ProfileInfoRow(
-                      label: context.l10n.tr(AppLocaleKeys.homeProfileNameLabel),
-                      value: profile.displayName,
-                    ),
-                    Divider(
-                      height: AppDimensions.spacing2xl,
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.8),
-                    ),
-                    _ProfileInfoRow(
-                      label: context.l10n.tr(
-                        AppLocaleKeys.homeProfileUsernameLabel,
+                    Text(
+                      context.l10n.tr(AppLocaleKeys.homeProfileBioLabel),
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.2,
                       ),
-                      value: '@${profile.username}',
+                    ),
+                    const SizedBox(height: AppDimensions.spacingMd),
+                    Text(
+                      profile.bio,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        height: 1.5,
+                        color: colorScheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppDimensions.spacingLg),
-              AppButton(
-                label: context.l10n.tr(AppLocaleKeys.homeLogoutAction),
-                onPressed: isLogoutLoading ? null : onLogoutPressed,
-                isLoading: isLogoutLoading,
-                variant: AppButtonVariant.secondary,
-                icon: Icons.logout_rounded,
-              ),
+              const SizedBox(height: AppDimensions.spacing2xl),
             ],
           ),
         ),
@@ -151,38 +92,34 @@ class HomeProfileTab extends StatelessWidget {
   }
 }
 
-class _ProfileInfoRow extends StatelessWidget {
-  const _ProfileInfoRow({required this.label, required this.value});
+class _ProfileHeadline extends StatelessWidget {
+  const _ProfileHeadline({
+    required this.label,
+    required this.value,
+    required this.valueStyle,
+  });
 
   final String label;
   final String value;
+  final TextStyle? valueStyle;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: <Widget>[
-        Expanded(
-          child: Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+        Text(
+          label,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
           ),
         ),
-        const SizedBox(width: AppDimensions.spacingLg),
-        Flexible(
-          child: Text(
-            value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.end,
-          ),
-        ),
+        const SizedBox(height: AppDimensions.spacingXs),
+        Text(value, style: valueStyle, textAlign: TextAlign.center),
       ],
     );
   }

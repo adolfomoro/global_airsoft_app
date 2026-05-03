@@ -11,8 +11,10 @@
     "home.timelinePlaceholderMessage": "A timeline da comunidade sera conectada aqui em seguida.",
     "home.profilePreviewBadge": "Conta atual",
     "home.profilePreviewDescription": "Este perfil usa dados mockados ate a conexao do endpoint da conta.",
+    "home.profileFullNameLabel": "Nome completo",
     "home.profileNameLabel": "Nome",
     "home.profileUsernameLabel": "Username",
+    "home.profileBioLabel": "Bio",
     "home.logoutAction": "Sair",
     "home.logoutErrorMessage": "NÃ£o foi possÃ­vel sair agora. Tente novamente.",
     "device.registrationFailed": "NÃ£o foi possÃ­vel registrar o dispositivo.",
@@ -123,5 +125,4 @@
     "profilePhoto.galleryPermissionDeniedMessage": "Para selecionar fotos, permita o acesso Ã  galeria nas configuraÃ§Ãµes do aparelho.",
     "profilePhoto.permissionOpenSettings": "Abrir configuraÃ§Ãµes"
 }
-
 
