@@ -28,6 +28,8 @@
     "home.privacyDescription": "Choose what appears on your account for other players.",
     "home.privacyFullNameVisibleTitle": "Show full name on profile",
     "home.privacyFullNameVisibleDescription": "When disabled, your profile will prefer your username instead of your full name.",
+    "home.privacyFullNamePrivateTitle": "Keep full name private",
+    "home.privacyFullNamePrivateDescription": "Turn this on to hide your full name from other users.",
     "home.privacySaveAction": "Save privacy settings",
     "home.privacyRetryAction": "Try again",
     "home.privacyLoadFailedMessage": "Unable to load your privacy settings right now.",

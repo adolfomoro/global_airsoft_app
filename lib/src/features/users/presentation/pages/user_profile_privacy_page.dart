@@ -105,6 +105,7 @@ class _UserProfilePrivacyPageState
               data: (UserProfilePrivacySettings settings) {
                 final bool fullNameVisible =
                     _fullNameVisible ?? settings.fullNameVisible;
+                final bool fullNamePrivate = !fullNameVisible;
 
                 return ListView(
                   padding: const EdgeInsets.fromLTRB(
@@ -122,6 +123,15 @@ class _UserProfilePrivacyPageState
                       ),
                     ),
                     const SizedBox(height: AppDimensions.spacingLg),
+                    Text(
+                      context.l10n.tr(AppLocaleKeys.homeProfileTabLabel),
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.spacingSm),
                     DecoratedBox(
                       decoration: BoxDecoration(
                         color: colorScheme.surfaceContainerLow,
@@ -135,7 +145,10 @@ class _UserProfilePrivacyPageState
                         ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(AppDimensions.spacingLg),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppDimensions.spacingMd,
+                          vertical: AppDimensions.spacingSm,
+                        ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -145,10 +158,12 @@ class _UserProfilePrivacyPageState
                                 children: <Widget>[
                                   Text(
                                     context.l10n.tr(
-                                      AppLocaleKeys.homePrivacyFullNameVisibleTitle,
+                                      AppLocaleKeys
+                                          .homePrivacyFullNamePrivateTitle,
                                     ),
                                     style: theme.textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.w700,
+                                      height: 1.1,
                                     ),
                                   ),
                                   const SizedBox(
@@ -157,24 +172,24 @@ class _UserProfilePrivacyPageState
                                   Text(
                                     context.l10n.tr(
                                       AppLocaleKeys
-                                          .homePrivacyFullNameVisibleDescription,
+                                          .homePrivacyFullNamePrivateDescription,
                                     ),
                                     style: theme.textTheme.bodyMedium?.copyWith(
                                       color: colorScheme.onSurfaceVariant,
-                                      height: 1.4,
+                                      height: 1.3,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: AppDimensions.spacingMd),
+                            const SizedBox(width: AppDimensions.spacingSm),
                             Switch.adaptive(
-                              value: fullNameVisible,
+                              value: fullNamePrivate,
                               onChanged: _isSaving
                                   ? null
                                   : (bool value) {
                                       setState(() {
-                                        _fullNameVisible = value;
+                                        _fullNameVisible = !value;
                                       });
                                     },
                             ),
@@ -216,6 +231,7 @@ class _UserProfilePrivacyPageState
       ),
     );
   }
+
 }
 
 class _PrivacyLoadingState extends StatelessWidget {
@@ -235,7 +251,9 @@ class _PrivacyLoadingState extends StatelessWidget {
         SizedBox(height: AppDimensions.spacingSm),
         AppSkeleton(width: 260, height: 18),
         SizedBox(height: AppDimensions.spacingLg),
-        AppSkeleton(height: 132),
+        AppSkeleton(width: 72, height: 18),
+        SizedBox(height: AppDimensions.spacingSm),
+        AppSkeleton(height: 104),
         SizedBox(height: AppDimensions.spacingLg),
         AppSkeleton(height: 48),
       ],

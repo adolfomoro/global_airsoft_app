@@ -28,6 +28,8 @@
     "home.privacyDescription": "Escolha o que aparece na sua conta para os outros jogadores.",
     "home.privacyFullNameVisibleTitle": "Mostrar nome completo no perfil",
     "home.privacyFullNameVisibleDescription": "Quando desativado, seu perfil prioriza o username no lugar do nome completo.",
+    "home.privacyFullNamePrivateTitle": "Nome completo privado",
+    "home.privacyFullNamePrivateDescription": "Ative para esconder seu nome completo de outros usuários.",
     "home.privacySaveAction": "Salvar privacidade",
     "home.privacyRetryAction": "Tentar novamente",
     "home.privacyLoadFailedMessage": "Não foi possível carregar suas configurações de privacidade agora.",

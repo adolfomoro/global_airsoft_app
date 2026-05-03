@@ -44,6 +44,10 @@ abstract final class AppLocaleKeys {
       'home.privacyFullNameVisibleTitle';
   static const String homePrivacyFullNameVisibleDescription =
       'home.privacyFullNameVisibleDescription';
+  static const String homePrivacyFullNamePrivateTitle =
+      'home.privacyFullNamePrivateTitle';
+  static const String homePrivacyFullNamePrivateDescription =
+      'home.privacyFullNamePrivateDescription';
   static const String homePrivacySaveAction = 'home.privacySaveAction';
   static const String homePrivacyRetryAction = 'home.privacyRetryAction';
   static const String homePrivacyLoadFailedMessage =
