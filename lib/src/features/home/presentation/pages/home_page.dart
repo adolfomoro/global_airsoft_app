@@ -21,7 +21,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     ref.read(homeTabProvider.notifier).select(HomeTab.discovery);
-    ref.read(currentUserProfileControllerProvider).load();
+    ref.read(currentUserProfileProvider.future);
   }
 
   @override

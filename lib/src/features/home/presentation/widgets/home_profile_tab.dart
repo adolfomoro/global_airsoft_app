@@ -25,7 +25,23 @@ class HomeProfileTab extends ConsumerWidget {
     );
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(currentUserProfileControllerProvider).reload(),
+      onRefresh: () async {
+        try {
+          await ref.read(currentUserProfileProvider.notifier).reload();
+        } catch (error) {
+          if (!context.mounted) {
+            return;
+          }
+
+          final Object source = error is UserProfileException
+              ? error.failure
+              : error;
+          context.showErrorSnackBar(
+            _resolveErrorMessage(context, error),
+            source: source,
+          );
+        }
+      },
       child: profileState.when(
         data: (UserProfile profile) => _ProfileContent(profile: profile),
         loading: () => const _ProfileLoadingState(),
@@ -215,7 +231,7 @@ class _EditableProfilePhotoSectionState
         return;
       }
 
-      await ref.read(currentUserProfileControllerProvider).reload();
+      await ref.read(currentUserProfileProvider.notifier).reload();
 
       if (!mounted) {
         return;

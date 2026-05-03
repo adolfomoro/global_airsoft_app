@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
+import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_service.dart';
+import 'package:global_airsoft_app/src/features/users/application/services/user_profile_storage_service.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/user_profile_repository.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
 
@@ -25,30 +30,84 @@ final Provider<UserProfileService> userProfileServiceProvider =
       );
     });
 
-final FutureProvider<UserProfile> currentUserProfileProvider =
-    FutureProvider<UserProfile>((Ref ref) async {
-      final service = ref.watch(userProfileServiceProvider);
-      return service.getCurrentUserProfile();
+final Provider<UserProfileStorageService> userProfileStorageServiceProvider =
+    Provider<UserProfileStorageService>((Ref ref) {
+      final secureStorage = ref.watch(secureStorageServiceProvider);
+      final authStorageService = ref.watch(authStorageServiceProvider);
+      return UserProfileStorageService(
+        secureStorage: secureStorage,
+        authStorageService: authStorageService,
+        logger: AppLogger.instance,
+      );
     });
 
-final Provider<CurrentUserProfileController>
-currentUserProfileControllerProvider = Provider<CurrentUserProfileController>((
-  Ref ref,
-) {
-  return CurrentUserProfileController(ref);
-});
+final AsyncNotifierProvider<CurrentUserProfileController, UserProfile>
+currentUserProfileProvider =
+    AsyncNotifierProvider<CurrentUserProfileController, UserProfile>(
+      CurrentUserProfileController.new,
+    );
 
-final class CurrentUserProfileController {
-  const CurrentUserProfileController(this._ref);
+class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
+  UserProfileService get _service => ref.read(userProfileServiceProvider);
+  UserProfileStorageService get _storage =>
+      ref.read(userProfileStorageServiceProvider);
+  AppLogger get _logger => AppLogger.instance;
 
-  final Ref _ref;
+  @override
+  Future<UserProfile> build() async {
+    final UserProfile? cachedProfile = await _storage.getCurrentUserProfile();
+    if (cachedProfile != null) {
+      unawaited(_refreshSilently());
+      return cachedProfile;
+    }
 
-  Future<UserProfile> load() {
-    return _ref.read(currentUserProfileProvider.future);
+    return _fetchAndPersistRemoteProfile();
   }
 
-  Future<UserProfile> reload() {
-    _ref.invalidate(currentUserProfileProvider);
-    return _ref.read(currentUserProfileProvider.future);
+  Future<UserProfile> reload() async {
+    final UserProfile? previousProfile = state.asData?.value;
+
+    try {
+      final UserProfile remoteProfile = await _fetchAndPersistRemoteProfile();
+      if (ref.mounted) {
+        state = AsyncData<UserProfile>(remoteProfile);
+      }
+      return remoteProfile;
+    } catch (error, stackTrace) {
+      if (ref.mounted) {
+        state = previousProfile != null
+            ? AsyncData<UserProfile>(previousProfile)
+            : AsyncError<UserProfile>(error, stackTrace);
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> clearCachedProfile() {
+    return _storage.clearCurrentUserProfile();
+  }
+
+  Future<UserProfile> _fetchAndPersistRemoteProfile() async {
+    final UserProfile remoteProfile = await _service.getCurrentUserProfile();
+    await _storage.saveCurrentUserProfile(remoteProfile);
+    return remoteProfile;
+  }
+
+  Future<void> _refreshSilently() async {
+    try {
+      final UserProfile remoteProfile = await _fetchAndPersistRemoteProfile();
+      if (ref.mounted) {
+        state = AsyncData<UserProfile>(remoteProfile);
+      }
+    } catch (error, stackTrace) {
+      _logger.debug(
+        'Silent current user profile refresh failed. Keeping cached profile.',
+      );
+      _logger.error(
+        'Current user profile silent refresh failed.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

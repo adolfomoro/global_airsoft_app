@@ -13,17 +13,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          currentUserProfileProvider.overrideWith((Ref ref) async {
-            return const UserProfile(
-              id: 'user-1',
-              username: 'marcus.kane',
-              fullName: 'Marcus Kane',
-              bio:
-                  'CQB-focused player who also enjoys long-form weekend milsim events.',
-              mediumProfilePictureUrl: '',
-              largeProfilePictureUrl: '',
-            );
-          }),
+          currentUserProfileProvider.overrideWith(
+            _TestCurrentUserProfileController.new,
+          ),
         ],
         child: MaterialApp(
           locale: Locale('en'),
@@ -54,4 +46,20 @@ void main() {
     expect(find.text('Bio'), findsOneWidget);
     expect(find.text('Logout'), findsNothing);
   });
+}
+
+final class _TestCurrentUserProfileController
+    extends CurrentUserProfileController {
+  @override
+  Future<UserProfile> build() async {
+    return const UserProfile(
+      id: 'user-1',
+      username: 'marcus.kane',
+      fullName: 'Marcus Kane',
+      bio:
+          'CQB-focused player who also enjoys long-form weekend milsim events.',
+      mediumProfilePictureUrl: '',
+      largeProfilePictureUrl: '',
+    );
+  }
 }
