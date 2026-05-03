@@ -38,6 +38,7 @@ class ProfilePhotoEditor extends StatelessWidget {
     this.badgeSize = 38,
     this.enabled = true,
     this.allowDelete = true,
+    this.isLoading = false,
     super.key,
   });
 
@@ -48,6 +49,7 @@ class ProfilePhotoEditor extends StatelessWidget {
   final double badgeSize;
   final bool enabled;
   final bool allowDelete;
+  final bool isLoading;
 
   Future<void> _handleEditTap(BuildContext context) async {
     if (!enabled) {
@@ -78,6 +80,7 @@ class ProfilePhotoEditor extends StatelessWidget {
       onEditTap: () => _handleEditTap(context),
       size: size,
       badgeSize: badgeSize,
+      isLoading: isLoading,
     );
   }
 }

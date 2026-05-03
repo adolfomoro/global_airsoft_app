@@ -269,15 +269,8 @@ class _EditableProfilePhotoSectionState
           badgeSize: 40,
           enabled: !_isUploading,
           allowDelete: false,
+          isLoading: _isUploading,
         ),
-        if (_isUploading) ...<Widget>[
-          const SizedBox(height: AppDimensions.spacingMd),
-          const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2.2),
-          ),
-        ],
       ],
     );
   }

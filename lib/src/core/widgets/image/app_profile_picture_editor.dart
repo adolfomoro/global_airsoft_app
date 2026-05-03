@@ -9,6 +9,7 @@ class AppProfilePictureEditor extends StatelessWidget {
     this.onPhotoTap,
     this.size = 126,
     this.badgeSize = 38,
+    this.isLoading = false,
     super.key,
   }) : assert(size > 0, 'size must be greater than zero.'),
        assert(badgeSize > 0, 'badgeSize must be greater than zero.'),
@@ -22,6 +23,7 @@ class AppProfilePictureEditor extends StatelessWidget {
     this.onPhotoTap,
     this.size = 126,
     this.badgeSize = 38,
+    this.isLoading = false,
     super.key,
   }) : assert(size > 0, 'size must be greater than zero.'),
        assert(badgeSize > 0, 'badgeSize must be greater than zero.'),
@@ -35,6 +37,7 @@ class AppProfilePictureEditor extends StatelessWidget {
     this.onPhotoTap,
     this.size = 126,
     this.badgeSize = 38,
+    this.isLoading = false,
     super.key,
   }) : assert(size > 0, 'size must be greater than zero.'),
        assert(badgeSize > 0, 'badgeSize must be greater than zero.'),
@@ -49,6 +52,7 @@ class AppProfilePictureEditor extends StatelessWidget {
   final VoidCallback onEditTap;
   final double size;
   final double badgeSize;
+  final bool isLoading;
 
   Widget _buildProfilePicture() {
     final ProfilePhoto? profilePhoto = _profilePhoto;
@@ -87,12 +91,33 @@ class AppProfilePictureEditor extends StatelessWidget {
         clipBehavior: Clip.none,
         children: <Widget>[
           _buildProfilePicture(),
+          if (isLoading)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colorScheme.scrim.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: SizedBox(
+                      width: size * 0.22,
+                      height: size * 0.22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           Positioned(
             right: 0,
             bottom: 0,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: onEditTap,
+              onTap: isLoading ? null : onEditTap,
               child: Container(
                 width: badgeSize,
                 height: badgeSize,
