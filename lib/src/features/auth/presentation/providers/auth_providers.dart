@@ -9,6 +9,9 @@ import 'package:global_airsoft_app/src/features/auth/application/services/auth_s
 import 'package:global_airsoft_app/src/features/auth/application/services/google_sign_in_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
 
+final Provider<Future<void> Function()> authLocalSessionCleanupProvider =
+    Provider<Future<void> Function()>((Ref ref) => () async {});
+
 final Provider<AuthStorageService> authStorageServiceProvider =
     Provider<AuthStorageService>((Ref ref) {
       final secureStorage = ref.watch(secureStorageServiceProvider);
@@ -31,10 +34,12 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
   final authRepository = ref.watch(authRepositoryProvider);
   final authStorageService = ref.watch(authStorageServiceProvider);
   final sharedPrefs = ref.watch(sharedPrefsKeyValueStoreProvider);
+  final clearLocalSessionData = ref.watch(authLocalSessionCleanupProvider);
   return AuthService(
     authRepository: authRepository,
     authStorageService: authStorageService,
     sharedPrefs: sharedPrefs,
+    clearLocalSessionData: clearLocalSessionData,
     logger: AppLogger.instance,
   );
 });

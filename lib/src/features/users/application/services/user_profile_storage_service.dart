@@ -1,17 +1,21 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
+import 'package:global_airsoft_app/src/features/users/application/services/user_profile_offline_photo_storage_service.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
 
 final class UserProfileStorageService {
-  const UserProfileStorageService({
+  UserProfileStorageService({
     required SecureStorageService secureStorage,
     required AuthStorageService authStorageService,
+    required UserProfileOfflinePhotoStorageService offlinePhotoStorageService,
     required AppLogger logger,
   }) : _secureStorage = secureStorage,
        _authStorageService = authStorageService,
+       _offlinePhotoStorageService = offlinePhotoStorageService,
        _logger = logger;
 
   static const String _currentUserProfileKey = 'users.current_user_profile';
@@ -20,6 +24,7 @@ final class UserProfileStorageService {
 
   final SecureStorageService _secureStorage;
   final AuthStorageService _authStorageService;
+  final UserProfileOfflinePhotoStorageService _offlinePhotoStorageService;
   final AppLogger _logger;
 
   Future<UserProfile?> getCurrentUserProfile() async {
@@ -35,6 +40,7 @@ final class UserProfileStorageService {
         _currentUserProfileUserIdKey,
       );
       if (storedUserId == null || storedUserId != currentAuthenticatedUserId) {
+        await _clearStoredProfileData(userId: storedUserId);
         return null;
       }
 
@@ -50,8 +56,14 @@ final class UserProfileStorageService {
         return null;
       }
 
+      final String profileId = (decoded['id'] as String? ?? '').trim();
+      final String? localProfilePhotoPath = await _offlinePhotoStorageService
+          .getStoredProfilePhotoPath(
+            userId: profileId.isNotEmpty ? profileId : storedUserId,
+          );
+
       return UserProfile(
-        id: (decoded['id'] as String? ?? '').trim(),
+        id: profileId,
         username: (decoded['username'] as String? ?? '').trim(),
         fullName: (decoded['fullName'] as String? ?? '').trim(),
         bio: (decoded['bio'] as String? ?? '').trim(),
@@ -59,6 +71,7 @@ final class UserProfileStorageService {
             (decoded['mediumProfilePictureUrl'] as String? ?? '').trim(),
         largeProfilePictureUrl:
             (decoded['largeProfilePictureUrl'] as String? ?? '').trim(),
+        localProfilePicturePath: localProfilePhotoPath ?? '',
       );
     } catch (error, stackTrace) {
       _logger.error(
@@ -87,10 +100,24 @@ final class UserProfileStorageService {
   }
 
   Future<void> clearCurrentUserProfile() async {
-    await Future.wait<void>(<Future<void>>[
-      _secureStorage.remove(_currentUserProfileKey),
-      _secureStorage.remove(_currentUserProfileUserIdKey),
-    ]);
+    final String? storedUserId = await _secureStorage.getString(
+      _currentUserProfileUserIdKey,
+    );
+    await _clearStoredProfileData(userId: storedUserId);
+  }
+
+  Future<String> storeCurrentUserProfilePhotoFile({
+    required String userId,
+    required File sourceFile,
+  }) {
+    return _offlinePhotoStorageService.storeProfilePhotoFile(
+      userId: userId,
+      sourceFile: sourceFile,
+    );
+  }
+
+  Future<void> clearCurrentUserProfilePhoto({required String userId}) {
+    return _offlinePhotoStorageService.clearStoredProfilePhoto(userId: userId);
   }
 
   Future<String?> _resolveCurrentAuthenticatedUserId() async {
@@ -101,5 +128,21 @@ final class UserProfileStorageService {
     }
 
     return userId;
+  }
+  Future<void> _clearStoredProfileData({String? userId}) async {
+    final String normalizedUserId = userId?.trim() ?? '';
+    final List<Future<void>> operations = <Future<void>>[
+      _secureStorage.remove(_currentUserProfileKey),
+      _secureStorage.remove(_currentUserProfileUserIdKey),
+    ];
+    if (normalizedUserId.isNotEmpty) {
+      operations.add(
+        _offlinePhotoStorageService.clearStoredProfileAssets(
+          userId: normalizedUserId,
+        ),
+      );
+    }
+
+    await Future.wait<void>(operations);
   }
 }

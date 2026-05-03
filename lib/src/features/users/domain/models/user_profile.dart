@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
 
 final class UserProfile {
@@ -8,6 +10,7 @@ final class UserProfile {
     required this.bio,
     required this.mediumProfilePictureUrl,
     required this.largeProfilePictureUrl,
+    this.localProfilePicturePath = '',
   });
 
   final String id;
@@ -16,12 +19,14 @@ final class UserProfile {
   final String bio;
   final String mediumProfilePictureUrl;
   final String largeProfilePictureUrl;
+  final String localProfilePicturePath;
 
   UserProfile copyWith({
     String? fullName,
     String? bio,
     String? mediumProfilePictureUrl,
     String? largeProfilePictureUrl,
+    String? localProfilePicturePath,
   }) {
     return UserProfile(
       id: id,
@@ -32,10 +37,17 @@ final class UserProfile {
           mediumProfilePictureUrl ?? this.mediumProfilePictureUrl,
       largeProfilePictureUrl:
           largeProfilePictureUrl ?? this.largeProfilePictureUrl,
+      localProfilePicturePath:
+          localProfilePicturePath ?? this.localProfilePicturePath,
     );
   }
 
   ProfilePhoto get profilePhoto {
+    final String localPath = localProfilePicturePath.trim();
+    if (localPath.isNotEmpty) {
+      return ProfilePhoto.local(File(localPath));
+    }
+
     final String mediumUrl = mediumProfilePictureUrl.trim();
     final String largeUrl = largeProfilePictureUrl.trim();
     final String preferredUrl = mediumUrl.isNotEmpty ? mediumUrl : largeUrl;

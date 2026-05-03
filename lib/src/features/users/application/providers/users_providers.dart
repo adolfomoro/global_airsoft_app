@@ -1,11 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
+import 'package:global_airsoft_app/src/core/network/constants/app_network_headers.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/users/application/services/current_user_profile_offline_persistence_service.dart';
+import 'package:global_airsoft_app/src/features/users/application/services/user_profile_offline_photo_storage_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_storage_service.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/user_profile_repository.dart';
@@ -35,9 +40,55 @@ final Provider<UserProfileStorageService> userProfileStorageServiceProvider =
     Provider<UserProfileStorageService>((Ref ref) {
       final secureStorage = ref.watch(secureStorageServiceProvider);
       final authStorageService = ref.watch(authStorageServiceProvider);
+      final offlinePhotoStorageService = ref.watch(
+        userProfileOfflinePhotoStorageServiceProvider,
+      );
       return UserProfileStorageService(
         secureStorage: secureStorage,
         authStorageService: authStorageService,
+        offlinePhotoStorageService: offlinePhotoStorageService,
+        logger: AppLogger.instance,
+      );
+    });
+
+final Provider<Dio> userProfileOfflineDownloadClientProvider =
+    Provider<Dio>((Ref ref) {
+      final config = ref.watch(appConfigProvider);
+      return Dio(
+        BaseOptions(
+          connectTimeout: Duration(milliseconds: config.connectTimeoutMs),
+          receiveTimeout: Duration(milliseconds: config.receiveTimeoutMs),
+          sendTimeout: Duration(milliseconds: config.sendTimeoutMs),
+          headers: <String, Object>{
+            Headers.acceptHeader: 'image/*,*/*',
+            AppNetworkHeaders.userAgentHeader: AppNetworkHeaders.userAgentValue,
+          },
+        ),
+      );
+    });
+
+final Provider<UserProfileOfflinePhotoStorageService>
+userProfileOfflinePhotoStorageServiceProvider =
+    Provider<UserProfileOfflinePhotoStorageService>((Ref ref) {
+      final fileStorage = ref.watch(appFileStorageServiceProvider);
+      final downloadClient = ref.watch(userProfileOfflineDownloadClientProvider);
+      return UserProfileOfflinePhotoStorageService(
+        fileStorage: fileStorage,
+        downloadClient: downloadClient,
+        logger: AppLogger.instance,
+      );
+    });
+
+final Provider<CurrentUserProfileOfflinePersistenceService>
+currentUserProfileOfflinePersistenceServiceProvider =
+    Provider<CurrentUserProfileOfflinePersistenceService>((Ref ref) {
+      final storageService = ref.watch(userProfileStorageServiceProvider);
+      final offlinePhotoStorageService = ref.watch(
+        userProfileOfflinePhotoStorageServiceProvider,
+      );
+      return CurrentUserProfileOfflinePersistenceService(
+        storageService: storageService,
+        offlinePhotoStorageService: offlinePhotoStorageService,
         logger: AppLogger.instance,
       );
     });
@@ -61,13 +112,14 @@ currentUserProfileRefreshRequestProvider =
 
 class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
   UserProfileService get _service => ref.read(userProfileServiceProvider);
-  UserProfileStorageService get _storage =>
-      ref.read(userProfileStorageServiceProvider);
+  CurrentUserProfileOfflinePersistenceService get _offlinePersistence =>
+      ref.read(currentUserProfileOfflinePersistenceServiceProvider);
   AppLogger get _logger => AppLogger.instance;
 
   @override
   Future<UserProfile> build() async {
-    final UserProfile? cachedProfile = await _storage.getCurrentUserProfile();
+    final UserProfile? cachedProfile =
+        await _offlinePersistence.getCurrentUserProfile();
     if (cachedProfile != null) {
       unawaited(_refreshSilently());
       return cachedProfile;
@@ -96,7 +148,41 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
   }
 
   Future<void> clearCachedProfile() {
-    return _storage.clearCurrentUserProfile();
+    return _offlinePersistence.clearCurrentUserProfile();
+  }
+
+  Future<void> applyProfilePhotoFile(File file) async {
+    final UserProfile? currentProfile =
+        state.asData?.value ?? await _offlinePersistence.getCurrentUserProfile();
+    if (currentProfile == null) {
+      return;
+    }
+
+    final String storedPhotoPath = await _offlinePersistence
+        .storeCurrentUserProfilePhotoFile(
+          userId: currentProfile.id,
+          sourceFile: file,
+        );
+    if (ref.mounted) {
+      state = AsyncData<UserProfile>(
+        currentProfile.copyWith(localProfilePicturePath: storedPhotoPath),
+      );
+    }
+  }
+
+  Future<void> clearProfilePhoto() async {
+    final UserProfile? currentProfile =
+        state.asData?.value ?? await _offlinePersistence.getCurrentUserProfile();
+    if (currentProfile == null) {
+      return;
+    }
+
+    final UserProfile updatedProfile = await _offlinePersistence
+        .clearCurrentUserProfilePhoto(currentProfile);
+
+    if (ref.mounted) {
+      state = AsyncData<UserProfile>(updatedProfile);
+    }
   }
 
   Future<void> applyProfileDetails({
@@ -104,7 +190,7 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
     required String bio,
   }) async {
     final UserProfile? currentProfile =
-        state.asData?.value ?? await _storage.getCurrentUserProfile();
+        state.asData?.value ?? await _offlinePersistence.getCurrentUserProfile();
     if (currentProfile == null) {
       return;
     }
@@ -113,7 +199,7 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
       fullName: fullName.trim(),
       bio: bio.trim(),
     );
-    await _storage.saveCurrentUserProfile(updatedProfile);
+    await _offlinePersistence.saveCurrentUserProfile(updatedProfile);
 
     if (ref.mounted) {
       state = AsyncData<UserProfile>(updatedProfile);
@@ -122,8 +208,7 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
 
   Future<UserProfile> _fetchAndPersistRemoteProfile() async {
     final UserProfile remoteProfile = await _service.getCurrentUserProfile();
-    await _storage.saveCurrentUserProfile(remoteProfile);
-    return remoteProfile;
+    return _offlinePersistence.persistRemoteProfile(remoteProfile);
   }
 
   Future<void> _refreshSilently() async {

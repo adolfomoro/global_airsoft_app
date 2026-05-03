@@ -24,15 +24,18 @@ final class AuthService {
     required AuthRepository authRepository,
     required AuthStorageService authStorageService,
     required SharedPrefsKeyValueStore sharedPrefs,
+    required Future<void> Function() clearLocalSessionData,
     required AppLogger logger,
   }) : _authRepository = authRepository,
        _authStorageService = authStorageService,
        _sharedPrefs = sharedPrefs,
+       _clearLocalSessionData = clearLocalSessionData,
        _logger = logger;
 
   final AuthRepository _authRepository;
   final AuthStorageService _authStorageService;
   final SharedPrefsKeyValueStore _sharedPrefs;
+  final Future<void> Function() _clearLocalSessionData;
   final AppLogger _logger;
 
   Future<void> persistAuthenticatedUser(
@@ -84,8 +87,11 @@ final class AuthService {
       return;
     }
 
-    await _authStorageService.clearAll();
-    await _sharedPrefs.remove(_userIdBackupKey);
+    await Future.wait<void>(<Future<void>>[
+      _clearLocalSessionData(),
+      _authStorageService.clearAll(),
+      _sharedPrefs.remove(_userIdBackupKey),
+    ]);
   }
 
   Future<void> signUp({

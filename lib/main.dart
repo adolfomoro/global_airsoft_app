@@ -77,6 +77,11 @@ Future<void> main() async {
           ),
           authStorageServiceProvider.overrideWithValue(authStorageService),
           initialIsAuthenticatedProvider.overrideWithValue(isAuthenticated),
+          authLocalSessionCleanupProvider.overrideWithValue(() async {
+            await container.read(userProfileStorageServiceProvider)
+                .clearCurrentUserProfile();
+            container.invalidate(currentUserProfileProvider);
+          }),
         ],
       );
 
@@ -127,9 +132,7 @@ Future<void> main() async {
         clearSession: () async {
           await authStorageService.clearAll();
           await keyValueStore.remove('user_id_for_backup');
-          await container.read(userProfileStorageServiceProvider)
-              .clearCurrentUserProfile();
-          container.invalidate(currentUserProfileProvider);
+          await container.read(authLocalSessionCleanupProvider)();
           container.read(isAuthenticatedProvider.notifier).setUnauthenticated();
         },
         refreshTokens: authTokenRefreshService.refreshTokens,

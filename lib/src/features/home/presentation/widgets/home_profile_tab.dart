@@ -4,6 +4,7 @@ import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
@@ -197,21 +198,78 @@ class _EditableProfilePhotoSectionState
 
     try {
       final userProfileService = ref.read(userProfileServiceProvider);
+      final CurrentUserProfileController profileController = ref.read(
+        currentUserProfileProvider.notifier,
+      );
       if (photo.isLocal) {
         await userProfileService.uploadCurrentUserProfilePicture(
           photo.localFile!,
         );
+        Object? localSyncError;
+        StackTrace? localSyncStackTrace;
+        try {
+          await profileController.applyProfilePhotoFile(photo.localFile!);
+        } catch (error, stackTrace) {
+          localSyncError = error;
+          localSyncStackTrace = stackTrace;
+        }
+
+        try {
+          await profileController.reload();
+          localSyncError = null;
+          localSyncStackTrace = null;
+        } catch (error, stackTrace) {
+          if (localSyncError != null) {
+            Error.throwWithStackTrace(
+              localSyncError,
+              localSyncStackTrace ?? stackTrace,
+            );
+          }
+
+          AppLogger.instance.debug(
+            'Profile photo updated, but the post-update refresh failed. Keeping the local cached photo.',
+          );
+          AppLogger.instance.error(
+            'Profile photo post-update refresh failed.',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
       } else if (photo.isEmpty) {
         await userProfileService.deleteCurrentUserProfilePicture();
+        Object? localSyncError;
+        StackTrace? localSyncStackTrace;
+        try {
+          await profileController.clearProfilePhoto();
+        } catch (error, stackTrace) {
+          localSyncError = error;
+          localSyncStackTrace = stackTrace;
+        }
+
+        try {
+          await profileController.reload();
+          localSyncError = null;
+          localSyncStackTrace = null;
+        } catch (error, stackTrace) {
+          if (localSyncError != null) {
+            Error.throwWithStackTrace(
+              localSyncError,
+              localSyncStackTrace ?? stackTrace,
+            );
+          }
+
+          AppLogger.instance.debug(
+            'Profile photo removal succeeded, but the post-update refresh failed.',
+          );
+          AppLogger.instance.error(
+            'Profile photo removal post-update refresh failed.',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
       } else {
         return;
       }
-
-      if (!mounted) {
-        return;
-      }
-
-      await ref.read(currentUserProfileProvider.notifier).reload();
 
       if (!mounted) {
         return;

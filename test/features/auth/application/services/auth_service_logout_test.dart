@@ -83,6 +83,7 @@ Future<AuthService> _buildAuthService({
   required List<String> events,
   required SecureStorageService secureStorageService,
   required SharedPrefsKeyValueStore sharedPrefs,
+  Future<void> Function()? clearLocalSessionData,
 }) async {
   final AppConfig config = AppConfig(
     environment: AppEnvironment.test,
@@ -134,6 +135,11 @@ Future<AuthService> _buildAuthService({
     authRepository: authRepository,
     authStorageService: authStorageService,
     sharedPrefs: sharedPrefs,
+    clearLocalSessionData:
+        clearLocalSessionData ??
+        () async {
+          events.add('local-cleanup');
+        },
     logger: AppLogger.instance,
   );
 }
@@ -176,6 +182,7 @@ void main() {
 
     expect(events.first, 'server:DELETE:/auth/logout');
     expect(events.skip(1).toSet(), <String>{
+      'local-cleanup',
       'secure-remove:auth_tokens',
       'secure-remove:auth_profile',
     });
@@ -215,6 +222,7 @@ void main() {
 
     expect(events.first, 'server:DELETE:/auth/logout');
     expect(events.skip(1).toSet(), <String>{
+      'local-cleanup',
       'secure-remove:auth_tokens',
       'secure-remove:auth_profile',
     });
