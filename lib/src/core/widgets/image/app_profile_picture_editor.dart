@@ -8,10 +8,11 @@ import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_plac
 class AppProfilePictureEditor extends StatelessWidget {
   const AppProfilePictureEditor.network({
     required String imageUrl,
-    required this.onPhotoTap,
-    required this.onEditTap,
+    this.onPhotoTap,
+    this.onEditTap,
     this.size = 126,
     this.badgeSize = 38,
+    this.showEditBadge = true,
     super.key,
   }) : _imageUrl = imageUrl,
        _imageProvider = null,
@@ -19,10 +20,11 @@ class AppProfilePictureEditor extends StatelessWidget {
 
   const AppProfilePictureEditor.imageProvider({
     required ImageProvider imageProvider,
-    required this.onPhotoTap,
-    required this.onEditTap,
+    this.onPhotoTap,
+    this.onEditTap,
     this.size = 126,
     this.badgeSize = 38,
+    this.showEditBadge = true,
     super.key,
   }) : _imageUrl = null,
        _imageProvider = imageProvider,
@@ -30,10 +32,11 @@ class AppProfilePictureEditor extends StatelessWidget {
 
   const AppProfilePictureEditor.profilePhoto({
     required ProfilePhoto profilePhoto,
-    required this.onPhotoTap,
-    required this.onEditTap,
+    this.onPhotoTap,
+    this.onEditTap,
     this.size = 126,
     this.badgeSize = 38,
+    this.showEditBadge = true,
     super.key,
   }) : _imageUrl = null,
        _imageProvider = null,
@@ -42,10 +45,11 @@ class AppProfilePictureEditor extends StatelessWidget {
   final String? _imageUrl;
   final ImageProvider? _imageProvider;
   final ProfilePhoto? _profilePhoto;
-  final VoidCallback onPhotoTap;
-  final VoidCallback onEditTap;
+  final VoidCallback? onPhotoTap;
+  final VoidCallback? onEditTap;
   final double size;
   final double badgeSize;
+  final bool showEditBadge;
 
   bool get _hasImage {
     if (_profilePhoto != null) {
@@ -54,6 +58,11 @@ class AppProfilePictureEditor extends StatelessWidget {
 
     final String? imageUrl = _imageUrl;
     return (imageUrl != null && imageUrl.isNotEmpty) || _imageProvider != null;
+  }
+
+  bool get _isInteractive {
+    return (_hasImage && onPhotoTap != null) ||
+        (showEditBadge && onEditTap != null);
   }
 
   Widget _buildPlaceholder() {
@@ -114,7 +123,7 @@ class AppProfilePictureEditor extends StatelessWidget {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Semantics(
-      button: true,
+      button: _isInteractive,
       child: SizedBox(
         width: size,
         height: size,
@@ -139,35 +148,36 @@ class AppProfilePictureEditor extends StatelessWidget {
                 child: ClipOval(child: _buildImage()),
               ),
             ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onEditTap,
-                child: Container(
-                  width: badgeSize,
-                  height: badgeSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: colorScheme.primary,
-                    border: Border.all(color: colorScheme.surface, width: 2),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: colorScheme.shadow.withValues(alpha: 0.12),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.edit_rounded,
-                    size: badgeSize * 0.47,
-                    color: colorScheme.onPrimary,
+            if (showEditBadge && onEditTap != null)
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: onEditTap,
+                  child: Container(
+                    width: badgeSize,
+                    height: badgeSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colorScheme.primary,
+                      border: Border.all(color: colorScheme.surface, width: 2),
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: colorScheme.shadow.withValues(alpha: 0.12),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.edit_rounded,
+                      size: badgeSize * 0.47,
+                      color: colorScheme.onPrimary,
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

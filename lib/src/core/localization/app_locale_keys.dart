@@ -12,6 +12,18 @@ abstract final class AppLocaleKeys {
   static const String appStartupFailedMessage = 'app.startupFailedMessage';
   static const String homeTitle = 'home.title';
   static const String homeMainLabel = 'home.mainLabel';
+  static const String homeDiscoveryTabLabel = 'home.discoveryTabLabel';
+  static const String homeTimelineTabLabel = 'home.timelineTabLabel';
+  static const String homeProfileTabLabel = 'home.profileTabLabel';
+  static const String homeDiscoveryPlaceholderMessage =
+      'home.discoveryPlaceholderMessage';
+  static const String homeTimelinePlaceholderMessage =
+      'home.timelinePlaceholderMessage';
+  static const String homeProfilePreviewBadge = 'home.profilePreviewBadge';
+  static const String homeProfilePreviewDescription =
+      'home.profilePreviewDescription';
+  static const String homeProfileNameLabel = 'home.profileNameLabel';
+  static const String homeProfileUsernameLabel = 'home.profileUsernameLabel';
   static const String homeLogoutAction = 'home.logoutAction';
   static const String homeLogoutErrorMessage = 'home.logoutErrorMessage';
   static const String deviceRegistrationFailed = 'device.registrationFailed';
