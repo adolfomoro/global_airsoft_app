@@ -131,10 +131,18 @@ class CurrentUserProfileRefreshRequestNotifier extends Notifier<bool> {
   }
 
   void requestRefresh() {
+    if (state) {
+      return;
+    }
+
     state = true;
   }
 
   void clear() {
+    if (!state) {
+      return;
+    }
+
     state = false;
   }
 }
