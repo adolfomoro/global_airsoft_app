@@ -254,6 +254,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
     return Scaffold(
       body: AppGradientBackground(
+        animateOnFirstBuild: true,
+        animationId: 'login-page-initial-background-fade',
         child: SafeArea(
           child: SingleChildScrollView(
             child: Form(
