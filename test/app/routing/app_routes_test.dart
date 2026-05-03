@@ -57,6 +57,17 @@ void main() {
     expect(route.settings.name, AppRoutePaths.userMenuPrivacy);
   });
 
+  test('maps the profile edit route for authenticated users', () {
+    final bool isAuthenticated = true;
+
+    final Route<dynamic> route = AppRoutes.onGenerateRoute(
+      const RouteSettings(name: AppRoutePaths.userMenuProfileEdit),
+      isAuthenticated: () => isAuthenticated,
+    );
+
+    expect(route.settings.name, AppRoutePaths.userMenuProfileEdit);
+  });
+
   test('generates a single initial route without expanding the stack', () {
     final bool isAuthenticated = false;
 

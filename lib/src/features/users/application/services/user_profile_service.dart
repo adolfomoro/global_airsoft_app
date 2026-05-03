@@ -48,6 +48,17 @@ final class UserProfileService {
     return _repository.deleteCurrentUserProfilePicture();
   }
 
+  Future<void> updateCurrentUserProfile({
+    required String fullName,
+    required String bio,
+  }) async {
+    final String normalizedBio = bio.trim();
+    await _repository.updateCurrentUserProfile(
+      fullName: fullName.trim(),
+      bio: normalizedBio.isEmpty ? null : normalizedBio,
+    );
+  }
+
   Future<UserProfilePrivacySettings> getCurrentUserPrivacySettings() async {
     final UserProfilePrivacySettingsOutputDto settings = await _repository
         .getCurrentUserPrivacySettings();

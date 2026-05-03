@@ -25,6 +25,10 @@ final class AppTextField extends StatefulWidget {
     this.autofillHints,
     this.onFieldSubmitted,
     this.errorMaxLines = 3,
+    this.minLines,
+    this.maxLines = 1,
+    this.maxLength,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   final String labelText;
@@ -46,6 +50,10 @@ final class AppTextField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final ValueChanged<String>? onFieldSubmitted;
   final int? errorMaxLines;
+  final int? minLines;
+  final int? maxLines;
+  final int? maxLength;
+  final TextCapitalization textCapitalization;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -155,8 +163,12 @@ class _AppTextFieldState extends State<AppTextField> {
         enableIMEPersonalizedLearning: effectiveEnableIMEPersonalizedLearning,
         keyboardType: widget.keyboardType,
         textInputAction: widget.textInputAction,
+        textCapitalization: widget.textCapitalization,
         autofillHints: widget.autofillHints,
         onFieldSubmitted: widget.onFieldSubmitted,
+        minLines: widget.minLines,
+        maxLines: widget.obscureText ? 1 : widget.maxLines,
+        maxLength: widget.maxLength,
         validator: (String? value) {
           if (widget.isRequired) {
             final String? requiredMessage = _requiredValidationRuleSet

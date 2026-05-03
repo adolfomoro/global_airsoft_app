@@ -23,6 +23,13 @@ class UserMenuPage extends ConsumerStatefulWidget {
 class _UserMenuPageState extends ConsumerState<UserMenuPage> {
   bool _isLoggingOut = false;
 
+  Future<void> _handleEditProfileTap() async {
+    if (_isLoggingOut) {
+      return;
+    }
+    await Navigator.of(context).pushNamed(AppRoutePaths.userMenuProfileEdit);
+  }
+
   Future<void> _handlePrivacyTap() async {
     if (_isLoggingOut) {
       return;
@@ -120,6 +127,13 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
                 const SizedBox(height: AppDimensions.spacingLg),
                 _UserSummaryCard(profileState: profileState),
                 const SizedBox(height: AppDimensions.spacingLg),
+                _MenuActionTile(
+                  icon: Icons.edit_outlined,
+                  title: context.l10n.tr(AppLocaleKeys.homeEditProfileAction),
+                  onTap: _handleEditProfileTap,
+                  enabled: !_isLoggingOut,
+                ),
+                const SizedBox(height: AppDimensions.spacingSm),
                 _MenuActionTile(
                   icon: Icons.privacy_tip_outlined,
                   title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),

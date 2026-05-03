@@ -15,8 +15,13 @@ void main() {
     expect(failure?.messageKey, AppLocaleKeys.validationFullNameComplete);
   });
 
-  test('rejects names with a one-character second word', () {
-    final failure = FullNameValidation.rules.validate('Joao A');
+  test('accepts names with one-character parts when there are two words', () {
+    expect(FullNameValidation.rules.validate('Joao A'), isNull);
+    expect(FullNameValidation.rules.validate('A B'), isNull);
+  });
+
+  test('rejects values without two non-empty words after trimming', () {
+    final failure = FullNameValidation.rules.validate('  A   ');
 
     expect(failure, isNotNull);
     expect(failure?.messageKey, AppLocaleKeys.validationFullNameComplete);

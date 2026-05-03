@@ -99,6 +99,27 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
     return _storage.clearCurrentUserProfile();
   }
 
+  Future<void> applyProfileDetails({
+    required String fullName,
+    required String bio,
+  }) async {
+    final UserProfile? currentProfile =
+        state.asData?.value ?? await _storage.getCurrentUserProfile();
+    if (currentProfile == null) {
+      return;
+    }
+
+    final UserProfile updatedProfile = currentProfile.copyWith(
+      fullName: fullName.trim(),
+      bio: bio.trim(),
+    );
+    await _storage.saveCurrentUserProfile(updatedProfile);
+
+    if (ref.mounted) {
+      state = AsyncData<UserProfile>(updatedProfile);
+    }
+  }
+
   Future<UserProfile> _fetchAndPersistRemoteProfile() async {
     final UserProfile remoteProfile = await _service.getCurrentUserProfile();
     await _storage.saveCurrentUserProfile(remoteProfile);

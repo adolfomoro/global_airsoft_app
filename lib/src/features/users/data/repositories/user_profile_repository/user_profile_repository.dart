@@ -11,8 +11,9 @@ import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 import 'package:global_airsoft_app/src/features/users/data/constants/user_profile_api_paths.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/update_my_privacy_settings_input_dto.dart';
-import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_privacy_settings_output_dto.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/update_user_profile_input_dto.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_output_dto.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_privacy_settings_output_dto.dart';
 
 enum UserProfilePictureSize { medium, large }
 
@@ -41,7 +42,15 @@ final class UserProfileRepository {
   }
 
   Future<String> _privacySettingsUpdateFailedMessage() {
-    return _localizationService.tr(AppLocaleKeys.homePrivacyUpdateFailedMessage);
+    return _localizationService.tr(
+      AppLocaleKeys.homePrivacyUpdateFailedMessage,
+    );
+  }
+
+  Future<String> _profileUpdateFailedMessage() {
+    return _localizationService.tr(
+      AppLocaleKeys.homeProfileEditUpdateFailedMessage,
+    );
   }
 
   Future<UserProfileOutputDto> getCurrentUserProfile() async {
@@ -179,6 +188,43 @@ final class UserProfileRepository {
     } on DioException {
       await _throwLocalizedFailure(
         failureMessageProvider: _privacySettingsUpdateFailedMessage,
+      );
+    }
+  }
+
+  Future<UserProfileOutputDto> updateCurrentUserProfile({
+    required String fullName,
+    required String? bio,
+  }) async {
+    try {
+      final Response<dynamic> response = await _dioService.put<dynamic>(
+        UserProfileApiPaths.updateCurrentUserProfile,
+        data: UpdateUserProfileInputDto(fullName: fullName, bio: bio).toJson(),
+      );
+
+      if (response.statusCode.isSuccessStatusCode &&
+          response.data is Map<String, dynamic>) {
+        return UserProfileOutputDto.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      }
+
+      await _throwLocalizedFailure(
+        failureMessageProvider: _profileUpdateFailedMessage,
+      );
+    } on AbpApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _profileUpdateFailedMessage,
+      );
+    } on ApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _profileUpdateFailedMessage,
+      );
+    } on DioException {
+      await _throwLocalizedFailure(
+        failureMessageProvider: _profileUpdateFailedMessage,
       );
     }
   }

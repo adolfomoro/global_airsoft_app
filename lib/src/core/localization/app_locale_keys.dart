@@ -37,6 +37,22 @@ abstract final class AppLocaleKeys {
   static const String homeUserMenuAction = 'home.userMenuAction';
   static const String homeUserMenuTitle = 'home.userMenuTitle';
   static const String homeUserMenuDescription = 'home.userMenuDescription';
+  static const String homeEditProfileAction = 'home.editProfileAction';
+  static const String homeProfileEditTitle = 'home.profileEditTitle';
+  static const String homeProfileEditDescription =
+      'home.profileEditDescription';
+  static const String homeProfileEditSaveAction =
+      'home.profileEditSaveAction';
+  static const String homeProfileEditCancelAction =
+      'home.profileEditCancelAction';
+  static const String homeProfileEditRetryAction =
+      'home.profileEditRetryAction';
+  static const String homeProfileEditLoadFailedMessage =
+      'home.profileEditLoadFailedMessage';
+  static const String homeProfileEditUpdateSuccessMessage =
+      'home.profileEditUpdateSuccessMessage';
+  static const String homeProfileEditUpdateFailedMessage =
+      'home.profileEditUpdateFailedMessage';
   static const String homePrivacyAction = 'home.privacyAction';
   static const String homePrivacyTitle = 'home.privacyTitle';
   static const String homePrivacyDescription = 'home.privacyDescription';
@@ -195,6 +211,13 @@ abstract final class AppLocaleKeys {
   static const String commonShowPassword = 'common.showPassword';
   static const String commonHidePassword = 'common.hidePassword';
   static const String commonCancel = 'common.cancel';
+  static const String commonKeepEditing = 'common.keepEditing';
+  static const String commonDiscardChangesTitle =
+      'common.discardChangesTitle';
+  static const String commonDiscardChangesMessage =
+      'common.discardChangesMessage';
+  static const String commonDiscardChangesAction =
+      'common.discardChangesAction';
   static const String commonGenericApiErrorMessage =
       'common.genericApiErrorMessage';
   static const String commonValidationError = 'common.validationError';

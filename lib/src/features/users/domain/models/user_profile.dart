@@ -17,6 +17,24 @@ final class UserProfile {
   final String mediumProfilePictureUrl;
   final String largeProfilePictureUrl;
 
+  UserProfile copyWith({
+    String? fullName,
+    String? bio,
+    String? mediumProfilePictureUrl,
+    String? largeProfilePictureUrl,
+  }) {
+    return UserProfile(
+      id: id,
+      username: username,
+      fullName: fullName ?? this.fullName,
+      bio: bio ?? this.bio,
+      mediumProfilePictureUrl:
+          mediumProfilePictureUrl ?? this.mediumProfilePictureUrl,
+      largeProfilePictureUrl:
+          largeProfilePictureUrl ?? this.largeProfilePictureUrl,
+    );
+  }
+
   ProfilePhoto get profilePhoto {
     final String mediumUrl = mediumProfilePictureUrl.trim();
     final String largeUrl = largeProfilePictureUrl.trim();

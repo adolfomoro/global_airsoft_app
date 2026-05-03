@@ -4,6 +4,7 @@ import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_leave_confirmation_guard.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
@@ -107,106 +108,114 @@ class _UserProfilePrivacyPageState
                     _fullNameVisible ?? settings.fullNameVisible;
                 final bool fullNamePrivate = !fullNameVisible;
 
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppDimensions.spacingLg,
-                    AppDimensions.spacingLg,
-                    AppDimensions.spacingLg,
-                    AppDimensions.spacing2xl,
-                  ),
-                  children: <Widget>[
-                    Text(
-                      context.l10n.tr(AppLocaleKeys.homePrivacyDescription),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.4,
-                      ),
+                return AppLeaveConfirmationGuard(
+                  hasUnsavedChanges:
+                      fullNameVisible != settings.fullNameVisible,
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppDimensions.spacingLg,
+                      AppDimensions.spacingLg,
+                      AppDimensions.spacingLg,
+                      AppDimensions.spacing2xl,
                     ),
-                    const SizedBox(height: AppDimensions.spacingLg),
-                    Text(
-                      context.l10n.tr(AppLocaleKeys.homeProfileTabLabel),
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.spacingSm),
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.radiusLg,
+                    children: <Widget>[
+                      Text(
+                        context.l10n.tr(AppLocaleKeys.homePrivacyDescription),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.4,
                         ),
-                        border: Border.all(
-                          color: colorScheme.outlineVariant.withValues(
-                            alpha: 0.56,
+                      ),
+                      const SizedBox(height: AppDimensions.spacingLg),
+                      Text(
+                        context.l10n.tr(AppLocaleKeys.homeProfileTabLabel),
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: AppDimensions.spacingSm),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(
+                            AppDimensions.radiusLg,
+                          ),
+                          border: Border.all(
+                            color: colorScheme.outlineVariant.withValues(
+                              alpha: 0.56,
+                            ),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimensions.spacingMd,
+                            vertical: AppDimensions.spacingSm,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      context.l10n.tr(
+                                        AppLocaleKeys
+                                            .homePrivacyFullNamePrivateTitle,
+                                      ),
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            height: 1.1,
+                                          ),
+                                    ),
+                                    const SizedBox(
+                                      height: AppDimensions.spacingXs,
+                                    ),
+                                    Text(
+                                      context.l10n.tr(
+                                        AppLocaleKeys
+                                            .homePrivacyFullNamePrivateDescription,
+                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                            height: 1.3,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: AppDimensions.spacingSm),
+                              Switch.adaptive(
+                                value: fullNamePrivate,
+                                onChanged: _isSaving
+                                    ? null
+                                    : (bool value) {
+                                        setState(() {
+                                          _fullNameVisible = !value;
+                                        });
+                                      },
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppDimensions.spacingMd,
-                          vertical: AppDimensions.spacingSm,
+                      const SizedBox(height: AppDimensions.spacingLg),
+                      AppButton(
+                        label: context.l10n.tr(
+                          AppLocaleKeys.homePrivacySaveAction,
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(
-                                    context.l10n.tr(
-                                      AppLocaleKeys
-                                          .homePrivacyFullNamePrivateTitle,
-                                    ),
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.1,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: AppDimensions.spacingXs,
-                                  ),
-                                  Text(
-                                    context.l10n.tr(
-                                      AppLocaleKeys
-                                          .homePrivacyFullNamePrivateDescription,
-                                    ),
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                      height: 1.3,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: AppDimensions.spacingSm),
-                            Switch.adaptive(
-                              value: fullNamePrivate,
-                              onChanged: _isSaving
-                                  ? null
-                                  : (bool value) {
-                                      setState(() {
-                                        _fullNameVisible = !value;
-                                      });
-                                    },
-                            ),
-                          ],
-                        ),
+                        isLoading: _isSaving,
+                        onPressed: _isSaving ||
+                                fullNameVisible == settings.fullNameVisible
+                            ? null
+                            : () => _handleSave(settings),
                       ),
-                    ),
-                    const SizedBox(height: AppDimensions.spacingLg),
-                    AppButton(
-                      label: context.l10n.tr(AppLocaleKeys.homePrivacySaveAction),
-                      isLoading: _isSaving,
-                      onPressed: _isSaving ||
-                              fullNameVisible == settings.fullNameVisible
-                          ? null
-                          : () => _handleSave(settings),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
               loading: () => const _PrivacyLoadingState(),
