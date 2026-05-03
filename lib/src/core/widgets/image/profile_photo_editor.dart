@@ -33,21 +33,32 @@ class ProfilePhotoEditor extends StatelessWidget {
   const ProfilePhotoEditor({
     required this.profilePhoto,
     required this.onPhotoChanged,
+    this.onPhotoTap,
     this.size = 126,
     this.badgeSize = 38,
+    this.enabled = true,
+    this.allowDelete = true,
     super.key,
   });
 
   final ProfilePhoto profilePhoto;
   final ValueChanged<ProfilePhoto> onPhotoChanged;
+  final VoidCallback? onPhotoTap;
   final double size;
   final double badgeSize;
+  final bool enabled;
+  final bool allowDelete;
 
   Future<void> _handleEditTap(BuildContext context) async {
+    if (!enabled) {
+      return;
+    }
+
     final ProfilePhotoSelectionResult? result =
         await ProfilePhotoSelectionBottomSheet.showForResult(
           context,
           hasCurrentPhoto: profilePhoto.hasPhoto,
+          allowDelete: allowDelete,
         );
 
     if (result == null) return;
@@ -59,13 +70,11 @@ class ProfilePhotoEditor extends StatelessWidget {
     }
   }
 
-  void _handlePhotoTap(BuildContext context) {}
-
   @override
   Widget build(BuildContext context) {
     return AppProfilePictureEditor.profilePhoto(
       profilePhoto: profilePhoto,
-      onPhotoTap: () => _handlePhotoTap(context),
+      onPhotoTap: onPhotoTap,
       onEditTap: () => _handleEditTap(context),
       size: size,
       badgeSize: badgeSize,

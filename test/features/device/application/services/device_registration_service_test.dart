@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
-import 'package:global_airsoft_app/src/features/device/application/models/device_storage_snapshot.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_registration_service.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_storage_service.dart';
 import 'package:global_airsoft_app/src/features/device/data/repositories/device_repository/device_repository.dart';
@@ -71,36 +70,31 @@ void main() {
     },
   );
 
-  test(
-    'registers a new device without sending an empty push token',
-    () async {
-      final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter();
-      final _CountingSecureStorageService secureStorage =
-          _CountingSecureStorageService();
+  test('registers a new device without sending an empty push token', () async {
+    final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter();
+    final _CountingSecureStorageService secureStorage =
+        _CountingSecureStorageService();
 
-      final DeviceRegistrationService service = DeviceRegistrationService(
-        deviceRepository: DeviceRepository(
-          dio: Dio(BaseOptions(baseUrl: 'https://api.example.com'))
-            ..httpClientAdapter = adapter,
-          localizationService: AppLocalizationService(
-            locale: const Locale('en'),
-          ),
-        ),
-        storageService: DeviceStorageService(secureStorage: secureStorage),
-        getPushNotificationToken: () => '',
-        logger: AppLogger.instance,
-      );
+    final DeviceRegistrationService service = DeviceRegistrationService(
+      deviceRepository: DeviceRepository(
+        dio: Dio(BaseOptions(baseUrl: 'https://api.example.com'))
+          ..httpClientAdapter = adapter,
+        localizationService: AppLocalizationService(locale: const Locale('en')),
+      ),
+      storageService: DeviceStorageService(secureStorage: secureStorage),
+      getPushNotificationToken: () => '',
+      logger: AppLogger.instance,
+    );
 
-      final bool synced = await service.ensureRegisteredBeforeRequest();
-      final Map<String, dynamic> requestBody =
-          adapter.lastRequestBody! as Map<String, dynamic>;
+    final bool synced = await service.ensureRegisteredBeforeRequest();
+    final Map<String, dynamic> requestBody =
+        adapter.lastRequestBody! as Map<String, dynamic>;
 
-      expect(synced, isTrue);
-      expect(requestBody.containsKey('pushNotificationToken'), isFalse);
-      expect(secureStorage.lastSavedSnapshot?.lastPushToken, isNull);
-      expect(service.getStoredDeviceId(), 'device-123');
-    },
-  );
+    expect(synced, isTrue);
+    expect(requestBody.containsKey('pushNotificationToken'), isFalse);
+    expect(secureStorage.lastSavedSnapshot?.lastPushToken, isNull);
+    expect(service.getStoredDeviceId(), 'device-123');
+  });
 
   test(
     'preserves the last known push token when the current token is unavailable',

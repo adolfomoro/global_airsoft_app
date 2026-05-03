@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
@@ -7,15 +5,14 @@ import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/network/http_status_code_extensions.dart';
 import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
-import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 import 'package:global_airsoft_app/src/features/users/data/constants/user_profile_api_paths.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_output_dto.dart';
 
 enum UserProfilePictureSize { medium, large }
 
-final class UserProfileRepository {
-  const UserProfileRepository({
+final class UsersRepository {
+  const UsersRepository({
     required AppDioService dioService,
     required AppLocalizationService localizationService,
   }) : _dioService = dioService,
@@ -26,12 +23,6 @@ final class UserProfileRepository {
 
   Future<String> _profileLoadFailedMessage() {
     return _localizationService.tr(AppLocaleKeys.homeProfileLoadFailedMessage);
-  }
-
-  Future<String> _profilePhotoUpdateFailedMessage() {
-    return _localizationService.tr(
-      AppLocaleKeys.homeProfilePhotoUpdateFailedMessage,
-    );
   }
 
   Future<UserProfileOutputDto> getCurrentUserProfile() async {
@@ -93,46 +84,10 @@ final class UserProfileRepository {
     }
   }
 
-  Future<void> uploadCurrentUserProfilePicture(File file) async {
-    try {
-      final MultipartFile multipartFile =
-          await MultipartUploadUtil.createFromFile(file);
-      final FormData data = MultipartUploadUtil.createFormData(
-        <String, dynamic>{'File': multipartFile},
-      );
-
-      final Response<dynamic> response = await _dioService.post<dynamic>(
-        UserProfileApiPaths.uploadCurrentUserProfilePicture,
-        data: data,
-        options: Options(contentType: 'multipart/form-data'),
-      );
-
-      if (response.statusCode.isSuccessStatusCode) {
-        return;
-      }
-
-      await _throwLocalizedProfilePhotoUpdateFailure();
-    } on AbpApiException catch (error) {
-      await _throwLocalizedUserProfileException(
-        error: error,
-        failureMessageProvider: _profilePhotoUpdateFailedMessage,
-      );
-    } on ApiException catch (error) {
-      await _throwLocalizedUserProfileException(
-        error: error,
-        failureMessageProvider: _profilePhotoUpdateFailedMessage,
-      );
-    } on DioException {
-      await _throwLocalizedProfilePhotoUpdateFailure();
-    }
-  }
-
   Future<Never> _throwLocalizedUserProfileException({
     required ApiException error,
-    Future<String> Function()? failureMessageProvider,
   }) async {
-    final String localizedFailureMessage =
-        await (failureMessageProvider ?? _profileLoadFailedMessage)();
+    final String localizedFailureMessage = await _profileLoadFailedMessage();
     final MessageOverrideBehavior overrideBehavior =
         error is ValidationApiException
         ? MessageOverrideBehavior.useAsFallback
@@ -155,16 +110,6 @@ final class UserProfileRepository {
 
   Future<Never> _throwLocalizedFailure() async {
     final String localizedFailureMessage = await _profileLoadFailedMessage();
-
-    throw UserProfileException(
-      failure: UnknownApiException(message: localizedFailureMessage),
-      messageOverride: localizedFailureMessage,
-    );
-  }
-
-  Future<Never> _throwLocalizedProfilePhotoUpdateFailure() async {
-    final String localizedFailureMessage =
-        await _profilePhotoUpdateFailedMessage();
 
     throw UserProfileException(
       failure: UnknownApiException(message: localizedFailureMessage),

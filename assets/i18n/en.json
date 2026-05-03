@@ -17,6 +17,8 @@
     "home.profileBioLabel": "Bio",
     "home.profileEmptyBioLabel": "No bio added yet.",
     "home.profileLoadFailedMessage": "Unable to load your profile right now.",
+    "home.profilePhotoUpdateSuccessMessage": "Your profile photo was updated.",
+    "home.profilePhotoUpdateFailedMessage": "Unable to update your profile photo right now.",
     "home.profileRefreshHint": "Pull down to try again.",
     "home.logoutAction": "Logout",
     "home.logoutErrorMessage": "Unable to sign out right now. Please try again.",

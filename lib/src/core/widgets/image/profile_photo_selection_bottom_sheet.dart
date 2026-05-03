@@ -34,16 +34,19 @@ class ProfilePhotoSelectionResult {
 class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
   const ProfilePhotoSelectionBottomSheet({
     required this.hasCurrentPhoto,
+    this.allowDelete = true,
     super.key,
   });
 
   static bool _isFlowInProgress = false;
 
   final bool hasCurrentPhoto;
+  final bool allowDelete;
 
   static Future<ProfilePhotoSelectionAction?> show(
     BuildContext context, {
     required bool hasCurrentPhoto,
+    bool allowDelete = true,
   }) {
     return showModalBottomSheet<ProfilePhotoSelectionAction?>(
       context: context,
@@ -51,14 +54,17 @@ class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (BuildContext context) =>
-          ProfilePhotoSelectionBottomSheet(hasCurrentPhoto: hasCurrentPhoto),
+      builder: (BuildContext context) => ProfilePhotoSelectionBottomSheet(
+        hasCurrentPhoto: hasCurrentPhoto,
+        allowDelete: allowDelete,
+      ),
     );
   }
 
   static Future<ProfilePhotoSelectionResult?> showForResult(
     BuildContext context, {
     required bool hasCurrentPhoto,
+    bool allowDelete = true,
   }) async {
     if (_isFlowInProgress) {
       return null;
@@ -67,23 +73,24 @@ class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
     _isFlowInProgress = true;
 
     try {
-    final ProfilePhotoSelectionAction? action = await show(
-      context,
-      hasCurrentPhoto: hasCurrentPhoto,
-    );
+      final ProfilePhotoSelectionAction? action = await show(
+        context,
+        hasCurrentPhoto: hasCurrentPhoto,
+        allowDelete: allowDelete,
+      );
 
-    if (!context.mounted || action == null) {
-      return null;
-    }
+      if (!context.mounted || action == null) {
+        return null;
+      }
 
-    switch (action) {
-      case ProfilePhotoSelectionAction.takePhoto:
-        return _takePhoto(context);
-      case ProfilePhotoSelectionAction.selectFromGallery:
-        return _selectFromGallery(context);
-      case ProfilePhotoSelectionAction.deletePhoto:
-        return const ProfilePhotoSelectionResult.deleted();
-    }
+      switch (action) {
+        case ProfilePhotoSelectionAction.takePhoto:
+          return _takePhoto(context);
+        case ProfilePhotoSelectionAction.selectFromGallery:
+          return _selectFromGallery(context);
+        case ProfilePhotoSelectionAction.deletePhoto:
+          return const ProfilePhotoSelectionResult.deleted();
+      }
     } finally {
       _isFlowInProgress = false;
     }
@@ -103,9 +110,8 @@ class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
     final CameraPermissionService cameraPermissionService = container.read(
       cameraPermissionServiceProvider,
     );
-    final ProfilePhotoCameraCaptureService cameraCaptureService = container.read(
-      profilePhotoCameraCaptureServiceProvider,
-    );
+    final ProfilePhotoCameraCaptureService cameraCaptureService = container
+        .read(profilePhotoCameraCaptureServiceProvider);
     final ImageCropService imageCropService = container.read(
       imageCropServiceProvider,
     );
@@ -281,7 +287,7 @@ class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
               context,
             ).pop(ProfilePhotoSelectionAction.selectFromGallery),
           ),
-          if (hasCurrentPhoto) ...<Widget>[
+          if (hasCurrentPhoto && allowDelete) ...<Widget>[
             const SizedBox(height: 4),
             _PhotoOption(
               icon: Icons.delete_outline_rounded,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_output_dto.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/user_profile_repository.dart';
@@ -34,6 +36,10 @@ final class UserProfileService {
           ? largePhotoUrl
           : mediumPhotoUrl,
     );
+  }
+
+  Future<void> uploadCurrentUserProfilePicture(File file) {
+    return _repository.uploadCurrentUserProfilePicture(file);
   }
 
   Future<String> _readProfilePictureUrlSafely(

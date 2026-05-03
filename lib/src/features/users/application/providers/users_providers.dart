@@ -30,3 +30,25 @@ final FutureProvider<UserProfile> currentUserProfileProvider =
       final service = ref.watch(userProfileServiceProvider);
       return service.getCurrentUserProfile();
     });
+
+final Provider<CurrentUserProfileController>
+currentUserProfileControllerProvider = Provider<CurrentUserProfileController>((
+  Ref ref,
+) {
+  return CurrentUserProfileController(ref);
+});
+
+final class CurrentUserProfileController {
+  const CurrentUserProfileController(this._ref);
+
+  final Ref _ref;
+
+  Future<UserProfile> load() {
+    return _ref.read(currentUserProfileProvider.future);
+  }
+
+  Future<UserProfile> reload() {
+    _ref.invalidate(currentUserProfileProvider);
+    return _ref.read(currentUserProfileProvider.future);
+  }
+}

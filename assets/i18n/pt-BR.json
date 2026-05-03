@@ -17,6 +17,8 @@
     "home.profileBioLabel": "Bio",
     "home.profileEmptyBioLabel": "Nenhuma bio adicionada ainda.",
     "home.profileLoadFailedMessage": "Não foi possível carregar seu perfil agora.",
+    "home.profilePhotoUpdateSuccessMessage": "Sua foto de perfil foi atualizada.",
+    "home.profilePhotoUpdateFailedMessage": "Nao foi possivel atualizar sua foto de perfil agora.",
     "home.profileRefreshHint": "Puxe para baixo para tentar novamente.",
     "home.logoutAction": "Sair",
     "home.logoutErrorMessage": "Não foi possível sair agora. Tente novamente.",

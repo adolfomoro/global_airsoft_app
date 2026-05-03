@@ -4,11 +4,13 @@ import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_zoom_viewer.dart';
-import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/profile_photo_editor.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
@@ -23,12 +25,14 @@ class HomeProfileTab extends ConsumerWidget {
     );
 
     return RefreshIndicator(
-      onRefresh: () => ref.refresh(currentUserProfileProvider.future),
+      onRefresh: () => ref.read(currentUserProfileControllerProvider).reload(),
       child: profileState.when(
         data: (UserProfile profile) => _ProfileContent(profile: profile),
         loading: () => const _ProfileLoadingState(),
         error: (Object error, StackTrace stackTrace) {
-          return _ProfileErrorState(message: _resolveErrorMessage(context, error));
+          return _ProfileErrorState(
+            message: _resolveErrorMessage(context, error),
+          );
         },
       ),
     );
@@ -64,7 +68,6 @@ class _ProfileContent extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     final String bio = profile.resolvedBio;
-    final String zoomImageUrl = profile.resolvedZoomImageUrl;
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -78,19 +81,12 @@ class _ProfileContent extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 const SizedBox(height: AppDimensions.spacing2xl),
-                AppProfilePicture.profilePhoto(
-                  profilePhoto: profile.profilePhoto,
-                  size: 124,
-                  onTap: zoomImageUrl.isNotEmpty
-                      ? () => AppProfileImageZoomViewer.showNetwork(
-                          context,
-                          imageUrl: zoomImageUrl,
-                        )
-                      : null,
-                ),
+                _EditableProfilePhotoSection(profile: profile),
                 const SizedBox(height: AppDimensions.spacingXl),
                 _ProfileHeadline(
-                  label: context.l10n.tr(AppLocaleKeys.homeProfileUsernameLabel),
+                  label: context.l10n.tr(
+                    AppLocaleKeys.homeProfileUsernameLabel,
+                  ),
                   value: '@${profile.username}',
                   valueStyle: theme.textTheme.headlineSmall?.copyWith(
                     color: AppColors.secondaryLight,
@@ -100,7 +96,9 @@ class _ProfileContent extends StatelessWidget {
                 ),
                 const SizedBox(height: AppDimensions.spacingLg),
                 _ProfileHeadline(
-                  label: context.l10n.tr(AppLocaleKeys.homeProfileFullNameLabel),
+                  label: context.l10n.tr(
+                    AppLocaleKeys.homeProfileFullNameLabel,
+                  ),
                   value: profile.resolvedFullName,
                   valueStyle: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w600,
@@ -150,6 +148,136 @@ class _ProfileContent extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _EditableProfilePhotoSection extends ConsumerStatefulWidget {
+  const _EditableProfilePhotoSection({required this.profile});
+
+  final UserProfile profile;
+
+  @override
+  ConsumerState<_EditableProfilePhotoSection> createState() =>
+      _EditableProfilePhotoSectionState();
+}
+
+class _EditableProfilePhotoSectionState
+    extends ConsumerState<_EditableProfilePhotoSection> {
+  ProfilePhoto? _pendingPhoto;
+  bool _isUploading = false;
+
+  ProfilePhoto get _displayedPhoto =>
+      _pendingPhoto ?? widget.profile.profilePhoto;
+
+  void _handlePhotoTap() {
+    final ProfilePhoto displayedPhoto = _displayedPhoto;
+    if (displayedPhoto.isLocal) {
+      AppProfileImageZoomViewer.showImageProvider(
+        context,
+        imageProvider: FileImage(displayedPhoto.localFile!),
+      );
+      return;
+    }
+
+    final String zoomImageUrl = widget.profile.resolvedZoomImageUrl;
+    if (zoomImageUrl.isEmpty) {
+      return;
+    }
+
+    AppProfileImageZoomViewer.showNetwork(context, imageUrl: zoomImageUrl);
+  }
+
+  Future<void> _handlePhotoChanged(ProfilePhoto photo) async {
+    if (!photo.isLocal || _isUploading) {
+      return;
+    }
+
+    setState(() {
+      _pendingPhoto = photo;
+      _isUploading = true;
+    });
+
+    try {
+      await ref
+          .read(userProfileServiceProvider)
+          .uploadCurrentUserProfilePicture(photo.localFile!);
+
+      if (!mounted) {
+        return;
+      }
+
+      await ref.read(currentUserProfileControllerProvider).reload();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _pendingPhoto = null;
+      });
+
+      context.showSuccessSnackBar(
+        context.l10n.tr(AppLocaleKeys.homeProfilePhotoUpdateSuccessMessage),
+      );
+    } on UserProfileException catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _pendingPhoto = null;
+      });
+
+      context.showErrorSnackBar(
+        error.message ??
+            context.l10n.tr(AppLocaleKeys.homeProfilePhotoUpdateFailedMessage),
+        source: error.failure,
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _pendingPhoto = null;
+      });
+
+      context.showErrorSnackBar(
+        context.l10n.tr(AppLocaleKeys.homeProfilePhotoUpdateFailedMessage),
+        source: error,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        ProfilePhotoEditor(
+          profilePhoto: _displayedPhoto,
+          onPhotoTap: _handlePhotoTap,
+          onPhotoChanged: _handlePhotoChanged,
+          size: 124,
+          badgeSize: 40,
+          enabled: !_isUploading,
+          allowDelete: false,
+        ),
+        if (_isUploading) ...<Widget>[
+          const SizedBox(height: AppDimensions.spacingMd),
+          const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2.2),
+          ),
+        ],
       ],
     );
   }

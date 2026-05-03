@@ -21,7 +21,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     ref.read(homeTabProvider.notifier).select(HomeTab.discovery);
-    ref.read(currentUserProfileProvider.future);
+    ref.read(currentUserProfileControllerProvider).load();
   }
 
   @override
@@ -30,7 +30,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     final homeTabNotifier = ref.read(homeTabProvider.notifier);
 
     return Scaffold(
-      appBar: AppAdaptiveAppBar(title: Text(_resolveTitle(context, currentTab))),
+      appBar: AppAdaptiveAppBar(
+        title: Text(_resolveTitle(context, currentTab)),
+      ),
       body: IndexedStack(
         index: currentTab.index,
         children: <Widget>[
