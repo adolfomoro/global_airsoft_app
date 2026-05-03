@@ -5,8 +5,6 @@ import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
-import 'package:global_airsoft_app/src/core/network/api_exception.dart';
-import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_zoom_viewer.dart';
@@ -14,6 +12,7 @@ import 'package:global_airsoft_app/src/core/widgets/image/profile_photo_editor.d
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
+import 'package:global_airsoft_app/src/features/users/presentation/support/user_profile_presentation_error_resolver.dart';
 
 class HomeProfileTab extends ConsumerWidget {
   const HomeProfileTab({super.key});
@@ -37,7 +36,7 @@ class HomeProfileTab extends ConsumerWidget {
               ? error.failure
               : error;
           context.showErrorSnackBar(
-            _resolveErrorMessage(context, error),
+            resolveUserProfilePresentationErrorMessage(context, error),
             source: source,
           );
         }
@@ -47,30 +46,11 @@ class HomeProfileTab extends ConsumerWidget {
         loading: () => const _ProfileLoadingState(),
         error: (Object error, StackTrace stackTrace) {
           return _ProfileErrorState(
-            message: _resolveErrorMessage(context, error),
+            message: resolveUserProfilePresentationErrorMessage(context, error),
           );
         },
       ),
     );
-  }
-
-  String _resolveErrorMessage(BuildContext context, Object error) {
-    if (error is UserProfileException) {
-      return error.message ??
-          context.l10n.tr(AppLocaleKeys.homeProfileLoadFailedMessage);
-    }
-
-    if (error is ApiExceptionSource) {
-      return error.apiException.resolveMessage(
-            overrideMessage: context.l10n.tr(
-              AppLocaleKeys.homeProfileLoadFailedMessage,
-            ),
-            overrideBehavior: MessageOverrideBehavior.useAsFallback,
-          ) ??
-          context.l10n.tr(AppLocaleKeys.homeProfileLoadFailedMessage);
-    }
-
-    return context.l10n.tr(AppLocaleKeys.homeProfileLoadFailedMessage);
   }
 }
 

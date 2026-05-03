@@ -10,6 +10,7 @@ import 'package:global_airsoft_app/src/features/users/application/services/user_
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_storage_service.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/user_profile_repository.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
+import 'package:global_airsoft_app/src/features/users/domain/models/user_profile_privacy_settings.dart';
 
 final Provider<UserProfileRepository> userProfileRepositoryProvider =
     Provider<UserProfileRepository>((Ref ref) {
@@ -45,6 +46,17 @@ final AsyncNotifierProvider<CurrentUserProfileController, UserProfile>
 currentUserProfileProvider =
     AsyncNotifierProvider<CurrentUserProfileController, UserProfile>(
       CurrentUserProfileController.new,
+    );
+
+final currentUserPrivacySettingsProvider =
+    FutureProvider.autoDispose<UserProfilePrivacySettings>((Ref ref) {
+      return ref.watch(userProfileServiceProvider).getCurrentUserPrivacySettings();
+    });
+
+final NotifierProvider<CurrentUserProfileRefreshRequestNotifier, bool>
+currentUserProfileRefreshRequestProvider =
+    NotifierProvider<CurrentUserProfileRefreshRequestNotifier, bool>(
+      CurrentUserProfileRefreshRequestNotifier.new,
     );
 
 class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
@@ -109,5 +121,20 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
         stackTrace: stackTrace,
       );
     }
+  }
+}
+
+class CurrentUserProfileRefreshRequestNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    return false;
+  }
+
+  void requestRefresh() {
+    state = true;
+  }
+
+  void clear() {
+    state = false;
   }
 }

@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_output_dto.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_privacy_settings_output_dto.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/user_profile_repository.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
+import 'package:global_airsoft_app/src/features/users/domain/models/user_profile_privacy_settings.dart';
 
 final class UserProfileService {
   const UserProfileService({
@@ -44,6 +46,26 @@ final class UserProfileService {
 
   Future<void> deleteCurrentUserProfilePicture() {
     return _repository.deleteCurrentUserProfilePicture();
+  }
+
+  Future<UserProfilePrivacySettings> getCurrentUserPrivacySettings() async {
+    final UserProfilePrivacySettingsOutputDto settings = await _repository
+        .getCurrentUserPrivacySettings();
+    return UserProfilePrivacySettings(
+      fullNameVisible: settings.fullNameVisible,
+    );
+  }
+
+  Future<UserProfilePrivacySettings> updateCurrentUserPrivacySettings(
+    UserProfilePrivacySettings settings,
+  ) async {
+    final UserProfilePrivacySettingsOutputDto updatedSettings =
+        await _repository.updateCurrentUserPrivacySettings(
+          fullNameVisible: settings.fullNameVisible,
+        );
+    return UserProfilePrivacySettings(
+      fullNameVisible: updatedSettings.fullNameVisible,
+    );
   }
 
   Future<String> _readProfilePictureUrlSafely(

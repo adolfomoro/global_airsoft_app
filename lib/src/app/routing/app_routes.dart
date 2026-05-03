@@ -7,6 +7,7 @@ import 'package:global_airsoft_app/src/features/auth/presentation/pages/password
 import 'package:global_airsoft_app/src/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/pages/home_page.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/pages/user_menu_page.dart';
+import 'package:global_airsoft_app/src/features/users/presentation/pages/user_profile_privacy_page.dart';
 
 enum AppRouteAccess { public, authenticatedOnly, unauthenticatedOnly }
 
@@ -137,6 +138,12 @@ final class AppRoutes {
           access: AppRouteAccess.authenticatedOnly,
           builder: (BuildContext context, Object? arguments) {
             return const UserMenuPage();
+          },
+        ),
+        AppRoutePaths.userMenuPrivacy: _AppRouteDefinition(
+          access: AppRouteAccess.authenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return const UserProfilePrivacyPage();
           },
         ),
       };

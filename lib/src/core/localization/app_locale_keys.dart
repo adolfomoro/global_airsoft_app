@@ -38,8 +38,20 @@ abstract final class AppLocaleKeys {
   static const String homeUserMenuTitle = 'home.userMenuTitle';
   static const String homeUserMenuDescription = 'home.userMenuDescription';
   static const String homePrivacyAction = 'home.privacyAction';
-  static const String homePrivacyComingSoonMessage =
-      'home.privacyComingSoonMessage';
+  static const String homePrivacyTitle = 'home.privacyTitle';
+  static const String homePrivacyDescription = 'home.privacyDescription';
+  static const String homePrivacyFullNameVisibleTitle =
+      'home.privacyFullNameVisibleTitle';
+  static const String homePrivacyFullNameVisibleDescription =
+      'home.privacyFullNameVisibleDescription';
+  static const String homePrivacySaveAction = 'home.privacySaveAction';
+  static const String homePrivacyRetryAction = 'home.privacyRetryAction';
+  static const String homePrivacyLoadFailedMessage =
+      'home.privacyLoadFailedMessage';
+  static const String homePrivacyUpdateSuccessMessage =
+      'home.privacyUpdateSuccessMessage';
+  static const String homePrivacyUpdateFailedMessage =
+      'home.privacyUpdateFailedMessage';
   static const String homeLogoutAction = 'home.logoutAction';
   static const String homeLogoutConfirmTitle = 'home.logoutConfirmTitle';
   static const String homeLogoutConfirmMessage = 'home.logoutConfirmMessage';

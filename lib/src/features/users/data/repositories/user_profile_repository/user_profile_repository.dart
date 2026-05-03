@@ -10,6 +10,8 @@ import 'package:global_airsoft_app/src/core/network/message_resolution_policy.da
 import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 import 'package:global_airsoft_app/src/features/users/data/constants/user_profile_api_paths.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/update_my_privacy_settings_input_dto.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_privacy_settings_output_dto.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_output_dto.dart';
 
 enum UserProfilePictureSize { medium, large }
@@ -34,6 +36,14 @@ final class UserProfileRepository {
     );
   }
 
+  Future<String> _privacySettingsLoadFailedMessage() {
+    return _localizationService.tr(AppLocaleKeys.homePrivacyLoadFailedMessage);
+  }
+
+  Future<String> _privacySettingsUpdateFailedMessage() {
+    return _localizationService.tr(AppLocaleKeys.homePrivacyUpdateFailedMessage);
+  }
+
   Future<UserProfileOutputDto> getCurrentUserProfile() async {
     try {
       final Response<dynamic> response = await _dioService.get<dynamic>(
@@ -47,13 +57,17 @@ final class UserProfileRepository {
         );
       }
 
-      await _throwLocalizedFailure();
+      await _throwLocalizedFailure(
+        failureMessageProvider: _profileLoadFailedMessage,
+      );
     } on AbpApiException catch (error) {
       await _throwLocalizedUserProfileException(error: error);
     } on ApiException catch (error) {
       await _throwLocalizedUserProfileException(error: error);
     } on DioException {
-      await _throwLocalizedFailure();
+      await _throwLocalizedFailure(
+        failureMessageProvider: _profileLoadFailedMessage,
+      );
     }
   }
 
@@ -81,7 +95,9 @@ final class UserProfileRepository {
         }
       }
 
-      await _throwLocalizedFailure();
+      await _throwLocalizedFailure(
+        failureMessageProvider: _profileLoadFailedMessage,
+      );
     } on NotFoundApiException {
       return '';
     } on AbpApiException catch (error) {
@@ -89,7 +105,81 @@ final class UserProfileRepository {
     } on ApiException catch (error) {
       await _throwLocalizedUserProfileException(error: error);
     } on DioException {
-      await _throwLocalizedFailure();
+      await _throwLocalizedFailure(
+        failureMessageProvider: _profileLoadFailedMessage,
+      );
+    }
+  }
+
+  Future<UserProfilePrivacySettingsOutputDto>
+  getCurrentUserPrivacySettings() async {
+    try {
+      final Response<dynamic> response = await _dioService.get<dynamic>(
+        UserProfileApiPaths.currentUserPrivacySettings,
+      );
+
+      if (response.statusCode.isSuccessStatusCode &&
+          response.data is Map<String, dynamic>) {
+        return UserProfilePrivacySettingsOutputDto.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      }
+
+      await _throwLocalizedFailure(
+        failureMessageProvider: _privacySettingsLoadFailedMessage,
+      );
+    } on AbpApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _privacySettingsLoadFailedMessage,
+      );
+    } on ApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _privacySettingsLoadFailedMessage,
+      );
+    } on DioException {
+      await _throwLocalizedFailure(
+        failureMessageProvider: _privacySettingsLoadFailedMessage,
+      );
+    }
+  }
+
+  Future<UserProfilePrivacySettingsOutputDto> updateCurrentUserPrivacySettings({
+    required bool fullNameVisible,
+  }) async {
+    try {
+      final Response<dynamic> response = await _dioService.put<dynamic>(
+        UserProfileApiPaths.updateCurrentUserPrivacySettings,
+        data: UpdateMyPrivacySettingsInputDto(
+          fullNameVisible: fullNameVisible,
+        ).toJson(),
+      );
+
+      if (response.statusCode.isSuccessStatusCode &&
+          response.data is Map<String, dynamic>) {
+        return UserProfilePrivacySettingsOutputDto.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      }
+
+      await _throwLocalizedFailure(
+        failureMessageProvider: _privacySettingsUpdateFailedMessage,
+      );
+    } on AbpApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _privacySettingsUpdateFailedMessage,
+      );
+    } on ApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _privacySettingsUpdateFailedMessage,
+      );
+    } on DioException {
+      await _throwLocalizedFailure(
+        failureMessageProvider: _privacySettingsUpdateFailedMessage,
+      );
     }
   }
 
@@ -179,8 +269,10 @@ final class UserProfileRepository {
     );
   }
 
-  Future<Never> _throwLocalizedFailure() async {
-    final String localizedFailureMessage = await _profileLoadFailedMessage();
+  Future<Never> _throwLocalizedFailure({
+    required Future<String> Function() failureMessageProvider,
+  }) async {
+    final String localizedFailureMessage = await failureMessageProvider();
 
     throw UserProfileException(
       failure: UnknownApiException(message: localizedFailureMessage),

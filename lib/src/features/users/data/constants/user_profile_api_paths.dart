@@ -5,6 +5,8 @@ abstract final class UserProfileApiPaths {
       '/users/me/profile-picture/url/medium';
   static const String currentUserProfilePictureLarge =
       '/users/me/profile-picture/url/large';
+  static const String currentUserPrivacySettings = '/users/me/privacy';
+  static const String updateCurrentUserPrivacySettings = '/users/me/privacy';
 
   UserProfileApiPaths._();
 }
