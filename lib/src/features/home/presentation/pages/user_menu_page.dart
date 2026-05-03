@@ -5,10 +5,10 @@ import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_confirmation_dialog.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture.dart';
-import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
@@ -68,39 +68,14 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
   }
 
   Future<bool> _showLogoutConfirmationDialog() async {
-    final bool? result = await showDialog<bool>(
+    return AppConfirmationDialog.show(
       context: context,
-      builder: (BuildContext context) {
-        final ThemeData theme = Theme.of(context);
-        final ColorScheme colorScheme = theme.colorScheme;
-
-        return AlertDialog(
-          backgroundColor: colorScheme.surfaceContainerLow,
-          title: Text(context.l10n.tr(AppLocaleKeys.homeLogoutConfirmTitle)),
-          content: Text(
-            context.l10n.tr(AppLocaleKeys.homeLogoutConfirmMessage),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(context.l10n.tr(AppLocaleKeys.commonCancel)),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: FilledButton.styleFrom(
-                backgroundColor: colorScheme.error,
-                foregroundColor: colorScheme.onError,
-              ),
-              child: Text(
-                context.l10n.tr(AppLocaleKeys.homeLogoutConfirmAction),
-              ),
-            ),
-          ],
-        );
-      },
+      title: context.l10n.tr(AppLocaleKeys.homeLogoutConfirmTitle),
+      message: context.l10n.tr(AppLocaleKeys.homeLogoutConfirmMessage),
+      cancelLabel: context.l10n.tr(AppLocaleKeys.commonCancel),
+      confirmLabel: context.l10n.tr(AppLocaleKeys.homeLogoutConfirmAction),
+      isDestructive: true,
     );
-
-    return result ?? false;
   }
 
   @override
@@ -115,7 +90,9 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
       appBar: AppAdaptiveAppBar(
         title: Text(context.l10n.tr(AppLocaleKeys.homeUserMenuTitle)),
         leading: IconButton(
-          onPressed: _isLoggingOut ? null : () => Navigator.of(context).maybePop(),
+          onPressed: _isLoggingOut
+              ? null
+              : () => Navigator.of(context).maybePop(),
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           icon: const Icon(Icons.close_rounded),
         ),
@@ -205,8 +182,9 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
                         foregroundColor: colorScheme.onError,
                         disabledBackgroundColor: colorScheme.errorContainer
                             .withValues(alpha: 0.48),
-                        disabledForegroundColor: colorScheme.onError
-                            .withValues(alpha: 0.72),
+                        disabledForegroundColor: colorScheme.onError.withValues(
+                          alpha: 0.72,
+                        ),
                       ),
                       icon: _isLoggingOut
                           ? SizedBox(
