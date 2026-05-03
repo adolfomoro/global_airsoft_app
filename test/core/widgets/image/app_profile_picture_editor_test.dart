@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture_editor.dart';
 
 void main() {
@@ -13,13 +14,12 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: AppProfilePictureEditor.imageProvider(
+          body: AppProfilePicture.imageProvider(
             imageProvider: _DelayedMemoryImage(
               _transparentImageBytes,
               const Duration(milliseconds: 50),
             ),
-            onPhotoTap: () {},
-            onEditTap: () {},
+            onTap: () {},
           ),
         ),
       ),
@@ -32,6 +32,25 @@ void main() {
 
     expect(find.byType(AppSkeleton), findsNothing);
     expect(find.byType(Image), findsOneWidget);
+  });
+
+  testWidgets('renders the edit badge in the editor variant', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AppProfilePictureEditor.imageProvider(
+            imageProvider: MemoryImage(_transparentImageBytes),
+            onEditTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.byIcon(Icons.edit_rounded), findsOneWidget);
   });
 }
 

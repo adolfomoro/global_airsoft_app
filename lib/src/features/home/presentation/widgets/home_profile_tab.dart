@@ -8,7 +8,7 @@ import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_zoom_viewer.dart';
-import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture_editor.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
@@ -78,12 +78,10 @@ class _ProfileContent extends StatelessWidget {
             child: Column(
               children: <Widget>[
                 const SizedBox(height: AppDimensions.spacing2xl),
-                AppProfilePictureEditor.profilePhoto(
+                AppProfilePicture.profilePhoto(
                   profilePhoto: profile.profilePhoto,
                   size: 124,
-                  badgeSize: 0,
-                  showEditBadge: false,
-                  onPhotoTap: zoomImageUrl.isNotEmpty
+                  onTap: zoomImageUrl.isNotEmpty
                       ? () => AppProfileImageZoomViewer.showNetwork(
                           context,
                           imageUrl: zoomImageUrl,

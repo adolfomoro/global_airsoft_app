@@ -1,20 +1,21 @@
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
-import 'package:global_airsoft_app/src/features/users/data/repositories/users_repository/dto/user_profile_output_dto.dart';
-import 'package:global_airsoft_app/src/features/users/data/repositories/users_repository/users_repository.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_output_dto.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/user_profile_repository.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
 
 final class UserProfileService {
   const UserProfileService({
-    required UsersRepository repository,
+    required UserProfileRepository repository,
     required AppLogger logger,
   }) : _repository = repository,
        _logger = logger;
 
-  final UsersRepository _repository;
+  final UserProfileRepository _repository;
   final AppLogger _logger;
 
   Future<UserProfile> getCurrentUserProfile() async {
-    final UserProfileOutputDto profile = await _repository.getCurrentUserProfile();
+    final UserProfileOutputDto profile = await _repository
+        .getCurrentUserProfile();
     final List<String> profilePictureUrls =
         await Future.wait<String>(<Future<String>>[
           _readProfilePictureUrlSafely(UserProfilePictureSize.medium),

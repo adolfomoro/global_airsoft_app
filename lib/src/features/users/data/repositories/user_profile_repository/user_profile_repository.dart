@@ -5,14 +5,14 @@ import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/network/http_status_code_extensions.dart';
 import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
-import 'package:global_airsoft_app/src/features/users/data/constants/user_api_paths.dart';
+import 'package:global_airsoft_app/src/features/users/data/constants/user_profile_api_paths.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
-import 'package:global_airsoft_app/src/features/users/data/repositories/users_repository/dto/user_profile_output_dto.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_output_dto.dart';
 
 enum UserProfilePictureSize { medium, large }
 
-final class UsersRepository {
-  const UsersRepository({
+final class UserProfileRepository {
+  const UserProfileRepository({
     required AppDioService dioService,
     required AppLocalizationService localizationService,
   }) : _dioService = dioService,
@@ -28,7 +28,7 @@ final class UsersRepository {
   Future<UserProfileOutputDto> getCurrentUserProfile() async {
     try {
       final Response<dynamic> response = await _dioService.get<dynamic>(
-        UserApiPaths.currentUserProfile,
+        UserProfileApiPaths.currentUserProfile,
       );
 
       if (response.statusCode.isSuccessStatusCode &&
@@ -55,9 +55,9 @@ final class UsersRepository {
       final Response<dynamic> response = await _dioService.get<dynamic>(
         switch (size) {
           UserProfilePictureSize.medium =>
-            UserApiPaths.currentUserProfilePictureMedium,
+            UserProfileApiPaths.currentUserProfilePictureMedium,
           UserProfilePictureSize.large =>
-            UserApiPaths.currentUserProfilePictureLarge,
+            UserProfileApiPaths.currentUserProfilePictureLarge,
         },
       );
 
