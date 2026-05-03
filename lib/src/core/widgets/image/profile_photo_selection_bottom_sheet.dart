@@ -9,7 +9,6 @@ import 'package:global_airsoft_app/src/core/media/image_picker_service.dart';
 import 'package:global_airsoft_app/src/core/media/media_providers.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo_camera_capture_service.dart';
 import 'package:global_airsoft_app/src/core/permissions/camera_permission_service.dart';
-import 'package:global_airsoft_app/src/core/permissions/gallery_permission_service.dart';
 import 'package:global_airsoft_app/src/core/permissions/permission_providers.dart';
 
 enum ProfilePhotoSelectionAction { takePhoto, selectFromGallery, deletePhoto }
@@ -38,6 +37,8 @@ class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
     super.key,
   });
 
+  static bool _isFlowInProgress = false;
+
   final bool hasCurrentPhoto;
 
   static Future<ProfilePhotoSelectionAction?> show(
@@ -59,6 +60,13 @@ class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
     BuildContext context, {
     required bool hasCurrentPhoto,
   }) async {
+    if (_isFlowInProgress) {
+      return null;
+    }
+
+    _isFlowInProgress = true;
+
+    try {
     final ProfilePhotoSelectionAction? action = await show(
       context,
       hasCurrentPhoto: hasCurrentPhoto,
@@ -75,6 +83,9 @@ class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
         return _selectFromGallery(context);
       case ProfilePhotoSelectionAction.deletePhoto:
         return const ProfilePhotoSelectionResult.deleted();
+    }
+    } finally {
+      _isFlowInProgress = false;
     }
   }
 
@@ -146,9 +157,6 @@ class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
       context,
       listen: false,
     );
-    final GalleryPermissionService galleryPermissionService = container.read(
-      galleryPermissionServiceProvider,
-    );
     final ImagePickerService imagePickerService = container.read(
       imagePickerServiceProvider,
     );
@@ -156,31 +164,11 @@ class ProfilePhotoSelectionBottomSheet extends StatelessWidget {
       imageCropServiceProvider,
     );
 
-    final bool isGranted = await galleryPermissionService.isGranted();
-
-    if (!isGranted) {
-      final bool permissionGranted = await galleryPermissionService.request();
-
-      if (!permissionGranted) {
-        if (!context.mounted) {
-          return null;
-        }
-
-        await _showPermissionDeniedDialog(
-          context,
-          isCamera: false,
-          onOpenSettings: () async {
-            await galleryPermissionService.openSettings();
-          },
-        );
-        return null;
-      }
-    }
-
     final ImagePickerResult result = await imagePickerService.pickFromGallery(
       maxWidth: 1024,
       maxHeight: 1024,
       imageQuality: 85,
+      requestFullMetadata: false,
     );
 
     if (!context.mounted || !result.hasImage) {

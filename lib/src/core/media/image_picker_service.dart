@@ -20,6 +20,7 @@ class ImagePickerService {
     int imageQuality = 85,
     double? maxWidth,
     double? maxHeight,
+    bool requestFullMetadata = true,
   }) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -27,16 +28,21 @@ class ImagePickerService {
         imageQuality: imageQuality,
         maxWidth: maxWidth,
         maxHeight: maxHeight,
+        requestFullMetadata: requestFullMetadata,
       );
 
-      if (pickedFile == null) {
+      final File? resolvedFile = await _resolvePickedFile(
+        pickedFile: pickedFile,
+      );
+
+      if (resolvedFile == null) {
         return ImagePickerResult(file: null, source: source);
       }
 
-      final File file = File(pickedFile.path);
-      return ImagePickerResult(file: file, source: source);
-    } catch (e) {
-      return ImagePickerResult(file: null, source: source);
+      return ImagePickerResult(file: resolvedFile, source: source);
+    } catch (_) {
+      final File? recoveredFile = await _retrieveLostImageFile();
+      return ImagePickerResult(file: recoveredFile, source: source);
     }
   }
 
@@ -44,12 +50,45 @@ class ImagePickerService {
     int imageQuality = 85,
     double? maxWidth,
     double? maxHeight,
+    bool requestFullMetadata = false,
   }) async {
     return pickImage(
       source: ImageSource.gallery,
       imageQuality: imageQuality,
       maxWidth: maxWidth,
       maxHeight: maxHeight,
+      requestFullMetadata: requestFullMetadata,
     );
+  }
+
+  Future<File?> _resolvePickedFile({required XFile? pickedFile}) async {
+    if (pickedFile != null) {
+      return File(pickedFile.path);
+    }
+
+    return _retrieveLostImageFile();
+  }
+
+  Future<File?> _retrieveLostImageFile() async {
+    try {
+      final LostDataResponse response = await _picker.retrieveLostData();
+      if (response.isEmpty) {
+        return null;
+      }
+
+      final XFile? singleFile = response.file;
+      if (singleFile != null) {
+        return File(singleFile.path);
+      }
+
+      final List<XFile>? files = response.files;
+      if (files == null || files.isEmpty) {
+        return null;
+      }
+
+      return File(files.first.path);
+    } catch (_) {
+      return null;
+    }
   }
 }
