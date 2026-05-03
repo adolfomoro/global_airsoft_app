@@ -190,7 +190,7 @@ class _EditableProfilePhotoSectionState
   }
 
   Future<void> _handlePhotoChanged(ProfilePhoto photo) async {
-    if (!photo.isLocal || _isUploading) {
+    if (_isUploading) {
       return;
     }
 
@@ -200,9 +200,16 @@ class _EditableProfilePhotoSectionState
     });
 
     try {
-      await ref
-          .read(userProfileServiceProvider)
-          .uploadCurrentUserProfilePicture(photo.localFile!);
+      final userProfileService = ref.read(userProfileServiceProvider);
+      if (photo.isLocal) {
+        await userProfileService.uploadCurrentUserProfilePicture(
+          photo.localFile!,
+        );
+      } else if (photo.isEmpty) {
+        await userProfileService.deleteCurrentUserProfilePicture();
+      } else {
+        return;
+      }
 
       if (!mounted) {
         return;
@@ -268,7 +275,7 @@ class _EditableProfilePhotoSectionState
           size: 124,
           badgeSize: 40,
           enabled: !_isUploading,
-          allowDelete: false,
+          allowDelete: true,
           isLoading: _isUploading,
         ),
       ],

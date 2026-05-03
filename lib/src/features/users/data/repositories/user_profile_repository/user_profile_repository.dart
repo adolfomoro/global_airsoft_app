@@ -102,9 +102,35 @@ final class UserProfileRepository {
       );
 
       final Response<dynamic> response = await _dioService.post<dynamic>(
-        UserProfileApiPaths.uploadCurrentUserProfilePicture,
+        UserProfileApiPaths.currentUserProfilePicture,
         data: data,
         options: Options(contentType: 'multipart/form-data'),
+      );
+
+      if (response.statusCode.isSuccessStatusCode) {
+        return;
+      }
+
+      await _throwLocalizedProfilePhotoUpdateFailure();
+    } on AbpApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _profilePhotoUpdateFailedMessage,
+      );
+    } on ApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _profilePhotoUpdateFailedMessage,
+      );
+    } on DioException {
+      await _throwLocalizedProfilePhotoUpdateFailure();
+    }
+  }
+
+  Future<void> deleteCurrentUserProfilePicture() async {
+    try {
+      final Response<dynamic> response = await _dioService.delete<dynamic>(
+        UserProfileApiPaths.currentUserProfilePicture,
       );
 
       if (response.statusCode.isSuccessStatusCode) {

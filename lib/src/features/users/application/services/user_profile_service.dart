@@ -42,6 +42,10 @@ final class UserProfileService {
     return _repository.uploadCurrentUserProfilePicture(file);
   }
 
+  Future<void> deleteCurrentUserProfilePicture() {
+    return _repository.deleteCurrentUserProfilePicture();
+  }
+
   Future<String> _readProfilePictureUrlSafely(
     UserProfilePictureSize size,
   ) async {
