@@ -34,7 +34,16 @@ abstract final class AppLocaleKeys {
   static const String homeProfilePhotoUpdateFailedMessage =
       'home.profilePhotoUpdateFailedMessage';
   static const String homeProfileRefreshHint = 'home.profileRefreshHint';
+  static const String homeUserMenuAction = 'home.userMenuAction';
+  static const String homeUserMenuTitle = 'home.userMenuTitle';
+  static const String homeUserMenuDescription = 'home.userMenuDescription';
+  static const String homePrivacyAction = 'home.privacyAction';
+  static const String homePrivacyComingSoonMessage =
+      'home.privacyComingSoonMessage';
   static const String homeLogoutAction = 'home.logoutAction';
+  static const String homeLogoutConfirmTitle = 'home.logoutConfirmTitle';
+  static const String homeLogoutConfirmMessage = 'home.logoutConfirmMessage';
+  static const String homeLogoutConfirmAction = 'home.logoutConfirmAction';
   static const String homeLogoutErrorMessage = 'home.logoutErrorMessage';
   static const String deviceRegistrationFailed = 'device.registrationFailed';
   static const String deviceRegistrationEmptyResponse =
@@ -169,6 +178,7 @@ abstract final class AppLocaleKeys {
       'validation.usernameLowercaseOnly';
   static const String commonShowPassword = 'common.showPassword';
   static const String commonHidePassword = 'common.hidePassword';
+  static const String commonCancel = 'common.cancel';
   static const String commonGenericApiErrorMessage =
       'common.genericApiErrorMessage';
   static const String commonValidationError = 'common.validationError';

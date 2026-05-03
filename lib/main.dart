@@ -27,6 +27,7 @@ import 'package:global_airsoft_app/src/features/auth/application/services/auth_t
 import 'package:global_airsoft_app/src/features/auth/domain/models/auth_tokens.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_registration_service.dart';
+import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 
 Future<void> main() async {
   final AppConfig appConfig = AppConfig.fromDartDefines();
@@ -126,6 +127,9 @@ Future<void> main() async {
         clearSession: () async {
           await authStorageService.clearAll();
           await keyValueStore.remove('user_id_for_backup');
+          await container.read(userProfileStorageServiceProvider)
+              .clearCurrentUserProfile();
+          container.invalidate(currentUserProfileProvider);
           container.read(isAuthenticatedProvider.notifier).setUnauthenticated();
         },
         refreshTokens: authTokenRefreshService.refreshTokens,
