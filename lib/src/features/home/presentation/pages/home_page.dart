@@ -8,11 +8,22 @@ import 'package:global_airsoft_app/src/features/home/presentation/widgets/home_b
 import 'package:global_airsoft_app/src/features/home/presentation/widgets/home_placeholder_tab.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/widgets/home_profile_tab.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(homeTabProvider.notifier).select(HomeTab.discovery);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final HomeTab currentTab = ref.watch(homeTabProvider);
     final homeTabNotifier = ref.read(homeTabProvider.notifier);
     final profileViewData = ref.watch(homeProfileViewDataProvider);
