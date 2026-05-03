@@ -4,14 +4,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
-import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
-import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/notifications/notification_permission_provider.dart';
 import 'package:global_airsoft_app/src/core/notifications/notification_permission_service.dart';
 import 'package:global_airsoft_app/src/core/notifications/push_notification_service.dart';
 import 'package:global_airsoft_app/src/core/notifications/widgets/request_notification_permission_screen.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -128,10 +125,6 @@ class _NotificationPermissionListenerState
       return;
     }
 
-    final String errorMessage = navigatorState.context.l10n.tr(
-      AppLocaleKeys.notificationPermissionError,
-    );
-
     final bool? didAllow = await navigatorState.push<bool>(
       MaterialPageRoute(
         fullscreenDialog: true,
@@ -153,11 +146,6 @@ class _NotificationPermissionListenerState
     );
 
     if (didAllow == null) {
-      if (!mounted) {
-        return;
-      }
-
-      navigatorState.context.showErrorSnackBar(errorMessage);
       return;
     }
 

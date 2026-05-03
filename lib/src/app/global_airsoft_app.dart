@@ -1,16 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_navigator.dart';
-import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/routing/app_routes.dart';
 import 'package:global_airsoft_app/src/app/theme/app_theme.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
-import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/notifications/widgets/notification_permission_listener.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_unfocus_wrapper.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
@@ -46,31 +42,6 @@ class _GlobalAirsoftAppState extends ConsumerState<GlobalAirsoftApp> {
           : AppRoutePaths.login;
       navigatorState.pushNamedAndRemoveUntil(targetRoute, (_) => false);
     });
-    unawaited(_initializeStartupServices());
-  }
-
-  Future<void> _initializeStartupServices() async {
-    try {
-      await _initializePushNotifications();
-    } catch (error, stackTrace) {
-      AppLogger.instance.error(
-        'Push notification initialization failed.',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-  }
-
-  Future<void> _initializePushNotifications() async {
-    final pushNotificationService = ref.read(pushNotificationServiceProvider);
-    await pushNotificationService.initialize(
-      onTokenUpdated: (String token) async {
-        ref.read(pushTokenProvider.notifier).setToken(token);
-        await ref
-            .read(deviceRegistrationServiceProvider)
-            .registerInBackground();
-      },
-    );
   }
 
   @override

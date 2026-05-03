@@ -122,12 +122,12 @@ final class DeviceRegistrationService {
   }
 
   Future<bool> ensureRegisteredBeforeRequest() async {
+    await initialize();
+
     final String pushToken = _getPushNotificationToken().trim();
     if (pushToken.isEmpty) {
       return true;
     }
-
-    await initialize();
 
     for (int attempt = 0; attempt < _maxSyncAttempts; attempt++) {
       final Future<bool>? inFlight = _inFlightSync;
