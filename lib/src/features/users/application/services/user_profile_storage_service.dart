@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
@@ -106,16 +105,6 @@ final class UserProfileStorageService {
     await _clearStoredProfileData(userId: storedUserId);
   }
 
-  Future<String> storeCurrentUserProfilePhotoFile({
-    required String userId,
-    required File sourceFile,
-  }) {
-    return _offlinePhotoStorageService.storeProfilePhotoFile(
-      userId: userId,
-      sourceFile: sourceFile,
-    );
-  }
-
   Future<void> clearCurrentUserProfilePhoto({required String userId}) {
     return _offlinePhotoStorageService.clearStoredProfilePhoto(userId: userId);
   }
@@ -129,6 +118,7 @@ final class UserProfileStorageService {
 
     return userId;
   }
+
   Future<void> _clearStoredProfileData({String? userId}) async {
     final String normalizedUserId = userId?.trim() ?? '';
     final List<Future<void>> operations = <Future<void>>[

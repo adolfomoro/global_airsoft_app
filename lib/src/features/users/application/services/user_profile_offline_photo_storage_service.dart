@@ -91,31 +91,6 @@ final class UserProfileOfflinePhotoStorageService {
     return existingPath;
   }
 
-  Future<String> storeProfilePhotoFile({
-    required String userId,
-    required File sourceFile,
-  }) async {
-    if (!sourceFile.existsSync()) {
-      throw ArgumentError.value(
-        sourceFile.path,
-        'sourceFile',
-        'Profile photo file does not exist.',
-      );
-    }
-
-    final File copiedFile = await _replaceStoredProfilePhoto(
-      userId: userId,
-      fileExtension: _resolveFileExtensionFromFilePath(sourceFile.path),
-      writeFile: (List<String> pathSegments) {
-        return _fileStorage.copyFile(
-          sourceFile: sourceFile,
-          pathSegments: pathSegments,
-        );
-      },
-    );
-    return copiedFile.path;
-  }
-
   Future<void> clearStoredProfilePhoto({required String userId}) {
     return _fileStorage.deleteDirectory(
       pathSegments: _photoDirectoryPathSegments(userId),
@@ -210,10 +185,6 @@ final class UserProfileOfflinePhotoStorageService {
   String _resolveFileExtensionFromUrl(String url) {
     final Uri uri = Uri.parse(url);
     return _normalizeFileExtension(path.extension(uri.path));
-  }
-
-  String _resolveFileExtensionFromFilePath(String filePath) {
-    return _normalizeFileExtension(path.extension(filePath));
   }
 
   String _normalizeFileExtension(String extension) {

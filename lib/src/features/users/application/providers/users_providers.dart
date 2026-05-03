@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,10 +29,7 @@ final Provider<UserProfileRepository> userProfileRepositoryProvider =
 final Provider<UserProfileService> userProfileServiceProvider =
     Provider<UserProfileService>((Ref ref) {
       final repository = ref.watch(userProfileRepositoryProvider);
-      return UserProfileService(
-        repository: repository,
-        logger: AppLogger.instance,
-      );
+      return UserProfileService(repository: repository);
     });
 
 final Provider<UserProfileStorageService> userProfileStorageServiceProvider =
@@ -149,40 +145,6 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
 
   Future<void> clearCachedProfile() {
     return _offlinePersistence.clearCurrentUserProfile();
-  }
-
-  Future<void> applyProfilePhotoFile(File file) async {
-    final UserProfile? currentProfile =
-        state.asData?.value ?? await _offlinePersistence.getCurrentUserProfile();
-    if (currentProfile == null) {
-      return;
-    }
-
-    final String storedPhotoPath = await _offlinePersistence
-        .storeCurrentUserProfilePhotoFile(
-          userId: currentProfile.id,
-          sourceFile: file,
-        );
-    if (ref.mounted) {
-      state = AsyncData<UserProfile>(
-        currentProfile.copyWith(localProfilePicturePath: storedPhotoPath),
-      );
-    }
-  }
-
-  Future<void> clearProfilePhoto() async {
-    final UserProfile? currentProfile =
-        state.asData?.value ?? await _offlinePersistence.getCurrentUserProfile();
-    if (currentProfile == null) {
-      return;
-    }
-
-    final UserProfile updatedProfile = await _offlinePersistence
-        .clearCurrentUserProfilePhoto(currentProfile);
-
-    if (ref.mounted) {
-      state = AsyncData<UserProfile>(updatedProfile);
-    }
   }
 
   Future<void> applyProfileDetails({

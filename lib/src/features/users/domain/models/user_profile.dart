@@ -59,6 +59,11 @@ final class UserProfile {
     return ProfilePhoto.network(preferredUrl);
   }
 
+  bool get hasRemoteProfilePicture {
+    return mediumProfilePictureUrl.trim().isNotEmpty ||
+        largeProfilePictureUrl.trim().isNotEmpty;
+  }
+
   String get resolvedFullName {
     final String normalized = fullName.trim();
     if (normalized.isNotEmpty) {
