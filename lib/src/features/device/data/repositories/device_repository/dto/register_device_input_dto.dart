@@ -5,10 +5,10 @@ final class RegisterDeviceInputDto {
     required this.platform,
     required this.deviceType,
     required this.appVersion,
-    required this.pushNotificationToken,
     required this.pushNotificationType,
     this.deviceId,
     this.deviceModel,
+    this.pushNotificationToken,
   });
 
   final String? deviceId;
@@ -16,7 +16,7 @@ final class RegisterDeviceInputDto {
   final String deviceType;
   final String appVersion;
   final String? deviceModel;
-  final String pushNotificationToken;
+  final String? pushNotificationToken;
   final PushNotificationType pushNotificationType;
 
   Map<String, dynamic> toJson() {
@@ -26,7 +26,8 @@ final class RegisterDeviceInputDto {
       'deviceType': deviceType,
       'appVersion': appVersion,
       if (deviceModel != null) 'deviceModel': deviceModel,
-      'pushNotificationToken': pushNotificationToken,
+      if (pushNotificationToken?.trim().isNotEmpty ?? false)
+        'pushNotificationToken': pushNotificationToken,
       'pushNotificationType': pushNotificationType.value,
     };
   }
