@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
@@ -98,116 +97,50 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[
-                    colorScheme.surfaceContainerLow,
-                    colorScheme.surface,
-                  ],
-                ),
-              ),
+      body: SafeArea(
+        top: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppDimensions.maxContentWidth,
             ),
-          ),
-          Positioned(
-            top: -72,
-            right: -36,
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.secondaryLight.withValues(alpha: 0.08),
-                ),
-                child: const SizedBox(width: 220, height: 220),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppDimensions.spacingLg,
+                AppDimensions.spacingLg,
+                AppDimensions.spacingLg,
+                AppDimensions.spacing2xl,
               ),
-            ),
-          ),
-          Positioned(
-            top: 120,
-            left: -70,
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.16),
-                ),
-                child: const SizedBox(width: 180, height: 180),
-              ),
-            ),
-          ),
-          SafeArea(
-            top: false,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppDimensions.maxContentWidth,
-                ),
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppDimensions.spacingLg,
-                    AppDimensions.spacingLg,
-                    AppDimensions.spacingLg,
-                    AppDimensions.spacing2xl,
+              children: <Widget>[
+                Text(
+                  context.l10n.tr(AppLocaleKeys.homeUserMenuDescription),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    height: 1.4,
                   ),
-                  children: <Widget>[
-                    Text(
-                      context.l10n.tr(AppLocaleKeys.homeUserMenuDescription),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.45,
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.spacingLg),
-                    _UserSummaryCard(profileState: profileState),
-                    const SizedBox(height: AppDimensions.spacingLg),
-                    _MenuActionCard(
-                      icon: Icons.privacy_tip_outlined,
-                      title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),
-                      onTap: _handlePrivacyTap,
-                      enabled: !_isLoggingOut,
-                    ),
-                    const SizedBox(height: AppDimensions.spacing2xl),
-                    FilledButton.icon(
-                      onPressed: _isLoggingOut ? null : _handleLogoutTap,
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(
-                          AppDimensions.controlHeight,
-                        ),
-                        backgroundColor: colorScheme.error,
-                        foregroundColor: colorScheme.onError,
-                        disabledBackgroundColor: colorScheme.errorContainer
-                            .withValues(alpha: 0.48),
-                        disabledForegroundColor: colorScheme.onError.withValues(
-                          alpha: 0.72,
-                        ),
-                      ),
-                      icon: _isLoggingOut
-                          ? SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  colorScheme.onError,
-                                ),
-                              ),
-                            )
-                          : const Icon(Icons.logout_rounded),
-                      label: Text(
-                        context.l10n.tr(AppLocaleKeys.homeLogoutAction),
-                      ),
-                    ),
-                  ],
                 ),
-              ),
+                const SizedBox(height: AppDimensions.spacingLg),
+                _UserSummaryCard(profileState: profileState),
+                const SizedBox(height: AppDimensions.spacingLg),
+                _MenuActionTile(
+                  icon: Icons.privacy_tip_outlined,
+                  title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),
+                  onTap: _handlePrivacyTap,
+                  enabled: !_isLoggingOut,
+                ),
+                const SizedBox(height: AppDimensions.spacingSm),
+                _MenuActionTile(
+                  icon: Icons.logout_rounded,
+                  title: context.l10n.tr(AppLocaleKeys.homeLogoutAction),
+                  onTap: _handleLogoutTap,
+                  enabled: !_isLoggingOut,
+                  isDestructive: true,
+                  isLoading: _isLoggingOut,
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -225,18 +158,11 @@ class _UserSummaryCard extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow.withValues(alpha: 0.9),
+        color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.62),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.56),
         ),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: AppColors.shadowDark,
-            blurRadius: 24,
-            offset: Offset(0, 12),
-          ),
-        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppDimensions.spacingLg),
@@ -265,7 +191,7 @@ class _UserSummaryCard extends StatelessWidget {
                       Text(
                         '@${profile.username}',
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: AppColors.secondaryLight,
+                          color: colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -328,29 +254,32 @@ class _UserSummaryCard extends StatelessWidget {
   }
 }
 
-class _MenuActionCard extends StatelessWidget {
-  const _MenuActionCard({
+class _MenuActionTile extends StatelessWidget {
+  const _MenuActionTile({
     required this.icon,
     required this.title,
     required this.onTap,
     this.enabled = true,
+    this.isDestructive = false,
+    this.isLoading = false,
   });
 
   final IconData icon;
   final String title;
   final VoidCallback onTap;
   final bool enabled;
+  final bool isDestructive;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final Color iconContainerColor = enabled
-        ? AppColors.primary.withValues(alpha: 0.22)
-        : colorScheme.surfaceContainerHighest;
-    final Color iconColor = enabled
-        ? AppColors.secondaryLight
-        : colorScheme.onSurfaceVariant;
+    final Color foregroundColor = !enabled
+        ? colorScheme.onSurfaceVariant
+        : isDestructive
+        ? colorScheme.error
+        : colorScheme.onSurface;
 
     return Material(
       color: Colors.transparent,
@@ -359,41 +288,46 @@ class _MenuActionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
         child: Ink(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow.withValues(alpha: 0.92),
+            color: colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
             border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.56),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
             ),
           ),
-          padding: const EdgeInsets.all(AppDimensions.spacingLg),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.spacingLg,
+            vertical: AppDimensions.spacingMd,
+          ),
           child: Row(
             children: <Widget>[
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: iconContainerColor,
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                ),
-                child: SizedBox(
-                  width: 46,
-                  height: 46,
-                  child: Icon(icon, color: iconColor),
-                ),
+              SizedBox(
+                width: 28,
+                child: isLoading
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            foregroundColor,
+                          ),
+                        ),
+                      )
+                    : Icon(icon, color: foregroundColor, size: 22),
               ),
-              const SizedBox(width: AppDimensions.spacingLg),
+              const SizedBox(width: AppDimensions.spacingMd),
               Expanded(
                 child: Text(
                   title,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: enabled
-                        ? colorScheme.onSurface
-                        : colorScheme.onSurfaceVariant,
+                    color: foregroundColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: colorScheme.onSurfaceVariant,
+                color: foregroundColor.withValues(alpha: 0.72),
               ),
             ],
           ),

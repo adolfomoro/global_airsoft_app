@@ -13,26 +13,32 @@ final class AppConfirmationDialog {
     bool isDestructive = false,
     bool barrierDismissible = false,
   }) {
-    final TargetPlatform platform = Theme.of(context).platform;
+    if (!context.mounted) {
+      return Future<bool>.value(false);
+    }
+
+    final ThemeData theme = Theme.of(context);
+    final NavigatorState navigator = Navigator.of(context, rootNavigator: true);
+    final TargetPlatform platform = theme.platform;
     final bool isCupertinoPlatform =
         platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
 
     final Future<bool?> result = showAdaptiveDialog<bool>(
       context: context,
       barrierDismissible: barrierDismissible,
-      builder: (BuildContext dialogContext) {
+      builder: (BuildContext _) {
         if (isCupertinoPlatform) {
           return CupertinoAlertDialog(
             title: Text(title),
             content: Text(message),
             actions: <Widget>[
               CupertinoDialogAction(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
+                onPressed: () => navigator.pop(false),
                 child: Text(cancelLabel),
               ),
               CupertinoDialogAction(
                 isDestructiveAction: isDestructive,
-                onPressed: () => Navigator.of(dialogContext).pop(true),
+                onPressed: () => navigator.pop(true),
                 child: Text(confirmLabel),
               ),
             ],
@@ -44,11 +50,11 @@ final class AppConfirmationDialog {
           content: Text(message),
           actions: <Widget>[
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
+              onPressed: () => navigator.pop(false),
               child: Text(cancelLabel),
             ),
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
+              onPressed: () => navigator.pop(true),
               child: Text(confirmLabel),
             ),
           ],
