@@ -2,14 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 
 final class AppFormPadding extends StatelessWidget {
-  static const EdgeInsets _defaultPadding = EdgeInsets.symmetric(
-    horizontal: AppDimensions.spacing2xl,
+  static const EdgeInsets defaultHorizontalPadding = EdgeInsets.symmetric(
+    horizontal: AppDimensions.spacingXl,
+  );
+  static const EdgeInsets standardScrollablePagePadding = EdgeInsets.fromLTRB(
+    AppDimensions.spacingXl,
+    AppDimensions.spacingXl,
+    AppDimensions.spacingXl,
+    AppDimensions.spacingXl,
+  );
+  static const EdgeInsets standardBottomActionsPadding = EdgeInsets.fromLTRB(
+    AppDimensions.spacingXl,
+    AppDimensions.spacingLg,
+    AppDimensions.spacingXl,
+    AppDimensions.spacingLg,
   );
 
   const AppFormPadding({
     super.key,
     required this.child,
-    this.padding = _defaultPadding,
+    this.padding = defaultHorizontalPadding,
     this.maxWidth = AppDimensions.maxContentWidth,
   });
 

@@ -14,6 +14,7 @@ import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_page_header.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
+import 'package:global_airsoft_app/src/core/widgets/form/app_form_padding.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_text_field.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
@@ -145,12 +146,11 @@ class _PasswordRecoveryPageState extends ConsumerState<PasswordRecoveryPage>
           child: Form(
             key: _formKey,
             autovalidateMode: formAutovalidateMode,
-            child: Padding(
-              padding: const EdgeInsets.all(AppDimensions.spacing2xl),
+            child: AppFormPadding(
+              padding: AppFormPadding.standardScrollablePagePadding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  const SizedBox(height: AppDimensions.spacingXl),
                   AppPageHeader(
                     title: context.l10n.tr(
                       AppLocaleKeys.authPasswordRecoveryHeading,

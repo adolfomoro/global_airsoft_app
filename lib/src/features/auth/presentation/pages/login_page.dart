@@ -266,7 +266,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppDimensions.spacingXl),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
@@ -374,7 +374,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppDimensions.spacingXl),
                       AppButton(
                         label: context.l10n.tr(AppLocaleKeys.authSignInAction),
                         onPressed: _isAnyAuthLoading ? null : _submitLogin,

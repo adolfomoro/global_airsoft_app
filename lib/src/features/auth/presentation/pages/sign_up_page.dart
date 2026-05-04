@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/localization/app_validation_localizations.dart';
@@ -467,7 +468,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage>
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              const SizedBox(height: 20),
+              const SizedBox(height: AppDimensions.spacingXl),
               _SignUpFormHeader(),
               const SizedBox(height: 24),
               _SignUpFormFields(

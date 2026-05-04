@@ -8,6 +8,7 @@ import 'package:global_airsoft_app/src/core/widgets/app_leave_confirmation_guard
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
+import 'package:global_airsoft_app/src/core/widgets/form/app_form_padding.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile_privacy_settings.dart';
@@ -112,12 +113,7 @@ class _UserProfilePrivacyPageState
                   hasUnsavedChanges:
                       fullNameVisible != settings.fullNameVisible,
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppDimensions.spacingLg,
-                      AppDimensions.spacingLg,
-                      AppDimensions.spacingLg,
-                      AppDimensions.spacing2xl,
-                    ),
+                    padding: AppFormPadding.standardScrollablePagePadding,
                     children: <Widget>[
                       Text(
                         context.l10n.tr(AppLocaleKeys.homePrivacyDescription),
@@ -240,7 +236,6 @@ class _UserProfilePrivacyPageState
       ),
     );
   }
-
 }
 
 class _PrivacyLoadingState extends StatelessWidget {
@@ -249,12 +244,7 @@ class _PrivacyLoadingState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        AppDimensions.spacingLg,
-        AppDimensions.spacingLg,
-        AppDimensions.spacingLg,
-        AppDimensions.spacing2xl,
-      ),
+      padding: AppFormPadding.standardScrollablePagePadding,
       children: const <Widget>[
         AppSkeleton(height: 18),
         SizedBox(height: AppDimensions.spacingSm),
@@ -283,9 +273,9 @@ class _PrivacyErrorState extends StatelessWidget {
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
-        AppDimensions.spacingLg,
+        AppDimensions.spacing2xl,
         120,
-        AppDimensions.spacingLg,
+        AppDimensions.spacing2xl,
         AppDimensions.spacing2xl,
       ),
       children: <Widget>[

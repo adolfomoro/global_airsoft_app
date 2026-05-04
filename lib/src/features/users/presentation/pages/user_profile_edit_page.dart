@@ -397,9 +397,9 @@ class _UserProfileEditErrorState extends StatelessWidget {
         ),
         child: ListView(
           padding: const EdgeInsets.fromLTRB(
-            AppDimensions.spacingLg,
+            AppDimensions.spacing2xl,
             120,
-            AppDimensions.spacingLg,
+            AppDimensions.spacing2xl,
             AppDimensions.spacing2xl,
           ),
           children: <Widget>[

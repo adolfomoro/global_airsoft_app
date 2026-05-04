@@ -16,15 +16,8 @@ final class AppFormWithBottomActions extends StatefulWidget {
     super.key,
     this.scrollController,
     this.bottomActionsRevealKeyboardCloseProgress = 0.6,
-    this.bodyPadding = const EdgeInsets.symmetric(
-      horizontal: AppDimensions.spacing2xl,
-    ),
-    this.bottomActionsPadding = const EdgeInsets.fromLTRB(
-      AppDimensions.spacing2xl,
-      AppDimensions.spacingLg,
-      AppDimensions.spacing2xl,
-      AppDimensions.spacingLg,
-    ),
+    this.bodyPadding = AppFormPadding.defaultHorizontalPadding,
+    this.bottomActionsPadding = AppFormPadding.standardBottomActionsPadding,
     this.bodyBottomSpacing = AppDimensions.spacingXl,
   }) : assert(
          bottomActionsRevealKeyboardCloseProgress >= 0 &&
