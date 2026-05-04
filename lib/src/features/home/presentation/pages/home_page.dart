@@ -67,13 +67,10 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _reloadProfileIfRequested() async {
-    if (!ref.read(currentUserProfileRefreshRequestProvider)) {
-      return;
-    }
-
     try {
-      await ref.read(currentUserProfileProvider.notifier).reload();
-      ref.read(currentUserProfileRefreshRequestProvider.notifier).clear();
+      await ref
+          .read(currentUserProfileProvider.notifier)
+          .reloadIfRefreshRequested();
     } catch (error) {
       if (!mounted) {
         return;

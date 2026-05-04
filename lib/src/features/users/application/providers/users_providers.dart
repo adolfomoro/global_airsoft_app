@@ -143,29 +143,18 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
     }
   }
 
-  Future<void> clearCachedProfile() {
-    return _offlinePersistence.clearCurrentUserProfile();
+  Future<bool> reloadIfRefreshRequested() async {
+    if (!ref.read(currentUserProfileRefreshRequestProvider)) {
+      return false;
+    }
+
+    await reload();
+    ref.read(currentUserProfileRefreshRequestProvider.notifier).clear();
+    return true;
   }
 
-  Future<void> applyProfileDetails({
-    required String fullName,
-    required String bio,
-  }) async {
-    final UserProfile? currentProfile =
-        state.asData?.value ?? await _offlinePersistence.getCurrentUserProfile();
-    if (currentProfile == null) {
-      return;
-    }
-
-    final UserProfile updatedProfile = currentProfile.copyWith(
-      fullName: fullName.trim(),
-      bio: bio.trim(),
-    );
-    await _offlinePersistence.saveCurrentUserProfile(updatedProfile);
-
-    if (ref.mounted) {
-      state = AsyncData<UserProfile>(updatedProfile);
-    }
+  Future<void> clearCachedProfile() {
+    return _offlinePersistence.clearCurrentUserProfile();
   }
 
   Future<UserProfile> _fetchAndPersistRemoteProfile() async {

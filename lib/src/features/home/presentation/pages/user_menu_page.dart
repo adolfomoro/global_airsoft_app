@@ -11,7 +11,9 @@ import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
+import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
+import 'package:global_airsoft_app/src/features/users/presentation/support/user_profile_presentation_error_resolver.dart';
 
 class UserMenuPage extends ConsumerStatefulWidget {
   const UserMenuPage({super.key});
@@ -28,6 +30,7 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
       return;
     }
     await Navigator.of(context).pushNamed(AppRoutePaths.userMenuProfileEdit);
+    await _reloadProfileIfRequested();
   }
 
   Future<void> _handlePrivacyTap() async {
@@ -35,6 +38,31 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
       return;
     }
     await Navigator.of(context).pushNamed(AppRoutePaths.userMenuPrivacy);
+    await _reloadProfileIfRequested();
+  }
+
+  Future<void> _reloadProfileIfRequested() async {
+    if (!mounted) {
+      return;
+    }
+
+    try {
+      await ref
+          .read(currentUserProfileProvider.notifier)
+          .reloadIfRefreshRequested();
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      final Object source = error is UserProfileException
+          ? error.failure
+          : error;
+      context.showErrorSnackBar(
+        resolveUserProfilePresentationErrorMessage(context, error),
+        source: source,
+      );
+    }
   }
 
   Future<void> _handleLogoutTap() async {

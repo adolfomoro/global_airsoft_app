@@ -127,9 +127,6 @@ class _UserProfileEditPageState extends ConsumerState<UserProfileEditPage> {
       await ref
           .read(userProfileServiceProvider)
           .updateCurrentUserProfile(fullName: fullName, bio: bio);
-      await ref
-          .read(currentUserProfileProvider.notifier)
-          .applyProfileDetails(fullName: fullName, bio: bio);
       ref.read(currentUserProfileRefreshRequestProvider.notifier).requestRefresh();
 
       _initialFullName = fullName;
