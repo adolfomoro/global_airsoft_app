@@ -707,8 +707,7 @@ final class _CupertinoNotificationOverlayState
                         decoration: BoxDecoration(
                           color: backgroundColor,
                           borderRadius: BorderRadius.circular(24),
-                          border:
-                              Border.all(color: widget.palette.borderColor),
+                          border: Border.all(color: widget.palette.borderColor),
                           boxShadow: const <BoxShadow>[
                             BoxShadow(
                               color: AppColors.shadowDark,
@@ -741,9 +740,7 @@ final class _CupertinoNotificationOverlayState
                               _NotificationDismissButton(
                                 icon: Icons.close,
                                 iconColor: widget.palette.foregroundColor
-                                    .withValues(
-                                  alpha: 0.76,
-                                ),
+                                    .withValues(alpha: 0.76),
                                 backgroundColor: widget.palette.foregroundColor
                                     .withValues(alpha: 0.06),
                                 onTap: widget.onDismiss,
