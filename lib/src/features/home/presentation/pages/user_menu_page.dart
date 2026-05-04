@@ -6,13 +6,10 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_confirmation_dialog.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
-import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
-import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
 import 'package:global_airsoft_app/src/features/users/presentation/support/user_profile_presentation_error_resolver.dart';
 
 class UserMenuPage extends ConsumerStatefulWidget {
@@ -114,9 +111,6 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final AsyncValue<UserProfile> profileState = ref.watch(
-      currentUserProfileProvider,
-    );
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
@@ -149,26 +143,38 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
                   context.l10n.tr(AppLocaleKeys.homeUserMenuDescription),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
-                    height: 1.4,
+                    height: 1.45,
                   ),
                 ),
-                const SizedBox(height: AppDimensions.spacingLg),
-                _UserSummaryCard(profileState: profileState),
-                const SizedBox(height: AppDimensions.spacingLg),
+                const SizedBox(height: AppDimensions.spacingXl),
                 _MenuActionTile(
                   icon: Icons.edit_outlined,
-                  title: context.l10n.tr(AppLocaleKeys.homeEditProfileAction),
+                  title: context.l10n.tr(
+                    AppLocaleKeys.homeEditProfileAction,
+                  ),
                   onTap: _handleEditProfileTap,
                   enabled: !_isLoggingOut,
+                  isHighlighted: true,
+                  showsDivider: false,
                 ),
-                const SizedBox(height: AppDimensions.spacingSm),
-                _MenuActionTile(
-                  icon: Icons.privacy_tip_outlined,
-                  title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),
-                  onTap: _handlePrivacyTap,
-                  enabled: !_isLoggingOut,
+                const SizedBox(height: AppDimensions.spacingLg),
+                _MenuActionGroup(
+                  children: <Widget>[
+                    _MenuActionTile(
+                      icon: Icons.privacy_tip_outlined,
+                      title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),
+                      onTap: _handlePrivacyTap,
+                      enabled: !_isLoggingOut,
+                      showsDivider: false,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppDimensions.spacingSm),
+                const SizedBox(height: AppDimensions.spacing2xl),
+                Divider(
+                  height: 1,
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.42),
+                ),
+                const SizedBox(height: AppDimensions.spacingLg),
                 _MenuActionTile(
                   icon: Icons.logout_rounded,
                   title: context.l10n.tr(AppLocaleKeys.homeLogoutAction),
@@ -176,6 +182,10 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
                   enabled: !_isLoggingOut,
                   isDestructive: true,
                   isLoading: _isLoggingOut,
+                  isCompact: true,
+                  showsChevron: false,
+                  showsDivider: false,
+                  usesMinimalStyle: true,
                 ),
               ],
             ),
@@ -186,110 +196,24 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
   }
 }
 
-class _UserSummaryCard extends StatelessWidget {
-  const _UserSummaryCard({required this.profileState});
+class _MenuActionGroup extends StatelessWidget {
+  const _MenuActionGroup({required this.children});
 
-  final AsyncValue<UserProfile> profileState;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.56),
+          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.spacingLg),
-        child: profileState.when(
-          data: (UserProfile profile) {
-            return Row(
-              children: <Widget>[
-                AppProfilePicture.profilePhoto(
-                  profilePhoto: profile.profilePhoto,
-                  size: 84,
-                ),
-                const SizedBox(width: AppDimensions.spacingLg),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        profile.resolvedFullName,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppDimensions.spacingXs),
-                      Text(
-                        '@${profile.username}',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-          loading: () => const Row(
-            children: <Widget>[
-              AppSkeleton.circle(size: 84),
-              SizedBox(width: AppDimensions.spacingLg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    AppSkeleton(width: 180, height: 22),
-                    SizedBox(height: AppDimensions.spacingSm),
-                    AppSkeleton(width: 120, height: 18),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          error: (Object error, StackTrace stackTrace) {
-            return Row(
-              children: <Widget>[
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: colorScheme.surfaceContainerHighest,
-                  ),
-                  child: SizedBox(
-                    width: 84,
-                    height: 84,
-                    child: Icon(
-                      Icons.person_outline_rounded,
-                      size: 36,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.spacingLg),
-                Expanded(
-                  child: Text(
-                    context.l10n.tr(AppLocaleKeys.homeProfileLoadFailedMessage),
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+      child: Column(children: children),
     );
   }
 }
@@ -302,6 +226,11 @@ class _MenuActionTile extends StatelessWidget {
     this.enabled = true,
     this.isDestructive = false,
     this.isLoading = false,
+    this.isCompact = false,
+    this.showsChevron = true,
+    this.showsDivider = true,
+    this.usesMinimalStyle = false,
+    this.isHighlighted = false,
   });
 
   final IconData icon;
@@ -310,6 +239,11 @@ class _MenuActionTile extends StatelessWidget {
   final bool enabled;
   final bool isDestructive;
   final bool isLoading;
+  final bool isCompact;
+  final bool showsChevron;
+  final bool showsDivider;
+  final bool usesMinimalStyle;
+  final bool isHighlighted;
 
   @override
   Widget build(BuildContext context) {
@@ -320,55 +254,144 @@ class _MenuActionTile extends StatelessWidget {
         : isDestructive
         ? colorScheme.error
         : colorScheme.onSurface;
+    final BorderRadius borderRadius = BorderRadius.circular(
+      AppDimensions.radiusLg,
+    );
+    final EdgeInsetsGeometry padding = EdgeInsets.symmetric(
+      horizontal: usesMinimalStyle
+          ? AppDimensions.spacingMd
+          : AppDimensions.spacingLg,
+      vertical: usesMinimalStyle
+          ? AppDimensions.spacingSm
+          : isCompact
+          ? AppDimensions.spacingSm
+          : AppDimensions.spacingMd,
+    );
+    final Color iconContainerColor = !enabled
+        ? colorScheme.surfaceContainerHighest
+        : isDestructive
+        ? colorScheme.errorContainer.withValues(alpha: 0.2)
+        : colorScheme.surfaceContainerHighest;
+    final Color tileBackgroundColor = usesMinimalStyle
+        ? Colors.transparent
+        : isHighlighted
+        ? colorScheme.surfaceContainerLow
+        : isCompact
+        ? colorScheme.surfaceContainerLowest
+        : Colors.transparent;
+    final BoxBorder? tileBorder = usesMinimalStyle
+        ? null
+        : isHighlighted || isCompact
+        ? Border.all(
+            color: isDestructive && isCompact
+                ? colorScheme.error.withValues(alpha: 0.28)
+                : colorScheme.outlineVariant.withValues(
+                    alpha: isHighlighted ? 0.5 : 0.5,
+                  ),
+          )
+        : null;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        borderRadius: borderRadius,
         child: Ink(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-            ),
+            color: tileBackgroundColor,
+            borderRadius: borderRadius,
+            border: tileBorder,
           ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacingLg,
-            vertical: AppDimensions.spacingMd,
-          ),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              SizedBox(
-                width: 28,
-                child: isLoading
-                    ? SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            foregroundColor,
+              Padding(
+                padding: padding,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    if (!usesMinimalStyle)
+                      Container(
+                        width: isCompact ? 30 : 36,
+                        height: isCompact ? 30 : 36,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: iconContainerColor,
+                          borderRadius: BorderRadius.circular(
+                            isCompact
+                                ? AppDimensions.radiusSm
+                                : AppDimensions.radiusLg,
                           ),
                         ),
-                      )
-                    : Icon(icon, color: foregroundColor, size: 22),
-              ),
-              const SizedBox(width: AppDimensions.spacingMd),
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: foregroundColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+                        child: isLoading
+                            ? SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    foregroundColor,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                icon,
+                                color: foregroundColor,
+                                size: isCompact ? 17 : 20,
+                              ),
+                      ),
+                    if (!usesMinimalStyle)
+                      const SizedBox(width: AppDimensions.spacingMd),
+                    if (usesMinimalStyle && isLoading)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          right: AppDimensions.spacingSm,
+                        ),
+                        child: SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              foregroundColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    Flexible(
+                      child: Text(
+                        title,
+                        style: (isCompact
+                                ? usesMinimalStyle
+                                    ? theme.textTheme.labelLarge
+                                    : theme.textTheme.titleSmall
+                                : theme.textTheme.titleMedium)
+                            ?.copyWith(
+                              color: foregroundColor,
+                              fontWeight: usesMinimalStyle
+                                  ? FontWeight.w700
+                                  : isHighlighted
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              letterSpacing: usesMinimalStyle ? 0.2 : null,
+                            ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: foregroundColor.withValues(alpha: 0.72),
-              ),
+              if (showsDivider)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.spacingLg,
+                  ),
+                  child: Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.26),
+                  ),
+                ),
             ],
           ),
         ),
