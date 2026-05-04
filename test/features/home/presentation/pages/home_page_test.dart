@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,6 +48,56 @@ void main() {
     expect(find.text('Bio'), findsOneWidget);
     expect(find.text('Logout'), findsNothing);
   });
+
+  testWidgets(
+    'keeps home startup stable while current user profile resolves asynchronously',
+    (WidgetTester tester) async {
+      final Completer<UserProfile> profileCompleter = Completer<UserProfile>();
+      _ConfigurableCurrentUserProfileController.buildHandler =
+          () => profileCompleter.future;
+      addTearDown(_ConfigurableCurrentUserProfileController.reset);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentUserProfileProvider.overrideWith(
+              _ConfigurableCurrentUserProfileController.new,
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: const HomePage(),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(
+        find.text('Game discovery will be connected here next.'),
+        findsOneWidget,
+      );
+
+      profileCompleter.complete(
+        const UserProfile(
+          id: 'user-2',
+          username: 'olivia.ward',
+          fullName: 'Olivia Ward',
+          bio: 'Weekend field organizer and precision DMR player.',
+          mediumProfilePictureUrl: '',
+          largeProfilePictureUrl: '',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.person_outline_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('@olivia.ward'), findsOneWidget);
+      expect(find.text('Olivia Ward'), findsOneWidget);
+    },
+  );
 }
 
 final class _TestCurrentUserProfileController
@@ -61,5 +113,24 @@ final class _TestCurrentUserProfileController
       mediumProfilePictureUrl: '',
       largeProfilePictureUrl: '',
     );
+  }
+}
+
+final class _ConfigurableCurrentUserProfileController
+    extends CurrentUserProfileController {
+  static Future<UserProfile> Function()? buildHandler;
+
+  static void reset() {
+    buildHandler = null;
+  }
+
+  @override
+  Future<UserProfile> build() {
+    final Future<UserProfile> Function()? handler = buildHandler;
+    if (handler == null) {
+      throw StateError('Missing build handler for test current user profile.');
+    }
+
+    return handler();
   }
 }

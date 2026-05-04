@@ -24,15 +24,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-
-      ref.read(homeTabProvider.notifier).select(HomeTab.discovery);
-      ref.read(currentUserProfileRefreshRequestProvider.notifier).clear();
-      ref.read(currentUserProfileProvider.future);
-    });
+    ref.read(homeTabProvider.notifier).select(HomeTab.discovery);
+    ref.read(currentUserProfileRefreshRequestProvider.notifier).clear();
+    ref.read(currentUserProfileProvider.future);
   }
 
   Future<void> _handleUserMenuTap() async {
