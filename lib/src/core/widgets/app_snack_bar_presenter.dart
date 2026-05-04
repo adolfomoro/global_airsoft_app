@@ -206,7 +206,7 @@ final class AppSnackBarPresenter {
         margin: _androidInset,
         padding: EdgeInsets.zero,
         duration: duration,
-        dismissDirection: DismissDirection.down,
+        dismissDirection: DismissDirection.horizontal,
         clipBehavior: Clip.none,
         content: _AndroidNotificationCard(
           message: message,
@@ -615,7 +615,7 @@ final class _AndroidNotificationCard extends StatelessWidget {
   }
 }
 
-final class _CupertinoNotificationOverlay extends StatelessWidget {
+final class _CupertinoNotificationOverlay extends StatefulWidget {
   const _CupertinoNotificationOverlay({
     required this.isVisible,
     required this.message,
@@ -631,14 +631,50 @@ final class _CupertinoNotificationOverlay extends StatelessWidget {
   final VoidCallback onDismiss;
 
   @override
+  State<_CupertinoNotificationOverlay> createState() =>
+      _CupertinoNotificationOverlayState();
+}
+
+final class _CupertinoNotificationOverlayState
+    extends State<_CupertinoNotificationOverlay> {
+  static const double _dragDismissThreshold = 80.0;
+  static const double _dragVelocityThreshold = 500.0;
+
+  double _dragOffset = 0.0;
+  late Offset _dragStartPosition;
+
+  void _handleVerticalDragStart(DragStartDetails details) {
+    _dragStartPosition = details.globalPosition;
+  }
+
+  void _handleVerticalDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      _dragOffset = details.globalPosition.dy - _dragStartPosition.dy;
+    });
+  }
+
+  void _handleVerticalDragEnd(DragEndDetails details) {
+    final double velocity = details.velocity.pixelsPerSecond.dy;
+
+    if (_dragOffset < -_dragDismissThreshold ||
+        velocity < -_dragVelocityThreshold) {
+      widget.onDismiss();
+    } else {
+      setState(() {
+        _dragOffset = 0.0;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final Color backgroundColor = Color.alphaBlend(
       AppColors.white.withValues(alpha: 0.05),
-      palette.backgroundColor.withValues(alpha: 0.96),
+      widget.palette.backgroundColor.withValues(alpha: 0.96),
     );
 
     return IgnorePointer(
-      ignoring: !isVisible,
+      ignoring: !widget.isVisible,
       child: Material(
         type: MaterialType.transparency,
         child: SafeArea(
@@ -654,55 +690,66 @@ final class _CupertinoNotificationOverlay extends StatelessWidget {
                 child: AnimatedSlide(
                   duration: AppSnackBarPresenter._cupertinoTransitionDuration,
                   curve: Curves.easeOutCubic,
-                  offset: isVisible ? Offset.zero : const Offset(0, -0.14),
+                  offset: widget.isVisible
+                      ? Offset(0, _dragOffset / 100)
+                      : const Offset(0, -0.14),
                   child: AnimatedOpacity(
                     duration: AppSnackBarPresenter._cupertinoTransitionDuration,
                     curve: Curves.easeOutCubic,
-                    opacity: isVisible ? 1 : 0,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: backgroundColor,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: palette.borderColor),
-                        boxShadow: const <BoxShadow>[
-                          BoxShadow(
-                            color: AppColors.shadowDark,
-                            blurRadius: 24,
-                            offset: Offset(0, 12),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            _NotificationIconBadge(
-                              palette: palette,
-                              fillOpacity: 0.14,
-                              size: 34,
-                              iconSize: 18,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                message,
-                                style: textStyle,
-                                maxLines: 4,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            _NotificationDismissButton(
-                              icon: Icons.close,
-                              iconColor: palette.foregroundColor.withValues(
-                                alpha: 0.76,
-                              ),
-                              backgroundColor: palette.foregroundColor
-                                  .withValues(alpha: 0.06),
-                              onTap: onDismiss,
+                    opacity: widget.isVisible
+                        ? (1 - (_dragOffset.abs() / 200)).clamp(0.0, 1.0)
+                        : 0,
+                    child: GestureDetector(
+                      onVerticalDragStart: _handleVerticalDragStart,
+                      onVerticalDragUpdate: _handleVerticalDragUpdate,
+                      onVerticalDragEnd: _handleVerticalDragEnd,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: backgroundColor,
+                          borderRadius: BorderRadius.circular(24),
+                          border:
+                              Border.all(color: widget.palette.borderColor),
+                          boxShadow: const <BoxShadow>[
+                            BoxShadow(
+                              color: AppColors.shadowDark,
+                              blurRadius: 24,
+                              offset: Offset(0, 12),
                             ),
                           ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              _NotificationIconBadge(
+                                palette: widget.palette,
+                                fillOpacity: 0.14,
+                                size: 34,
+                                iconSize: 18,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  widget.message,
+                                  style: widget.textStyle,
+                                  maxLines: 4,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              _NotificationDismissButton(
+                                icon: Icons.close,
+                                iconColor: widget.palette.foregroundColor
+                                    .withValues(
+                                  alpha: 0.76,
+                                ),
+                                backgroundColor: widget.palette.foregroundColor
+                                    .withValues(alpha: 0.06),
+                                onTap: widget.onDismiss,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
