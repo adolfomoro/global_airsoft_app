@@ -121,37 +121,23 @@ class _HomePageState extends ConsumerState<HomePage> {
     final HomeTab currentTab = ref.watch(homeTabProvider);
 
     return Scaffold(
-      appBar: AppAdaptiveAppBar(
-        title: Text(_resolveTitle(context, currentTab)),
-        actions: currentTab == HomeTab.profile
-            ? <Widget>[
-                IconButton(
-                  onPressed: _handleUserMenuTap,
-                  tooltip: context.l10n.tr(AppLocaleKeys.homeUserMenuAction),
-                  icon: const Icon(Icons.menu_rounded),
-                ),
-              ]
-            : null,
-      ),
       body: PageView(
         controller: _pageController,
         onPageChanged: _handlePageChanged,
         children: <Widget>[
-          HomePlaceholderTab(
-            icon: Icons.explore_rounded,
+          _HomeDiscoveryTabPage(
             title: context.l10n.tr(AppLocaleKeys.homeDiscoveryTabLabel),
             message: context.l10n.tr(
               AppLocaleKeys.homeDiscoveryPlaceholderMessage,
             ),
           ),
-          HomePlaceholderTab(
-            icon: Icons.dynamic_feed_rounded,
+          _HomeTimelineTabPage(
             title: context.l10n.tr(AppLocaleKeys.homeTimelineTabLabel),
             message: context.l10n.tr(
               AppLocaleKeys.homeTimelinePlaceholderMessage,
             ),
           ),
-          const HomeProfileTab(),
+          _HomeProfileTabPage(onUserMenuTap: _handleUserMenuTap),
         ],
       ),
       bottomNavigationBar: HomeBottomNavigationBar(
@@ -160,15 +146,77 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
     );
   }
+}
 
-  String _resolveTitle(BuildContext context, HomeTab currentTab) {
-    switch (currentTab) {
-      case HomeTab.discovery:
-        return context.l10n.tr(AppLocaleKeys.homeDiscoveryTabLabel);
-      case HomeTab.timeline:
-        return context.l10n.tr(AppLocaleKeys.homeTimelineTabLabel);
-      case HomeTab.profile:
-        return context.l10n.tr(AppLocaleKeys.homeProfileTabLabel);
-    }
+class _HomeDiscoveryTabPage extends StatelessWidget {
+  const _HomeDiscoveryTabPage({required this.title, required this.message});
+
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HomeTabScaffold(
+      appBar: AppAdaptiveAppBar(title: Text(title)),
+      body: HomePlaceholderTab(
+        icon: Icons.explore_rounded,
+        title: title,
+        message: message,
+      ),
+    );
+  }
+}
+
+class _HomeTimelineTabPage extends StatelessWidget {
+  const _HomeTimelineTabPage({required this.title, required this.message});
+
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HomeTabScaffold(
+      appBar: AppAdaptiveAppBar(title: Text(title)),
+      body: HomePlaceholderTab(
+        icon: Icons.dynamic_feed_rounded,
+        title: title,
+        message: message,
+      ),
+    );
+  }
+}
+
+class _HomeProfileTabPage extends StatelessWidget {
+  const _HomeProfileTabPage({required this.onUserMenuTap});
+
+  final Future<void> Function() onUserMenuTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _HomeTabScaffold(
+      appBar: AppAdaptiveAppBar(
+        title: Text(context.l10n.tr(AppLocaleKeys.homeProfileTabLabel)),
+        actions: <Widget>[
+          IconButton(
+            onPressed: onUserMenuTap,
+            tooltip: context.l10n.tr(AppLocaleKeys.homeUserMenuAction),
+            icon: const Icon(Icons.menu_rounded),
+          ),
+        ],
+      ),
+      body: const HomeProfileTab(),
+    );
+  }
+}
+
+class _HomeTabScaffold extends StatelessWidget {
+  const _HomeTabScaffold({required this.body, this.appBar});
+
+  final PreferredSizeWidget? appBar;
+  final Widget body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: appBar, body: body);
   }
 }
