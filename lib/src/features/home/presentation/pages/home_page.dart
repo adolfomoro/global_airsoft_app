@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
@@ -21,12 +23,38 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  static const Duration _tabTransitionDuration = Duration(milliseconds: 220);
+
+  late final PageController _pageController;
+  ProviderSubscription<HomeTab>? _homeTabSubscription;
+
   @override
   void initState() {
     super.initState();
     ref.read(homeTabProvider.notifier).select(HomeTab.discovery);
+    _pageController = PageController(
+      initialPage: ref.read(homeTabProvider).index,
+    );
+    _homeTabSubscription = ref.listenManual<HomeTab>(homeTabProvider, (
+      HomeTab? previous,
+      HomeTab next,
+    ) {
+      if (previous == next) {
+        return;
+      }
+
+      unawaited(_syncPageToTab(next));
+    });
     ref.read(currentUserProfileRefreshRequestProvider.notifier).clear();
     ref.read(currentUserProfileProvider.future);
+  }
+
+  @override
+  void dispose() {
+    _homeTabSubscription?.close();
+    _homeTabSubscription = null;
+    _pageController.dispose();
+    super.dispose();
   }
 
   Future<void> _handleUserMenuTap() async {
@@ -61,10 +89,36 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
+  Future<void> _syncPageToTab(HomeTab tab) async {
+    final int targetPage = tab.index;
+    if (!_pageController.hasClients) {
+      return;
+    }
+
+    final int currentPage =
+        _pageController.page?.round() ?? _pageController.initialPage;
+    if (currentPage == targetPage) {
+      return;
+    }
+
+    await _pageController.animateToPage(
+      targetPage,
+      duration: _tabTransitionDuration,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _handlePageChanged(int index) {
+    ref.read(homeTabProvider.notifier).selectIndex(index);
+  }
+
+  void _handleDestinationSelected(int index) {
+    ref.read(homeTabProvider.notifier).selectIndex(index);
+  }
+
   @override
   Widget build(BuildContext context) {
     final HomeTab currentTab = ref.watch(homeTabProvider);
-    final homeTabNotifier = ref.read(homeTabProvider.notifier);
 
     return Scaffold(
       appBar: AppAdaptiveAppBar(
@@ -79,8 +133,9 @@ class _HomePageState extends ConsumerState<HomePage> {
               ]
             : null,
       ),
-      body: IndexedStack(
-        index: currentTab.index,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _handlePageChanged,
         children: <Widget>[
           HomePlaceholderTab(
             icon: Icons.explore_rounded,
@@ -101,7 +156,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       bottomNavigationBar: HomeBottomNavigationBar(
         currentTab: currentTab,
-        onDestinationSelected: homeTabNotifier.selectIndex,
+        onDestinationSelected: _handleDestinationSelected,
       ),
     );
   }

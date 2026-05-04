@@ -49,6 +49,45 @@ void main() {
     expect(find.text('Logout'), findsNothing);
   });
 
+  testWidgets('switches tabs when swiping horizontally', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          currentUserProfileProvider.overrideWith(
+            _TestCurrentUserProfileController.new,
+          ),
+        ],
+        child: MaterialApp(
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const HomePage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Game discovery will be connected here next.'),
+      findsOneWidget,
+    );
+
+    await tester.drag(find.byType(PageView), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Community timeline will be connected here next.'),
+      findsOneWidget,
+    );
+
+    await tester.drag(find.byType(PageView), const Offset(-500, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('@marcus.kane'), findsOneWidget);
+  });
+
   testWidgets(
     'keeps home startup stable while current user profile resolves asynchronously',
     (WidgetTester tester) async {
