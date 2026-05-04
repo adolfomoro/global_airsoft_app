@@ -6,15 +6,15 @@ final class AppFormPadding extends StatelessWidget {
     horizontal: AppDimensions.spacingXl,
   );
   static const EdgeInsets standardScrollablePagePadding = EdgeInsets.fromLTRB(
+    AppDimensions.spacingMd,
     AppDimensions.spacingXl,
-    AppDimensions.spacingXl,
-    AppDimensions.spacingXl,
-    AppDimensions.spacingXl,
+    AppDimensions.spacingMd,
+    AppDimensions.spacingMd,
   );
   static const EdgeInsets standardBottomActionsPadding = EdgeInsets.fromLTRB(
-    AppDimensions.spacingXl,
+    AppDimensions.spacingMd,
     AppDimensions.spacingLg,
-    AppDimensions.spacingXl,
+    AppDimensions.spacingMd,
     AppDimensions.spacingLg,
   );
 

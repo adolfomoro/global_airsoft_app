@@ -5,6 +5,7 @@ import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_section_box.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_zoom_viewer.dart';
@@ -101,42 +102,29 @@ class _ProfileContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppDimensions.spacing2xl),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppDimensions.spacingXl),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                    border: Border.all(
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.78),
-                    ),
+                AppSectionBox(
+                  title: context.l10n.tr(AppLocaleKeys.homeProfileBioLabel),
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  titleTextAlign: TextAlign.center,
+                  contentPadding: const EdgeInsets.fromLTRB(
+                    AppDimensions.spacingXl,
+                    AppDimensions.spacingMd,
+                    AppDimensions.spacingXl,
+                    AppDimensions.spacingXl,
                   ),
-                  child: Column(
-                    children: <Widget>[
-                      Text(
-                        context.l10n.tr(AppLocaleKeys.homeProfileBioLabel),
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                      const SizedBox(height: AppDimensions.spacingMd),
-                      Text(
-                        bio.isNotEmpty
-                            ? bio
-                            : context.l10n.tr(
-                                AppLocaleKeys.homeProfileEmptyBioLabel,
-                              ),
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          height: 1.5,
-                          color: bio.isNotEmpty
-                              ? colorScheme.onSurface
-                              : colorScheme.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                  child: Text(
+                    bio.isNotEmpty
+                        ? bio
+                        : context.l10n.tr(
+                            AppLocaleKeys.homeProfileEmptyBioLabel,
+                          ),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      height: 1.5,
+                      color: bio.isNotEmpty
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 const SizedBox(height: AppDimensions.spacing2xl),
@@ -298,14 +286,10 @@ class _ProfileLoadingState extends StatelessWidget {
                 const SizedBox(height: AppDimensions.spacingLg),
                 const AppSkeleton(width: 220, height: 24),
                 const SizedBox(height: AppDimensions.spacing2xl),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppDimensions.spacingXl),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                  ),
-                  child: const Column(
+                const AppSectionBox(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  contentPadding: EdgeInsets.all(AppDimensions.spacingXl),
+                  child: Column(
                     children: <Widget>[
                       AppSkeleton(width: 90, height: 18),
                       SizedBox(height: AppDimensions.spacingMd),

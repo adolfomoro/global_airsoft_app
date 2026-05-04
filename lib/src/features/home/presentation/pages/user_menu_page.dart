@@ -6,6 +6,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_confirmation_dialog.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_section_box.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
@@ -203,16 +204,8 @@ class _MenuActionGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
+    return AppSectionBox(
+      contentPadding: EdgeInsets.zero,
       child: Column(children: children),
     );
   }
