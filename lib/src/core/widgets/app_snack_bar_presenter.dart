@@ -574,7 +574,7 @@ final class _AndroidNotificationCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(18, 12, 10, 12),
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         _NotificationIconBadge(
                           palette: palette,
@@ -675,7 +675,7 @@ final class _CupertinoNotificationOverlay extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
                         child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             _NotificationIconBadge(
                               palette: palette,
