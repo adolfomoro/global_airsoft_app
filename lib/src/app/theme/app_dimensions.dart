@@ -3,6 +3,7 @@ abstract final class AppDimensions {
   static const double radiusLg = 20;
   static const double radiusPill = 999;
 
+  static const double spacingXss = 4;
   static const double spacingXs = 8;
   static const double spacingSm = 10;
   static const double spacingMd = 12;

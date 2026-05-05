@@ -7,10 +7,6 @@ class AppSectionBox extends StatelessWidget {
     super.key,
     this.title,
     this.backgroundColor,
-    this.borderRadius = AppDimensions.radiusLg,
-    this.titlePadding,
-    this.contentPadding,
-    this.titleStyle,
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.titleTextAlign,
   });
@@ -18,10 +14,6 @@ class AppSectionBox extends StatelessWidget {
   final String? title;
   final Widget child;
   final Color? backgroundColor;
-  final double borderRadius;
-  final EdgeInsetsGeometry? titlePadding;
-  final EdgeInsetsGeometry? contentPadding;
-  final TextStyle? titleStyle;
   final CrossAxisAlignment crossAxisAlignment;
   final TextAlign? titleTextAlign;
 
@@ -33,44 +25,36 @@ class AppSectionBox extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: backgroundColor ?? theme.cardTheme.color ?? colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(borderRadius),
+        color:
+            backgroundColor ??
+            theme.cardTheme.color ??
+            colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
       ),
       child: Column(
         crossAxisAlignment: crossAxisAlignment,
         children: <Widget>[
           if (hasTitle)
             Padding(
-              padding:
-                  titlePadding ??
-                  const EdgeInsets.fromLTRB(
-                    AppDimensions.spacingLg,
-                    AppDimensions.spacingLg,
-                    AppDimensions.spacingLg,
-                    AppDimensions.spacingSm,
-                  ),
+              padding: const EdgeInsets.fromLTRB(
+                AppDimensions.spacingLg,
+                AppDimensions.spacingLg,
+                AppDimensions.spacingLg,
+                AppDimensions.spacingSm,
+              ),
               child: Text(
                 title!,
                 textAlign: titleTextAlign,
-                style:
-                    titleStyle ??
-                    theme.textTheme.labelLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           Padding(
-            padding:
-                contentPadding ??
-                (hasTitle
-                    ? const EdgeInsets.fromLTRB(
-                        AppDimensions.spacingLg,
-                        AppDimensions.spacingSm,
-                        AppDimensions.spacingLg,
-                        AppDimensions.spacingLg,
-                      )
-                    : const EdgeInsets.all(AppDimensions.spacingLg)),
+            padding: (hasTitle
+                ? EdgeInsets.only(bottom: AppDimensions.spacingLg)
+                : EdgeInsets.symmetric(vertical: AppDimensions.spacingSm)),
             child: child,
           ),
         ],

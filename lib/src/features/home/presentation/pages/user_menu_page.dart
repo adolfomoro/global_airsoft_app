@@ -150,9 +150,7 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
                 const SizedBox(height: AppDimensions.spacingXl),
                 _MenuActionTile(
                   icon: Icons.edit_outlined,
-                  title: context.l10n.tr(
-                    AppLocaleKeys.homeEditProfileAction,
-                  ),
+                  title: context.l10n.tr(AppLocaleKeys.homeEditProfileAction),
                   onTap: _handleEditProfileTap,
                   enabled: !_isLoggingOut,
                   isHighlighted: true,
@@ -204,10 +202,7 @@ class _MenuActionGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppSectionBox(
-      contentPadding: EdgeInsets.zero,
-      child: Column(children: children),
-    );
+    return AppSectionBox(child: Column(children: children));
   }
 }
 
@@ -354,20 +349,21 @@ class _MenuActionTile extends StatelessWidget {
                     Flexible(
                       child: Text(
                         title,
-                        style: (isCompact
-                                ? usesMinimalStyle
-                                    ? theme.textTheme.labelLarge
-                                    : theme.textTheme.titleSmall
-                                : theme.textTheme.titleMedium)
-                            ?.copyWith(
-                              color: foregroundColor,
-                              fontWeight: usesMinimalStyle
-                                  ? FontWeight.w700
-                                  : isHighlighted
-                                  ? FontWeight.w700
-                                  : FontWeight.w600,
-                              letterSpacing: usesMinimalStyle ? 0.2 : null,
-                            ),
+                        style:
+                            (isCompact
+                                    ? usesMinimalStyle
+                                          ? theme.textTheme.labelLarge
+                                          : theme.textTheme.titleSmall
+                                    : theme.textTheme.titleMedium)
+                                ?.copyWith(
+                                  color: foregroundColor,
+                                  fontWeight: usesMinimalStyle
+                                      ? FontWeight.w700
+                                      : isHighlighted
+                                      ? FontWeight.w700
+                                      : FontWeight.w600,
+                                  letterSpacing: usesMinimalStyle ? 0.2 : null,
+                                ),
                         textAlign: TextAlign.left,
                       ),
                     ),

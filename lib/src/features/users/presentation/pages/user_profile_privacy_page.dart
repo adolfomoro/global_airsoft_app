@@ -6,6 +6,7 @@ import 'package:global_airsoft_app/src/core/localization/app_localizations.dart'
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_leave_confirmation_guard.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_section_box.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_settings_row.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
@@ -43,11 +44,15 @@ class _UserProfilePrivacyPageState
     });
 
     try {
-      await ref.read(userProfileServiceProvider).updateCurrentUserPrivacySettings(
-        UserProfilePrivacySettings(fullNameVisible: fullNameVisible),
-      );
+      await ref
+          .read(userProfileServiceProvider)
+          .updateCurrentUserPrivacySettings(
+            UserProfilePrivacySettings(fullNameVisible: fullNameVisible),
+          );
       ref.invalidate(currentUserPrivacySettingsProvider);
-      ref.read(currentUserProfileRefreshRequestProvider.notifier).requestRefresh();
+      ref
+          .read(currentUserProfileRefreshRequestProvider.notifier)
+          .requestRefresh();
 
       if (!mounted) {
         return;
@@ -125,59 +130,34 @@ class _UserProfilePrivacyPageState
                       ),
                       const SizedBox(height: AppDimensions.spacingLg),
                       AppSectionBox(
-                        title: context.l10n.tr(AppLocaleKeys.homeProfileTabLabel),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(
-                                    context.l10n.tr(
-                                      AppLocaleKeys
-                                          .homePrivacyFullNamePrivateTitle,
-                                    ),
-                                    style: theme.textTheme.headlineSmall
-                                        ?.copyWith(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                          height: 1.2,
-                                        ),
-                                  ),
-                                  const SizedBox(
-                                    height: AppDimensions.spacingXs,
-                                  ),
-                                  Text(
-                                    context.l10n.tr(
-                                      AppLocaleKeys
-                                          .homePrivacyFullNamePrivateDescription,
-                                    ),
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                      height: 1.35,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: AppDimensions.spacingLg),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                top: AppDimensions.spacingXs,
-                              ),
-                              child: Switch.adaptive(
-                                value: fullNamePrivate,
-                                onChanged: _isSaving
-                                    ? null
-                                    : (bool value) {
-                                        setState(() {
-                                          _fullNameVisible = !value;
-                                        });
-                                      },
-                              ),
-                            ),
-                          ],
+                        title: context.l10n.tr(
+                          AppLocaleKeys.homeProfileTabLabel,
+                        ),
+                        child: AppSettingsRow(
+                          title: context.l10n.tr(
+                            AppLocaleKeys.homePrivacyFullNamePrivateTitle,
+                          ),
+                          subtitle: context.l10n.tr(
+                            AppLocaleKeys.homePrivacyFullNamePrivateDescription,
+                          ),
+                          enabled: !_isSaving,
+                          onTap: _isSaving
+                              ? null
+                              : () {
+                                  setState(() {
+                                    _fullNameVisible = fullNamePrivate;
+                                  });
+                                },
+                          trailing: Switch.adaptive(
+                            value: fullNamePrivate,
+                            onChanged: _isSaving
+                                ? null
+                                : (bool value) {
+                                    setState(() {
+                                      _fullNameVisible = !value;
+                                    });
+                                  },
+                          ),
                         ),
                       ),
                       const SizedBox(height: AppDimensions.spacingLg),
@@ -186,7 +166,8 @@ class _UserProfilePrivacyPageState
                           AppLocaleKeys.homePrivacySaveAction,
                         ),
                         isLoading: _isSaving,
-                        onPressed: _isSaving ||
+                        onPressed:
+                            _isSaving ||
                                 fullNameVisible == settings.fullNameVisible
                             ? null
                             : () => _handleSave(settings),
@@ -199,9 +180,9 @@ class _UserProfilePrivacyPageState
               error: (Object error, StackTrace stackTrace) {
                 final String message = error is UserProfileException
                     ? error.message ??
-                        context.l10n.tr(
-                          AppLocaleKeys.homePrivacyLoadFailedMessage,
-                        )
+                          context.l10n.tr(
+                            AppLocaleKeys.homePrivacyLoadFailedMessage,
+                          )
                     : context.l10n.tr(
                         AppLocaleKeys.homePrivacyLoadFailedMessage,
                       );

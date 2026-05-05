@@ -106,12 +106,6 @@ class _ProfileContent extends StatelessWidget {
                   title: context.l10n.tr(AppLocaleKeys.homeProfileBioLabel),
                   crossAxisAlignment: CrossAxisAlignment.center,
                   titleTextAlign: TextAlign.center,
-                  contentPadding: const EdgeInsets.fromLTRB(
-                    AppDimensions.spacingXl,
-                    AppDimensions.spacingMd,
-                    AppDimensions.spacingXl,
-                    AppDimensions.spacingXl,
-                  ),
                   child: Text(
                     bio.isNotEmpty
                         ? bio
@@ -288,7 +282,6 @@ class _ProfileLoadingState extends StatelessWidget {
                 const SizedBox(height: AppDimensions.spacing2xl),
                 const AppSectionBox(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  contentPadding: EdgeInsets.all(AppDimensions.spacingXl),
                   child: Column(
                     children: <Widget>[
                       AppSkeleton(width: 90, height: 18),
