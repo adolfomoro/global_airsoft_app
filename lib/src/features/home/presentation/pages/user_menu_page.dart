@@ -346,7 +346,7 @@ class _MenuActionTile extends StatelessWidget {
                           ),
                         ),
                       ),
-                    Flexible(
+                    Expanded(
                       child: Text(
                         title,
                         style:
@@ -367,6 +367,18 @@ class _MenuActionTile extends StatelessWidget {
                         textAlign: TextAlign.left,
                       ),
                     ),
+                    if (showsChevron) ...<Widget>[
+                      const SizedBox(width: AppDimensions.spacingSm),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: enabled
+                            ? colorScheme.onSurfaceVariant
+                            : colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.72,
+                              ),
+                        size: isCompact ? 20 : 22,
+                      ),
+                    ],
                   ],
                 ),
               ),
