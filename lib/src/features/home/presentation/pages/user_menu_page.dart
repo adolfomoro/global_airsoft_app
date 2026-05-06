@@ -4,13 +4,18 @@ import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
+import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_confirmation_dialog.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_section.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_zoom_viewer.dart';
+import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
+import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
 import 'package:global_airsoft_app/src/features/users/presentation/support/user_profile_presentation_error_resolver.dart';
 
 class UserMenuPage extends ConsumerStatefulWidget {
@@ -142,6 +147,10 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
 
   @override
   Widget build(BuildContext context) {
+    final AsyncValue<UserProfile> profileState = ref.watch(
+      currentUserProfileProvider,
+    );
+
     return Scaffold(
       appBar: AppAdaptiveAppBar(
         title: Text(context.l10n.tr(AppLocaleKeys.homeUserMenuTitle)),
@@ -151,6 +160,7 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
       body: SafeArea(
         top: false,
         child: _UserMenuContent(
+          profileState: profileState,
           enabled: !_isInteractionLocked,
           isLoggingOut: _isLoggingOut,
           onEditProfileTap: _handleEditProfileTap,
@@ -179,6 +189,7 @@ class _UserMenuCloseButton extends StatelessWidget {
 
 class _UserMenuContent extends StatelessWidget {
   const _UserMenuContent({
+    required this.profileState,
     required this.enabled,
     required this.isLoggingOut,
     required this.onEditProfileTap,
@@ -186,6 +197,7 @@ class _UserMenuContent extends StatelessWidget {
     required this.onLogoutTap,
   });
 
+  final AsyncValue<UserProfile> profileState;
   final bool enabled;
   final bool isLoggingOut;
   final VoidCallback onEditProfileTap;
@@ -207,7 +219,7 @@ class _UserMenuContent extends StatelessWidget {
             AppDimensions.spacing2xl,
           ),
           children: <Widget>[
-            const _UserMenuDescription(),
+            _UserMenuProfileHeader(profileState: profileState),
             const SizedBox(height: AppDimensions.spacing2xl),
             _UserMenuNavigationButton(
               icon: Icons.edit_outlined,
@@ -244,20 +256,149 @@ class _UserMenuContent extends StatelessWidget {
   }
 }
 
-class _UserMenuDescription extends StatelessWidget {
-  const _UserMenuDescription();
+class _UserMenuProfileHeader extends StatelessWidget {
+  const _UserMenuProfileHeader({required this.profileState});
+
+  static const double _photoSize = 96;
+
+  final AsyncValue<UserProfile> profileState;
+
+  @override
+  Widget build(BuildContext context) {
+    return profileState.when(
+      data: (UserProfile profile) =>
+          _UserMenuProfileIdentity(profile: profile, photoSize: _photoSize),
+      loading: () => const _UserMenuProfileLoadingHeader(photoSize: _photoSize),
+      error: (Object error, StackTrace stackTrace) {
+        return const _UserMenuProfileFallbackHeader(photoSize: _photoSize);
+      },
+    );
+  }
+}
+
+class _UserMenuProfileIdentity extends StatelessWidget {
+  const _UserMenuProfileIdentity({
+    required this.profile,
+    required this.photoSize,
+  });
+
+  final UserProfile profile;
+  final double photoSize;
+
+  void _handlePhotoTap(BuildContext context) {
+    final ProfilePhoto profilePhoto = profile.profilePhoto;
+    if (profilePhoto.isLocal) {
+      AppProfileImageZoomViewer.showImageProvider(
+        context,
+        imageProvider: FileImage(profilePhoto.localFile!),
+      );
+      return;
+    }
+
+    final String zoomImageUrl = profile.resolvedZoomImageUrl;
+    if (zoomImageUrl.isEmpty) {
+      return;
+    }
+
+    AppProfileImageZoomViewer.showNetwork(context, imageUrl: zoomImageUrl);
+  }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
-    return Text(
-      context.l10n.tr(AppLocaleKeys.homeUserMenuDescription),
-      style: theme.textTheme.bodyMedium?.copyWith(
-        color: colorScheme.onSurfaceVariant,
-        height: 1.45,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        AppProfilePicture.profilePhoto(
+          profilePhoto: profile.profilePhoto,
+          onTap: () => _handlePhotoTap(context),
+          size: photoSize,
+        ),
+        const SizedBox(height: AppDimensions.spacingLg),
+        Text(
+          profile.resolvedFullName,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.1,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppDimensions.spacingXs),
+        Text(
+          '@${profile.username}',
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: colorScheme.primary,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.2,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+}
+
+class _UserMenuProfileLoadingHeader extends StatelessWidget {
+  const _UserMenuProfileLoadingHeader({required this.photoSize});
+
+  final double photoSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        AppSkeleton.circle(size: photoSize),
+        const SizedBox(height: AppDimensions.spacingLg),
+        const AppSkeleton(width: 220, height: 24),
+        const SizedBox(height: AppDimensions.spacingXs),
+        const AppSkeleton(width: 140, height: 18),
+      ],
+    );
+  }
+}
+
+class _UserMenuProfileFallbackHeader extends StatelessWidget {
+  const _UserMenuProfileFallbackHeader({required this.photoSize});
+
+  final double photoSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return Column(
+      children: <Widget>[
+        AppProfilePicture.profilePhoto(
+          profilePhoto: const ProfilePhoto.empty(),
+          size: photoSize,
+        ),
+        const SizedBox(height: AppDimensions.spacingLg),
+        Text(
+          context.l10n.tr(AppLocaleKeys.homeUserMenuTitle),
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppDimensions.spacingXs),
+        Text(
+          context.l10n.tr(AppLocaleKeys.homeUserMenuDescription),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            height: 1.35,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
