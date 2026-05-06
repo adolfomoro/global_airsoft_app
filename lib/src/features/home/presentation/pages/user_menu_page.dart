@@ -6,8 +6,6 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_confirmation_dialog.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_section.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_settings_row.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
@@ -210,9 +208,19 @@ class _UserMenuContent extends StatelessWidget {
           children: <Widget>[
             const _UserMenuDescription(),
             const SizedBox(height: AppDimensions.spacingXl),
-            _EditProfileMenuCard(enabled: enabled, onTap: onEditProfileTap),
+            _UserMenuNavigationButton(
+              icon: Icons.edit_outlined,
+              title: context.l10n.tr(AppLocaleKeys.homeEditProfileAction),
+              enabled: enabled,
+              onTap: onEditProfileTap,
+            ),
             const SizedBox(height: AppDimensions.spacingLg),
-            _PrivacyMenuSection(enabled: enabled, onTap: onPrivacyTap),
+            _UserMenuNavigationButton(
+              icon: Icons.privacy_tip_outlined,
+              title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),
+              enabled: enabled,
+              onTap: onPrivacyTap,
+            ),
             const SizedBox(height: AppDimensions.spacing2xl),
             const _UserMenuDivider(),
             const SizedBox(height: AppDimensions.spacingLg),
@@ -246,9 +254,16 @@ class _UserMenuDescription extends StatelessWidget {
   }
 }
 
-class _EditProfileMenuCard extends StatelessWidget {
-  const _EditProfileMenuCard({required this.enabled, required this.onTap});
+class _UserMenuNavigationButton extends StatelessWidget {
+  const _UserMenuNavigationButton({
+    required this.icon,
+    required this.title,
+    required this.enabled,
+    required this.onTap,
+  });
 
+  final IconData icon;
+  final String title;
   final bool enabled;
   final VoidCallback onTap;
 
@@ -262,6 +277,8 @@ class _EditProfileMenuCard extends StatelessWidget {
     final Color foregroundColor = enabled
         ? colorScheme.onSurface
         : colorScheme.onSurfaceVariant;
+    final Color backgroundColor =
+        theme.cardTheme.color ?? colorScheme.surfaceContainerHigh;
 
     return Material(
       color: Colors.transparent,
@@ -270,53 +287,49 @@ class _EditProfileMenuCard extends StatelessWidget {
         borderRadius: borderRadius,
         child: Ink(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow,
+            color: backgroundColor,
             borderRadius: borderRadius,
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AppDimensions.controlHeight,
             ),
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.spacingLg,
-            vertical: AppDimensions.spacingMd,
-          ),
-          child: Row(
-            children: <Widget>[
-              _MenuIconBadge(icon: Icons.edit_outlined, color: foregroundColor),
-              const SizedBox(width: AppDimensions.spacingMd),
-              Expanded(
-                child: Text(
-                  context.l10n.tr(AppLocaleKeys.homeEditProfileAction),
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: foregroundColor,
-                    fontWeight: FontWeight.w700,
+            child: Stack(
+              alignment: Alignment.centerLeft,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppDimensions.spacingLg,
+                    AppDimensions.spacingMd,
+                    AppDimensions.spacing2xl,
+                    AppDimensions.spacingMd,
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      _MenuIconBadge(icon: icon, color: foregroundColor),
+                      const SizedBox(width: AppDimensions.spacingMd),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: foregroundColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(width: AppDimensions.spacingSm),
-              _MenuChevron(enabled: enabled),
-            ],
+                PositionedDirectional(
+                  end: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(child: _MenuChevron(enabled: enabled)),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _PrivacyMenuSection extends StatelessWidget {
-  const _PrivacyMenuSection({required this.enabled, required this.onTap});
-
-  final bool enabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AppSection(
-      child: AppSettingsRow(
-        title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),
-        enabled: enabled,
-        onTap: onTap,
-        trailing: _MenuChevron(enabled: enabled, size: 20),
       ),
     );
   }
@@ -417,10 +430,9 @@ class _MenuIconBadge extends StatelessWidget {
 }
 
 class _MenuChevron extends StatelessWidget {
-  const _MenuChevron({required this.enabled, this.size = 22});
+  const _MenuChevron({required this.enabled});
 
   final bool enabled;
-  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -429,6 +441,6 @@ class _MenuChevron extends StatelessWidget {
         ? colorScheme.onSurfaceVariant
         : colorScheme.onSurfaceVariant.withValues(alpha: 0.72);
 
-    return Icon(Icons.chevron_right_rounded, color: color, size: size);
+    return Icon(Icons.chevron_right_rounded, color: color, size: 22);
   }
 }
