@@ -313,9 +313,9 @@ class _UserMenuNavigationButton extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     AppDimensions.spacingLg,
-                    AppDimensions.spacingMd,
+                    AppDimensions.spacingSm,
                     AppDimensions.spacing2xl,
-                    AppDimensions.spacingMd,
+                    AppDimensions.spacingSm,
                   ),
                   child: Row(
                     children: <Widget>[
