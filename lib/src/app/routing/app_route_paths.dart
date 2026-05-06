@@ -8,6 +8,7 @@ abstract final class AppRoutePaths {
   static const String userMenu = '/user-menu';
   static const String userMenuProfileEdit = '/user-menu/profile-edit';
   static const String userMenuPrivacy = '/user-menu/privacy';
+  static const String userMenuAccountAccess = '/user-menu/account-access';
 
   AppRoutePaths._();
 }

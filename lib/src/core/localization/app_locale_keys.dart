@@ -39,12 +39,13 @@ abstract final class AppLocaleKeys {
   static const String homeUserMenuDescription = 'home.userMenuDescription';
   static const String homeUserMenuSettingsSectionTitle =
       'home.userMenuSettingsSectionTitle';
+  static const String homeUserMenuAccountAccessSectionTitle =
+      'home.userMenuAccountAccessSectionTitle';
   static const String homeEditProfileAction = 'home.editProfileAction';
   static const String homeProfileEditTitle = 'home.profileEditTitle';
   static const String homeProfileEditDescription =
       'home.profileEditDescription';
-  static const String homeProfileEditSaveAction =
-      'home.profileEditSaveAction';
+  static const String homeProfileEditSaveAction = 'home.profileEditSaveAction';
   static const String homeProfileEditCancelAction =
       'home.profileEditCancelAction';
   static const String homeProfileEditRetryAction =
@@ -74,6 +75,98 @@ abstract final class AppLocaleKeys {
       'home.privacyUpdateSuccessMessage';
   static const String homePrivacyUpdateFailedMessage =
       'home.privacyUpdateFailedMessage';
+  static const String homeAccountAccessAction = 'home.accountAccessAction';
+  static const String homeAccountAccessTitle = 'home.accountAccessTitle';
+  static const String homeAccountAccessHeroTitle =
+      'home.accountAccessHeroTitle';
+  static const String homeAccountAccessDescription =
+      'home.accountAccessDescription';
+  static const String homeAccountAccessIdentitySection =
+      'home.accountAccessIdentitySection';
+  static const String homeAccountAccessMethodsSection =
+      'home.accountAccessMethodsSection';
+  static const String homeAccountAccessPhoneLabel =
+      'home.accountAccessPhoneLabel';
+  static const String homeAccountAccessVerifiedLabel =
+      'home.accountAccessVerifiedLabel';
+  static const String homeAccountAccessUnverifiedLabel =
+      'home.accountAccessUnverifiedLabel';
+  static const String homeAccountAccessNotConfiguredLabel =
+      'home.accountAccessNotConfiguredLabel';
+  static const String homeAccountAccessUnknownStatusLabel =
+      'home.accountAccessUnknownStatusLabel';
+  static const String homeAccountAccessActiveLabel =
+      'home.accountAccessActiveLabel';
+  static const String homeAccountAccessConnectedLabel =
+      'home.accountAccessConnectedLabel';
+  static const String homeAccountAccessNotConnectedLabel =
+      'home.accountAccessNotConnectedLabel';
+  static const String homeAccountAccessSetPasswordActionLabel =
+      'home.accountAccessSetPasswordActionLabel';
+  static const String homeAccountAccessConnectActionLabel =
+      'home.accountAccessConnectActionLabel';
+  static const String homeAccountAccessAddEmailAction =
+      'home.accountAccessAddEmailAction';
+  static const String homeAccountAccessVerifyEmailAction =
+      'home.accountAccessVerifyEmailAction';
+  static const String homeAccountAccessAddPhoneAction =
+      'home.accountAccessAddPhoneAction';
+  static const String homeAccountAccessVerifyPhoneAction =
+      'home.accountAccessVerifyPhoneAction';
+  static const String homeAccountAccessConnectGoogleAction =
+      'home.accountAccessConnectGoogleAction';
+  static const String homeAccountAccessConnectAppleAction =
+      'home.accountAccessConnectAppleAction';
+  static const String homeAccountAccessPasswordMethodLabel =
+      'home.accountAccessPasswordMethodLabel';
+  static const String homeAccountAccessExternalMethodLabel =
+      'home.accountAccessExternalMethodLabel';
+  static const String homeAccountAccessGoogleMethodLabel =
+      'home.accountAccessGoogleMethodLabel';
+  static const String homeAccountAccessAppleMethodLabel =
+      'home.accountAccessAppleMethodLabel';
+  static const String homeAccountAccessEmptyValueLabel =
+      'home.accountAccessEmptyValueLabel';
+  static const String homeAccountAccessEmptySectionMessage =
+      'home.accountAccessEmptySectionMessage';
+  static const String homeAccountAccessEmailVerifiedDescription =
+      'home.accountAccessEmailVerifiedDescription';
+  static const String homeAccountAccessEmailUnverifiedDescription =
+      'home.accountAccessEmailUnverifiedDescription';
+  static const String homeAccountAccessEmailNotConfiguredDescription =
+      'home.accountAccessEmailNotConfiguredDescription';
+  static const String homeAccountAccessPhoneVerifiedDescription =
+      'home.accountAccessPhoneVerifiedDescription';
+  static const String homeAccountAccessPhoneUnverifiedDescription =
+      'home.accountAccessPhoneUnverifiedDescription';
+  static const String homeAccountAccessPhoneNotConfiguredDescription =
+      'home.accountAccessPhoneNotConfiguredDescription';
+  static const String homeAccountAccessPasswordActiveDescription =
+      'home.accountAccessPasswordActiveDescription';
+  static const String homeAccountAccessPasswordNotConfiguredDescription =
+      'home.accountAccessPasswordNotConfiguredDescription';
+  static const String homeAccountAccessGoogleConnectedDescription =
+      'home.accountAccessGoogleConnectedDescription';
+  static const String homeAccountAccessGoogleNotConnectedDescription =
+      'home.accountAccessGoogleNotConnectedDescription';
+  static const String homeAccountAccessAppleConnectedDescription =
+      'home.accountAccessAppleConnectedDescription';
+  static const String homeAccountAccessAppleNotConnectedDescription =
+      'home.accountAccessAppleNotConnectedDescription';
+  static const String homeAccountAccessExternalConnectedDescription =
+      'home.accountAccessExternalConnectedDescription';
+  static const String homeAccountAccessExternalNotConnectedDescription =
+      'home.accountAccessExternalNotConnectedDescription';
+  static const String homeAccountAccessUnknownDescription =
+      'home.accountAccessUnknownDescription';
+  static const String homeAccountAccessActionUnavailableMessage =
+      'home.accountAccessActionUnavailableMessage';
+  static const String homeAccountAccessLoginEnabledLabel =
+      'home.accountAccessLoginEnabledLabel';
+  static const String homeAccountAccessLoadFailedMessage =
+      'home.accountAccessLoadFailedMessage';
+  static const String homeAccountAccessRetryAction =
+      'home.accountAccessRetryAction';
   static const String homeLogoutAction = 'home.logoutAction';
   static const String homeLogoutConfirmTitle = 'home.logoutConfirmTitle';
   static const String homeLogoutConfirmMessage = 'home.logoutConfirmMessage';
@@ -214,8 +307,7 @@ abstract final class AppLocaleKeys {
   static const String commonHidePassword = 'common.hidePassword';
   static const String commonCancel = 'common.cancel';
   static const String commonKeepEditing = 'common.keepEditing';
-  static const String commonDiscardChangesTitle =
-      'common.discardChangesTitle';
+  static const String commonDiscardChangesTitle = 'common.discardChangesTitle';
   static const String commonDiscardChangesMessage =
       'common.discardChangesMessage';
   static const String commonDiscardChangesAction =

@@ -9,10 +9,13 @@ import 'package:global_airsoft_app/src/core/network/constants/app_network_header
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/current_user_profile_offline_persistence_service.dart';
+import 'package:global_airsoft_app/src/features/users/application/services/user_account_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_offline_photo_storage_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_storage_service.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_account_repository/user_account_repository.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/user_profile_repository.dart';
+import 'package:global_airsoft_app/src/features/users/domain/models/user_account_access_overview.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile_privacy_settings.dart';
 
@@ -32,6 +35,22 @@ final Provider<UserProfileService> userProfileServiceProvider =
       return UserProfileService(repository: repository);
     });
 
+final Provider<UserAccountRepository> userAccountRepositoryProvider =
+    Provider<UserAccountRepository>((Ref ref) {
+      final dioService = ref.watch(appDioServiceProvider);
+      final localizationService = ref.watch(appLocalizationServiceProvider);
+      return UserAccountRepository(
+        dioService: dioService,
+        localizationService: localizationService,
+      );
+    });
+
+final Provider<UserAccountService> userAccountServiceProvider =
+    Provider<UserAccountService>((Ref ref) {
+      final repository = ref.watch(userAccountRepositoryProvider);
+      return UserAccountService(repository: repository);
+    });
+
 final Provider<UserProfileStorageService> userProfileStorageServiceProvider =
     Provider<UserProfileStorageService>((Ref ref) {
       final secureStorage = ref.watch(secureStorageServiceProvider);
@@ -47,27 +66,30 @@ final Provider<UserProfileStorageService> userProfileStorageServiceProvider =
       );
     });
 
-final Provider<Dio> userProfileOfflineDownloadClientProvider =
-    Provider<Dio>((Ref ref) {
-      final config = ref.watch(appConfigProvider);
-      return Dio(
-        BaseOptions(
-          connectTimeout: Duration(milliseconds: config.connectTimeoutMs),
-          receiveTimeout: Duration(milliseconds: config.receiveTimeoutMs),
-          sendTimeout: Duration(milliseconds: config.sendTimeoutMs),
-          headers: <String, Object>{
-            Headers.acceptHeader: 'image/*,*/*',
-            AppNetworkHeaders.userAgentHeader: AppNetworkHeaders.userAgentValue,
-          },
-        ),
-      );
-    });
+final Provider<Dio> userProfileOfflineDownloadClientProvider = Provider<Dio>((
+  Ref ref,
+) {
+  final config = ref.watch(appConfigProvider);
+  return Dio(
+    BaseOptions(
+      connectTimeout: Duration(milliseconds: config.connectTimeoutMs),
+      receiveTimeout: Duration(milliseconds: config.receiveTimeoutMs),
+      sendTimeout: Duration(milliseconds: config.sendTimeoutMs),
+      headers: <String, Object>{
+        Headers.acceptHeader: 'image/*,*/*',
+        AppNetworkHeaders.userAgentHeader: AppNetworkHeaders.userAgentValue,
+      },
+    ),
+  );
+});
 
 final Provider<UserProfileOfflinePhotoStorageService>
 userProfileOfflinePhotoStorageServiceProvider =
     Provider<UserProfileOfflinePhotoStorageService>((Ref ref) {
       final fileStorage = ref.watch(appFileStorageServiceProvider);
-      final downloadClient = ref.watch(userProfileOfflineDownloadClientProvider);
+      final downloadClient = ref.watch(
+        userProfileOfflineDownloadClientProvider,
+      );
       return UserProfileOfflinePhotoStorageService(
         fileStorage: fileStorage,
         downloadClient: downloadClient,
@@ -97,7 +119,16 @@ currentUserProfileProvider =
 
 final currentUserPrivacySettingsProvider =
     FutureProvider.autoDispose<UserProfilePrivacySettings>((Ref ref) {
-      return ref.watch(userProfileServiceProvider).getCurrentUserPrivacySettings();
+      return ref
+          .watch(userProfileServiceProvider)
+          .getCurrentUserPrivacySettings();
+    });
+
+final currentUserAccountAccessOverviewProvider =
+    FutureProvider.autoDispose<UserAccountAccessOverview>((Ref ref) {
+      return ref
+          .watch(userAccountServiceProvider)
+          .getCurrentUserAccessOverview();
     });
 
 final NotifierProvider<CurrentUserProfileRefreshRequestNotifier, bool>
@@ -114,8 +145,8 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
 
   @override
   Future<UserProfile> build() async {
-    final UserProfile? cachedProfile =
-        await _offlinePersistence.getCurrentUserProfile();
+    final UserProfile? cachedProfile = await _offlinePersistence
+        .getCurrentUserProfile();
     if (cachedProfile != null) {
       unawaited(_refreshSilently());
       return cachedProfile;

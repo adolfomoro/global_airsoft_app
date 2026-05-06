@@ -41,6 +41,10 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
     return _openMenuRoute(AppRoutePaths.userMenuPrivacy);
   }
 
+  Future<void> _handleAccountAccessTap() {
+    return _openMenuRoute(AppRoutePaths.userMenuAccountAccess);
+  }
+
   Future<void> _openMenuRoute(String routeName) async {
     if (_isInteractionLocked) {
       return;
@@ -165,6 +169,7 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
           isLoggingOut: _isLoggingOut,
           onEditProfileTap: _handleEditProfileTap,
           onPrivacyTap: _handlePrivacyTap,
+          onAccountAccessTap: _handleAccountAccessTap,
           onLogoutTap: _handleLogoutTap,
         ),
       ),
@@ -194,6 +199,7 @@ class _UserMenuContent extends StatelessWidget {
     required this.isLoggingOut,
     required this.onEditProfileTap,
     required this.onPrivacyTap,
+    required this.onAccountAccessTap,
     required this.onLogoutTap,
   });
 
@@ -202,6 +208,7 @@ class _UserMenuContent extends StatelessWidget {
   final bool isLoggingOut;
   final VoidCallback onEditProfileTap;
   final VoidCallback onPrivacyTap;
+  final VoidCallback onAccountAccessTap;
   final VoidCallback onLogoutTap;
 
   @override
@@ -239,6 +246,20 @@ class _UserMenuContent extends StatelessWidget {
                 title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),
                 enabled: enabled,
                 onTap: onPrivacyTap,
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spacing2xl),
+            const _UserMenuDivider(),
+            const SizedBox(height: AppDimensions.spacing2xl),
+            AppSection(
+              title: context.l10n.tr(
+                AppLocaleKeys.homeUserMenuAccountAccessSectionTitle,
+              ),
+              child: _UserMenuNavigationButton(
+                icon: Icons.manage_accounts_outlined,
+                title: context.l10n.tr(AppLocaleKeys.homeAccountAccessAction),
+                enabled: enabled,
+                onTap: onAccountAccessTap,
               ),
             ),
             const SizedBox(height: AppDimensions.spacing2xl),
