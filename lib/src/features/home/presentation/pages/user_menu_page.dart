@@ -277,8 +277,13 @@ class _UserMenuNavigationButton extends StatelessWidget {
     final Color foregroundColor = enabled
         ? colorScheme.onSurface
         : colorScheme.onSurfaceVariant;
-    final Color backgroundColor =
-        theme.cardTheme.color ?? colorScheme.surfaceContainerHigh;
+    final Color iconColor = enabled
+        ? colorScheme.primary
+        : colorScheme.onSurfaceVariant;
+    final Color backgroundColor = Color.alphaBlend(
+      colorScheme.onSurface.withValues(alpha: 0.06),
+      colorScheme.surface,
+    );
 
     return Material(
       color: Colors.transparent,
@@ -306,7 +311,7 @@ class _UserMenuNavigationButton extends StatelessWidget {
                   ),
                   child: Row(
                     children: <Widget>[
-                      _MenuIconBadge(icon: icon, color: foregroundColor),
+                      _MenuLeadingIcon(icon: icon, color: iconColor),
                       const SizedBox(width: AppDimensions.spacingMd),
                       Expanded(
                         child: Text(
@@ -406,25 +411,18 @@ class _UserMenuDivider extends StatelessWidget {
   }
 }
 
-class _MenuIconBadge extends StatelessWidget {
-  const _MenuIconBadge({required this.icon, required this.color});
+class _MenuLeadingIcon extends StatelessWidget {
+  const _MenuLeadingIcon({required this.icon, required this.color});
 
   final IconData icon;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
+    return SizedBox(
       width: 36,
       height: 36,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-      ),
-      child: Icon(icon, color: color, size: 20),
+      child: Center(child: Icon(icon, color: color, size: 20)),
     );
   }
 }
