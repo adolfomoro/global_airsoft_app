@@ -8,7 +8,7 @@ class AppSection extends StatelessWidget {
     this.title,
     this.crossAxisAlignment = CrossAxisAlignment.start,
     this.titleTextAlign,
-    this.titlePadding = const EdgeInsets.only(bottom: AppDimensions.spacingSm),
+    this.titlePadding = const EdgeInsets.only(bottom: AppDimensions.spacingLg),
     this.contentPadding = EdgeInsets.zero,
   });
 

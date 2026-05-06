@@ -37,6 +37,8 @@ abstract final class AppLocaleKeys {
   static const String homeUserMenuAction = 'home.userMenuAction';
   static const String homeUserMenuTitle = 'home.userMenuTitle';
   static const String homeUserMenuDescription = 'home.userMenuDescription';
+  static const String homeUserMenuSettingsSectionTitle =
+      'home.userMenuSettingsSectionTitle';
   static const String homeEditProfileAction = 'home.editProfileAction';
   static const String homeProfileEditTitle = 'home.profileEditTitle';
   static const String homeProfileEditDescription =

@@ -6,6 +6,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_confirmation_dialog.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_section.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
@@ -207,23 +208,30 @@ class _UserMenuContent extends StatelessWidget {
           ),
           children: <Widget>[
             const _UserMenuDescription(),
-            const SizedBox(height: AppDimensions.spacingXl),
+            const SizedBox(height: AppDimensions.spacing2xl),
             _UserMenuNavigationButton(
               icon: Icons.edit_outlined,
               title: context.l10n.tr(AppLocaleKeys.homeEditProfileAction),
               enabled: enabled,
               onTap: onEditProfileTap,
             ),
-            const SizedBox(height: AppDimensions.spacingLg),
-            _UserMenuNavigationButton(
-              icon: Icons.privacy_tip_outlined,
-              title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),
-              enabled: enabled,
-              onTap: onPrivacyTap,
+            const SizedBox(height: AppDimensions.spacing2xl),
+            const _UserMenuDivider(),
+            const SizedBox(height: AppDimensions.spacing2xl),
+            AppSection(
+              title: context.l10n.tr(
+                AppLocaleKeys.homeUserMenuSettingsSectionTitle,
+              ),
+              child: _UserMenuNavigationButton(
+                icon: Icons.privacy_tip_outlined,
+                title: context.l10n.tr(AppLocaleKeys.homePrivacyAction),
+                enabled: enabled,
+                onTap: onPrivacyTap,
+              ),
             ),
             const SizedBox(height: AppDimensions.spacing2xl),
             const _UserMenuDivider(),
-            const SizedBox(height: AppDimensions.spacingLg),
+            const SizedBox(height: AppDimensions.spacing2xl),
             _LogoutMenuAction(
               enabled: enabled || isLoggingOut,
               isLoading: isLoggingOut,
@@ -326,7 +334,7 @@ class _UserMenuNavigationButton extends StatelessWidget {
                   ),
                 ),
                 PositionedDirectional(
-                  end: 0,
+                  end: 12,
                   top: 0,
                   bottom: 0,
                   child: Center(child: _MenuChevron(enabled: enabled)),
@@ -439,6 +447,6 @@ class _MenuChevron extends StatelessWidget {
         ? colorScheme.onSurfaceVariant
         : colorScheme.onSurfaceVariant.withValues(alpha: 0.72);
 
-    return Icon(Icons.chevron_right_rounded, color: color, size: 22);
+    return Icon(Icons.chevron_right_rounded, color: color, size: 30);
   }
 }

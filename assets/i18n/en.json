@@ -23,6 +23,7 @@
     "home.userMenuAction": "Open user menu",
     "home.userMenuTitle": "Account settings",
     "home.userMenuDescription": "Manage your account settings and access from one place.",
+    "home.userMenuSettingsSectionTitle": "Settings and preferences",
     "home.editProfileAction": "Edit profile",
     "home.profileEditTitle": "Edit profile",
     "home.profileEditDescription": "Update the public details shown on your account.",
