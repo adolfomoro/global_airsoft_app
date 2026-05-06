@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_section.dart';
 
 class AppSectionBox extends StatelessWidget {
   const AppSectionBox({
@@ -31,33 +32,20 @@ class AppSectionBox extends StatelessWidget {
             colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
       ),
-      child: Column(
+      child: AppSection(
+        title: title,
         crossAxisAlignment: crossAxisAlignment,
-        children: <Widget>[
-          if (hasTitle)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppDimensions.spacingLg,
-                AppDimensions.spacingLg,
-                AppDimensions.spacingLg,
-                AppDimensions.spacingSm,
-              ),
-              child: Text(
-                title!,
-                textAlign: titleTextAlign,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          Padding(
-            padding: (hasTitle
-                ? EdgeInsets.only(bottom: AppDimensions.spacingLg)
-                : EdgeInsets.symmetric(vertical: AppDimensions.spacingSm)),
-            child: child,
-          ),
-        ],
+        titleTextAlign: titleTextAlign,
+        titlePadding: const EdgeInsets.fromLTRB(
+          AppDimensions.spacingLg,
+          AppDimensions.spacingLg,
+          AppDimensions.spacingLg,
+          AppDimensions.spacingSm,
+        ),
+        contentPadding: hasTitle
+            ? const EdgeInsets.only(bottom: AppDimensions.spacingLg)
+            : const EdgeInsets.symmetric(vertical: AppDimensions.spacingSm),
+        child: child,
       ),
     );
   }
