@@ -27,12 +27,18 @@ final class AuthSecurityInterceptor extends Interceptor {
       'GlobalAirsoft:Auth:AccessTokenExpired';
   static const String _accessTokenInvalidCode =
       'GlobalAirsoft:Auth:AccessTokenInvalid';
+  static const String _authRequiredCode =
+      'GlobalAirsoft:Auth:AuthRequired';
+  static const String _sessionEndedCode =
+      'GlobalAirsoft:Auth:SessionEnded';
   static const String _sessionInvalidCode = 'GlobalAirsoft:Auth:SessionInvalid';
   static const String _refreshTokenInvalidCode =
       'GlobalAirsoft:Auth:RefreshTokenInvalid';
   static const String _refreshTokenExpiredCode =
       'GlobalAirsoft:Auth:RefreshTokenExpired';
   static const String _sessionExpiredCode = 'GlobalAirsoft:Auth:SessionExpired';
+  static const String _accessForbiddenCode =
+      'GlobalAirsoft:Auth:AccessForbidden';
 
   static const String _sessionEndedMessageKey =
       AppLocaleKeys.authSessionEndedForSecurityMessage;
@@ -166,7 +172,9 @@ final class AuthSecurityInterceptor extends Interceptor {
     if (_isSecurityInvalid(statusCode: statusCode, code: code)) {
       await _logoutAndReject(
         handler,
-        fallbackMessageKey: _securityChangeMessageKey,
+        fallbackMessageKey: _isSessionEndedCode(code)
+            ? _sessionEndedMessageKey
+            : _securityChangeMessageKey,
         requestOptions: err.requestOptions,
         response: response,
         apiException: apiException,
@@ -308,14 +316,17 @@ final class AuthSecurityInterceptor extends Interceptor {
     required int? statusCode,
     required String? code,
   }) {
-    return code == _accessTokenExpiredCode ||
-        (statusCode == 401 &&
-            code != _accessTokenInvalidCode &&
-            code != _sessionInvalidCode);
+    return code == _accessTokenExpiredCode;
   }
 
   bool _isSecurityInvalid({required int? statusCode, required String? code}) {
-    if (code == _accessTokenInvalidCode || code == _sessionInvalidCode) {
+    if (code == _accessTokenInvalidCode ||
+        code == _sessionInvalidCode ||
+        code == _authRequiredCode ||
+        code == _sessionEndedCode ||
+        code == _refreshTokenInvalidCode ||
+        code == _refreshTokenExpiredCode ||
+        code == _sessionExpiredCode) {
       return true;
     }
 
@@ -332,6 +343,13 @@ final class AuthSecurityInterceptor extends Interceptor {
         code != _refreshTokenInvalidCode &&
         code != _refreshTokenExpiredCode &&
         code != _sessionExpiredCode;
+  }
+
+  bool _isSessionEndedCode(String? code) {
+    return code == _sessionEndedCode ||
+        code == _refreshTokenInvalidCode ||
+        code == _refreshTokenExpiredCode ||
+        code == _sessionExpiredCode;
   }
 
   Future<void> _refreshAndRetry({

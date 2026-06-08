@@ -103,7 +103,12 @@ ResponseBody _errorBody({
     statusCode,
     headers: <String, List<String>>{
       Headers.contentTypeHeader: <String>[Headers.jsonContentType],
-        'AbpErrorFormat': <String>['true'],
+      'AbpErrorFormat': <String>['true'],
+    },
+  );
+}
+
+Future<AppDioService> _buildService(
   _RecordingHttpClientAdapter adapter, {
   Locale locale = const Locale('en'),
   bool enableAuthSecurityInterceptor = true,
@@ -351,6 +356,148 @@ void main() {
     expect(messages, <String>[
       'We detected a security change. Please sign in again.',
     ]);
+  });
+
+  test('goes to login without refresh on auth required', () async {
+    final List<String> messages = <String>[];
+    AuthTokens currentTokens = const AuthTokens(
+      jwtToken: 'old-access-token',
+      refreshToken: 'old-refresh-token',
+    );
+    int refreshCalls = 0;
+    int clearCalls = 0;
+
+    AuthSecurityCoordinator.instance.configure(
+      getTokens: () async => currentTokens,
+      saveTokens: (AuthTokens tokens) async {
+        currentTokens = tokens;
+      },
+      clearSession: () async {
+        clearCalls += 1;
+        currentTokens = const AuthTokens(jwtToken: '', refreshToken: '');
+      },
+      refreshTokens: (String refreshToken) {
+        refreshCalls += 1;
+        return Future<AuthTokens>.value(
+          const AuthTokens(jwtToken: 'unexpected', refreshToken: 'unexpected'),
+        );
+      },
+      translateMessage: (String key) async {
+        return switch (key) {
+          AppLocaleKeys.authSecurityChangeDetectedMessage =>
+            'Please sign in again to continue.',
+          _ => key,
+        };
+      },
+        showMessage: (String message, {Object? source}) async {
+          messages.add(message);
+        },
+    );
+
+    final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
+      respond: (RequestOptions options) async {
+        return _errorBody(
+          code: 'GlobalAirsoft:Auth:AuthRequired',
+          statusCode: HttpStatus.unauthorized,
+        );
+      },
+    );
+
+    final AppDioService service = await _buildService(adapter);
+
+    await expectLater(
+      service.get<dynamic>('/protected'),
+      throwsA(
+        isA<AuthSecurityHandledException>()
+            .having(
+              (AuthSecurityHandledException error) => error.code,
+              'code',
+              'GlobalAirsoft:Auth:AuthRequired',
+            )
+            .having(
+              (AuthSecurityHandledException error) => error.message,
+              'message',
+              'Please sign in again to continue.',
+            ),
+      ),
+    );
+
+    expect(refreshCalls, 0);
+    expect(clearCalls, 1);
+    expect(currentTokens.jwtToken, isEmpty);
+    expect(currentTokens.refreshToken, isEmpty);
+    expect(messages, <String>['Please sign in again to continue.']);
+  });
+
+  test('logs out immediately on session ended', () async {
+    final List<String> messages = <String>[];
+    AuthTokens currentTokens = const AuthTokens(
+      jwtToken: 'old-access-token',
+      refreshToken: 'old-refresh-token',
+    );
+    int refreshCalls = 0;
+    int clearCalls = 0;
+
+    AuthSecurityCoordinator.instance.configure(
+      getTokens: () async => currentTokens,
+      saveTokens: (AuthTokens tokens) async {
+        currentTokens = tokens;
+      },
+      clearSession: () async {
+        clearCalls += 1;
+        currentTokens = const AuthTokens(jwtToken: '', refreshToken: '');
+      },
+      refreshTokens: (String refreshToken) {
+        refreshCalls += 1;
+        return Future<AuthTokens>.value(
+          const AuthTokens(jwtToken: 'unexpected', refreshToken: 'unexpected'),
+        );
+      },
+      translateMessage: (String key) async {
+        return switch (key) {
+          AppLocaleKeys.authSessionEndedForSecurityMessage =>
+            'Your session ended. Please sign in again.',
+          _ => key,
+        };
+      },
+        showMessage: (String message, {Object? source}) async {
+          messages.add(message);
+        },
+    );
+
+    final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
+      respond: (RequestOptions options) async {
+        return _errorBody(
+          code: 'GlobalAirsoft:Auth:SessionEnded',
+          statusCode: HttpStatus.unauthorized,
+        );
+      },
+    );
+
+    final AppDioService service = await _buildService(adapter);
+
+    await expectLater(
+      service.get<dynamic>('/protected'),
+      throwsA(
+        isA<AuthSecurityHandledException>()
+            .having(
+              (AuthSecurityHandledException error) => error.code,
+              'code',
+              'GlobalAirsoft:Auth:SessionEnded',
+            )
+            .having(
+              (AuthSecurityHandledException error) => error.message,
+              'message',
+              'Your session ended. Please sign in again.',
+            ),
+      ),
+    );
+
+    expect(refreshCalls, 0);
+    expect(clearCalls, 1);
+    expect(currentTokens.jwtToken, isEmpty);
+    expect(currentTokens.refreshToken, isEmpty);
+    expect(messages, <String>['Your session ended. Please sign in again.']);
   });
 
   test('logs out when token refresh fails', () async {
