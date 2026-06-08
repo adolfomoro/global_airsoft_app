@@ -185,6 +185,8 @@ class ApiException implements Exception {
         return ForbiddenApiException.fromApiException(this);
       case 404:
         return NotFoundApiException.fromApiException(this);
+      case 400:
+        return UserFriendlyApiException.fromApiException(this);
       case 409:
         return UserFriendlyApiException.fromApiException(this);
       case 501:

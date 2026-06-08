@@ -90,7 +90,7 @@ void main() {
         HttpStatus.internalServerError,
         headers: <String, List<String>>{
           Headers.contentTypeHeader: <String>[Headers.jsonContentType],
-          '_abperrorformat': <String>['true'],
+          'AbpErrorFormat': <String>['true'],
           'X-Correlation-Id': <String>['corr-log-123'],
         },
       ),

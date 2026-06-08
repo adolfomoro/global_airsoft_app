@@ -103,12 +103,7 @@ ResponseBody _errorBody({
     statusCode,
     headers: <String, List<String>>{
       Headers.contentTypeHeader: <String>[Headers.jsonContentType],
-      '_abperrorformat': <String>['true'],
-    },
-  );
-}
-
-Future<AppDioService> _buildService(
+        'AbpErrorFormat': <String>['true'],
   _RecordingHttpClientAdapter adapter, {
   Locale locale = const Locale('en'),
   bool enableAuthSecurityInterceptor = true,
@@ -572,7 +567,7 @@ void main() {
           HttpStatus.internalServerError,
           headers: <String, List<String>>{
             Headers.contentTypeHeader: <String>[Headers.jsonContentType],
-            '_abperrorformat': <String>['true'],
+            'AbpErrorFormat': <String>['true'],
             'X-Correlation-Id': <String>['corr-auth-500'],
           },
         );

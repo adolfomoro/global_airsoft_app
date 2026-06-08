@@ -45,6 +45,11 @@ final class ApiExceptionFormatter {
     ).toTypedException();
   }
 
+  static const Set<String> _abpErrorFormatHeaderNames = <String>{
+    'abperrorformat',
+    '_abperrorformat',
+  };
+
   static bool _isAbpFormatted(Response<dynamic>? response) {
     if (response == null) {
       return false;
@@ -55,7 +60,7 @@ final class ApiExceptionFormatter {
 
     for (final MapEntry<String, List<String>> entry in headerMap.entries) {
       final String normalizedKey = entry.key.toLowerCase();
-      if (normalizedKey == '_abperrorformat') {
+      if (_abpErrorFormatHeaderNames.contains(normalizedKey)) {
         final bool hasExpectedValue = entry.value.any((String value) {
           return value.trim().toLowerCase() == 'true';
         });
