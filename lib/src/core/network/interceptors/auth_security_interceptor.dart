@@ -6,6 +6,7 @@ import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/api_exception_formatter.dart';
 import 'package:global_airsoft_app/src/core/network/auth_security_handled_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_coordinator.dart';
+import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_policy.dart';
 import 'package:global_airsoft_app/src/features/auth/data/constants/auth_api_paths.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/models/auth_tokens.dart';
 
@@ -23,23 +24,6 @@ final class AuthSecurityInterceptor extends Interceptor {
     AuthApiPaths.passwordRecovery,
   };
 
-  static const String _accessTokenExpiredCode =
-      'GlobalAirsoft:Auth:AccessTokenExpired';
-  static const String _accessTokenInvalidCode =
-      'GlobalAirsoft:Auth:AccessTokenInvalid';
-  static const String _authRequiredCode =
-      'GlobalAirsoft:Auth:AuthRequired';
-  static const String _sessionEndedCode =
-      'GlobalAirsoft:Auth:SessionEnded';
-  static const String _sessionInvalidCode = 'GlobalAirsoft:Auth:SessionInvalid';
-  static const String _refreshTokenInvalidCode =
-      'GlobalAirsoft:Auth:RefreshTokenInvalid';
-  static const String _refreshTokenExpiredCode =
-      'GlobalAirsoft:Auth:RefreshTokenExpired';
-  static const String _sessionExpiredCode = 'GlobalAirsoft:Auth:SessionExpired';
-  static const String _accessForbiddenCode =
-      'GlobalAirsoft:Auth:AccessForbidden';
-
   static const String _sessionEndedMessageKey =
       AppLocaleKeys.authSessionEndedForSecurityMessage;
   static const String _securityChangeMessageKey =
@@ -51,10 +35,17 @@ final class AuthSecurityInterceptor extends Interceptor {
   static const String _serverUnavailableMessageKey =
       AppLocaleKeys.authServerUnavailableMessage;
 
-  AuthSecurityInterceptor({required Dio dio}) : _dio = dio;
+  AuthSecurityInterceptor({
+    required Dio dio,
+    AuthSecurityCoordinator? coordinator,
+    AuthSecurityPolicy policy = const AuthSecurityPolicy(),
+  }) : _dio = dio,
+       _coordinator = coordinator ?? AuthSecurityCoordinator.instance,
+       _policy = policy;
 
   final Dio _dio;
-  final AuthSecurityCoordinator _coordinator = AuthSecurityCoordinator.instance;
+  final AuthSecurityCoordinator _coordinator;
+  final AuthSecurityPolicy _policy;
   final Set<RequestOptions> _retriedRequests = Set<RequestOptions>.identity();
   Future<AuthTokens?>? _refreshInFlight;
   int? _refreshInFlightSessionVersion;
@@ -118,39 +109,51 @@ final class AuthSecurityInterceptor extends Interceptor {
         ? error
         : ApiExceptionFormatter.toTypedException(err);
 
-    if (_isRefreshPath(path)) {
-      await _logoutAndReject(
-        handler,
-        fallbackMessageKey: _sessionEndedMessageKey,
-        requestOptions: err.requestOptions,
-        response: response,
-        apiException: apiException,
-      );
-      return;
-    }
-
     final int? statusCode = apiException.statusCode ?? response.statusCode;
     final String? code = apiException.code;
-    final AuthTokens? currentTokens = await _readCurrentTokens();
-    final String currentAccessToken = currentTokens?.jwtToken.trim() ?? '';
-    final String requestAccessToken = _readRequestAccessToken(
-      err.requestOptions,
+    final AuthSecurityAction action = _policy.resolve(
+      statusCode: statusCode,
+      code: code,
+      isRefreshRequest: _isRefreshPath(path),
     );
 
-    if (_isAccessTokenExpired(statusCode: statusCode, code: code)) {
-      if (_shouldRetryWithCurrentToken(
-        currentAccessToken: currentAccessToken,
-        requestAccessToken: requestAccessToken,
-      )) {
-        await _retryWithCurrentToken(
-          requestOptions: err.requestOptions,
+    switch (action) {
+      case AuthSecurityAction.refreshAndRetry:
+        final AuthTokens? currentTokens = await _readCurrentTokens();
+        final String currentAccessToken = currentTokens?.jwtToken.trim() ?? '';
+        final String requestAccessToken = _readRequestAccessToken(
+          err.requestOptions,
+        );
+        if (_shouldRetryWithCurrentToken(
           currentAccessToken: currentAccessToken,
+          requestAccessToken: requestAccessToken,
+        )) {
+          await _retryWithCurrentToken(
+            requestOptions: err.requestOptions,
+            currentAccessToken: currentAccessToken,
+            handler: handler,
+          );
+          return;
+        }
+
+        if (_wasRetryAttempted(err.requestOptions)) {
+          await _logoutAndReject(
+            handler,
+            fallbackMessageKey: _sessionEndedMessageKey,
+            requestOptions: err.requestOptions,
+            response: response,
+            apiException: apiException,
+          );
+          return;
+        }
+
+        await _refreshAndRetry(
+          originalError: err,
+          apiException: apiException,
           handler: handler,
         );
         return;
-      }
-
-      if (_wasRetryAttempted(err.requestOptions)) {
+      case AuthSecurityAction.logoutSessionEnded:
         await _logoutAndReject(
           handler,
           fallbackMessageKey: _sessionEndedMessageKey,
@@ -159,74 +162,46 @@ final class AuthSecurityInterceptor extends Interceptor {
           apiException: apiException,
         );
         return;
-      }
-
-      await _refreshAndRetry(
-        originalError: err,
-        apiException: apiException,
-        handler: handler,
-      );
-      return;
+      case AuthSecurityAction.logoutSecurityChange:
+        await _logoutAndReject(
+          handler,
+          fallbackMessageKey: _securityChangeMessageKey,
+          requestOptions: err.requestOptions,
+          response: response,
+          apiException: apiException,
+        );
+        return;
+      case AuthSecurityAction.showPermissionDenied:
+        await _showMessageAndReject(
+          handler,
+          fallbackMessageKey: _permissionDeniedMessageKey,
+          requestOptions: err.requestOptions,
+          response: response,
+          apiException: apiException,
+        );
+        return;
+      case AuthSecurityAction.showTooManyAttempts:
+        await _showMessageAndReject(
+          handler,
+          fallbackMessageKey: _tooManyAttemptsMessageKey,
+          requestOptions: err.requestOptions,
+          response: response,
+          apiException: apiException,
+        );
+        return;
+      case AuthSecurityAction.showServerUnavailable:
+        await _showMessageAndReject(
+          handler,
+          fallbackMessageKey: _serverUnavailableMessageKey,
+          requestOptions: err.requestOptions,
+          response: response,
+          apiException: apiException,
+        );
+        return;
+      case AuthSecurityAction.passThrough:
+        handler.next(err);
+        return;
     }
-
-    if (_isSecurityInvalid(statusCode: statusCode, code: code)) {
-      await _logoutAndReject(
-        handler,
-        fallbackMessageKey: _isSessionEndedCode(code)
-            ? _sessionEndedMessageKey
-            : _securityChangeMessageKey,
-        requestOptions: err.requestOptions,
-        response: response,
-        apiException: apiException,
-      );
-      return;
-    }
-
-    if (_isForbidden(statusCode: statusCode, code: code)) {
-      await _showMessageAndReject(
-        handler,
-        fallbackMessageKey: _permissionDeniedMessageKey,
-        requestOptions: err.requestOptions,
-        response: response,
-        apiException: apiException,
-      );
-      return;
-    }
-
-    if (statusCode == 429) {
-      await _showMessageAndReject(
-        handler,
-        fallbackMessageKey: _tooManyAttemptsMessageKey,
-        requestOptions: err.requestOptions,
-        response: response,
-        apiException: apiException,
-      );
-      return;
-    }
-
-    if (statusCode != null && statusCode >= 500) {
-      await _showMessageAndReject(
-        handler,
-        fallbackMessageKey: _serverUnavailableMessageKey,
-        requestOptions: err.requestOptions,
-        response: response,
-        apiException: apiException,
-      );
-      return;
-    }
-
-    if (statusCode == 401) {
-      await _logoutAndReject(
-        handler,
-        fallbackMessageKey: _securityChangeMessageKey,
-        requestOptions: err.requestOptions,
-        response: response,
-        apiException: apiException,
-      );
-      return;
-    }
-
-    handler.next(err);
   }
 
   bool _shouldSkipAuthorizationHeader(String path) {
@@ -310,42 +285,6 @@ final class AuthSecurityInterceptor extends Interceptor {
 
   void _clearRetryAttempted(RequestOptions options) {
     _retriedRequests.remove(options);
-  }
-
-  bool _isAccessTokenExpired({
-    required int? statusCode,
-    required String? code,
-  }) {
-    return statusCode == 401 && code == _accessTokenExpiredCode;
-  }
-
-  bool _isSecurityInvalid({required int? statusCode, required String? code}) {
-    if (statusCode != 401) {
-      return false;
-    }
-
-    if (code == _accessTokenInvalidCode ||
-        code == _sessionInvalidCode ||
-        code == _authRequiredCode ||
-        code == _sessionEndedCode ||
-        code == _refreshTokenInvalidCode ||
-        code == _refreshTokenExpiredCode ||
-        code == _sessionExpiredCode) {
-      return true;
-    }
-
-    return code == null;
-  }
-
-  bool _isForbidden({required int? statusCode, required String? code}) {
-    return statusCode == 403 && code == _accessForbiddenCode;
-  }
-
-  bool _isSessionEndedCode(String? code) {
-    return code == _sessionEndedCode ||
-        code == _refreshTokenInvalidCode ||
-        code == _refreshTokenExpiredCode ||
-        code == _sessionExpiredCode;
   }
 
   Future<void> _refreshAndRetry({
