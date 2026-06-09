@@ -563,6 +563,90 @@ void main() {
     ]);
   });
 
+  test(
+    'does not refresh or logout when access expired code is not unauthorized',
+    () async {
+      final List<String> messages = <String>[];
+      AuthTokens currentTokens = const AuthTokens(
+        jwtToken: 'old-access-token',
+        refreshToken: 'old-refresh-token',
+      );
+      int refreshCalls = 0;
+      int clearCalls = 0;
+
+      AuthSecurityCoordinator.instance.configure(
+        getTokens: () async => currentTokens,
+        saveTokens: (AuthTokens tokens) async {
+          currentTokens = tokens;
+        },
+        clearSession: () async {
+          clearCalls += 1;
+          currentTokens = const AuthTokens(jwtToken: '', refreshToken: '');
+        },
+        refreshTokens: (String refreshToken) {
+          refreshCalls += 1;
+          return Future<AuthTokens>.value(
+            const AuthTokens(
+              jwtToken: 'unexpected',
+              refreshToken: 'unexpected',
+            ),
+          );
+        },
+        translateMessage: (String key) async {
+          return switch (key) {
+            AppLocaleKeys.authServerUnavailableMessage =>
+              'Unable to complete this now. Please try again.',
+            _ => key,
+          };
+        },
+        showMessage: (String message, {Object? source}) async {
+          messages.add(message);
+        },
+      );
+
+      final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
+        respond: (RequestOptions options) async {
+          return _errorBody(
+            code: 'GlobalAirsoft:Auth:AccessTokenExpired',
+            statusCode: HttpStatus.internalServerError,
+          );
+        },
+      );
+
+      final AppDioService service = await _buildService(adapter);
+
+      await expectLater(
+        service.get<dynamic>('/protected'),
+        throwsA(
+          isA<AuthSecurityHandledException>()
+              .having(
+                (AuthSecurityHandledException error) => error.code,
+                'code',
+                'GlobalAirsoft:Auth:AccessTokenExpired',
+              )
+              .having(
+                (AuthSecurityHandledException error) => error.statusCode,
+                'statusCode',
+                HttpStatus.internalServerError,
+              )
+              .having(
+                (AuthSecurityHandledException error) => error.message,
+                'message',
+                'Unable to complete this now. Please try again.',
+              ),
+        ),
+      );
+
+      expect(refreshCalls, 0);
+      expect(clearCalls, 0);
+      expect(currentTokens.jwtToken, 'old-access-token');
+      expect(currentTokens.refreshToken, 'old-refresh-token');
+      expect(messages, <String>[
+        'Unable to complete this now. Please try again.',
+      ]);
+    },
+  );
+
   test('shows permission denied without logging out', () async {
     final List<String> messages = <String>[];
     AuthTokens currentTokens = const AuthTokens(
@@ -635,6 +719,75 @@ void main() {
     expect(messages, <String>[
       'You do not have permission to access this resource.',
     ]);
+  });
+
+  test('does not treat generic forbidden responses as access forbidden', () async {
+    final List<String> messages = <String>[];
+    AuthTokens currentTokens = const AuthTokens(
+      jwtToken: 'old-access-token',
+      refreshToken: 'old-refresh-token',
+    );
+    int refreshCalls = 0;
+    int clearCalls = 0;
+
+    AuthSecurityCoordinator.instance.configure(
+      getTokens: () async => currentTokens,
+      saveTokens: (AuthTokens tokens) async {
+        currentTokens = tokens;
+      },
+      clearSession: () async {
+        clearCalls += 1;
+        currentTokens = const AuthTokens(jwtToken: '', refreshToken: '');
+      },
+      refreshTokens: (String refreshToken) {
+        refreshCalls += 1;
+        return Future<AuthTokens>.value(
+          const AuthTokens(
+            jwtToken: 'unexpected',
+            refreshToken: 'unexpected',
+          ),
+        );
+      },
+      translateMessage: (String key) async => key,
+      showMessage: (String message, {Object? source}) async {
+        messages.add(message);
+      },
+    );
+
+    final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
+      respond: (RequestOptions options) async {
+        return _errorBody(
+          code: 'GlobalAirsoft:GenericForbidden',
+          message: 'Forbidden by backend.',
+          statusCode: HttpStatus.forbidden,
+        );
+      },
+    );
+
+    final AppDioService service = await _buildService(adapter);
+
+    await expectLater(
+      service.get<dynamic>('/protected'),
+      throwsA(
+        isA<ForbiddenApiException>()
+            .having(
+              (ForbiddenApiException error) => error.code,
+              'code',
+              'GlobalAirsoft:GenericForbidden',
+            )
+            .having(
+              (ForbiddenApiException error) => error.message,
+              'message',
+              'Forbidden by backend.',
+            ),
+      ),
+    );
+
+    expect(refreshCalls, 0);
+    expect(clearCalls, 0);
+    expect(currentTokens.jwtToken, 'old-access-token');
+    expect(currentTokens.refreshToken, 'old-refresh-token');
+    expect(messages, isEmpty);
   });
 
   test(

@@ -316,10 +316,14 @@ final class AuthSecurityInterceptor extends Interceptor {
     required int? statusCode,
     required String? code,
   }) {
-    return code == _accessTokenExpiredCode;
+    return statusCode == 401 && code == _accessTokenExpiredCode;
   }
 
   bool _isSecurityInvalid({required int? statusCode, required String? code}) {
+    if (statusCode != 401) {
+      return false;
+    }
+
     if (code == _accessTokenInvalidCode ||
         code == _sessionInvalidCode ||
         code == _authRequiredCode ||
@@ -330,19 +334,11 @@ final class AuthSecurityInterceptor extends Interceptor {
       return true;
     }
 
-    return statusCode == 401 && code == null;
+    return code == null;
   }
 
   bool _isForbidden({required int? statusCode, required String? code}) {
-    if (statusCode != 403) {
-      return false;
-    }
-
-    return code != _sessionInvalidCode &&
-        code != _accessTokenInvalidCode &&
-        code != _refreshTokenInvalidCode &&
-        code != _refreshTokenExpiredCode &&
-        code != _sessionExpiredCode;
+    return statusCode == 403 && code == _accessForbiddenCode;
   }
 
   bool _isSessionEndedCode(String? code) {
