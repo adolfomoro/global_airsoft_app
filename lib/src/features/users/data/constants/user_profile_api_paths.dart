@@ -2,6 +2,8 @@ abstract final class UserProfileApiPaths {
   static const String currentUserProfile = '/users/me';
   static const String updateCurrentUserProfile = '/users/me/profile';
   static const String currentUserProfilePicture = '/users/me/profile-picture';
+  static const String currentUserProfilePictureUploadUrl =
+      '/users/me/profile-picture/upload-url';
   static const String currentUserProfilePictureMedium =
       '/users/me/profile-picture/url/medium';
   static const String currentUserProfilePictureLarge =
