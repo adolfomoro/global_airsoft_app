@@ -1,0 +1,98 @@
+import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
+import 'package:global_airsoft_app/src/features/users/application/services/user_profile_offline_photo_storage_service.dart';
+import 'package:global_airsoft_app/src/features/users/application/services/user_profile_storage_service.dart';
+import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
+
+final class CurrentUserProfileOfflinePersistenceService {
+  CurrentUserProfileOfflinePersistenceService({
+    required UserProfileStorageService storageService,
+    required UserProfileOfflinePhotoStorageService offlinePhotoStorageService,
+    required AppLogger logger,
+  }) : _storageService = storageService,
+       _offlinePhotoStorageService = offlinePhotoStorageService,
+       _logger = logger;
+
+  final UserProfileStorageService _storageService;
+  final UserProfileOfflinePhotoStorageService _offlinePhotoStorageService;
+  final AppLogger _logger;
+
+  Future<UserProfile?> getCurrentUserProfile() {
+    return _storageService.getCurrentUserProfile();
+  }
+
+  Future<UserProfile> persistRemoteProfile(UserProfile profile) async {
+    final UserProfile? previousProfile = await _storageService
+        .getCurrentUserProfile();
+    final String localProfilePicturePath = await _reconcileRemoteProfilePhoto(
+      previousProfile: previousProfile,
+      profile: profile,
+    );
+    await _storageService.saveCurrentUserProfile(profile);
+    return profile.copyWith(localProfilePicturePath: localProfilePicturePath);
+  }
+
+  Future<void> clearCurrentUserProfile() {
+    return _storageService.clearCurrentUserProfile();
+  }
+
+  Future<void> saveCurrentUserProfile(UserProfile profile) {
+    return _storageService.saveCurrentUserProfile(profile);
+  }
+
+  Future<String> _reconcileRemoteProfilePhoto({
+    required UserProfile? previousProfile,
+    required UserProfile profile,
+  }) async {
+    if (profile.id.trim().isEmpty) {
+      return '';
+    }
+
+    if (!_hasRemoteProfilePhoto(profile)) {
+      await _storageService.clearCurrentUserProfilePhoto(userId: profile.id);
+      return '';
+    }
+
+    if (_canReuseCachedProfilePhoto(
+      previousProfile: previousProfile,
+      profile: profile,
+    )) {
+      return previousProfile!.localProfilePicturePath;
+    }
+
+    try {
+      return await _offlinePhotoStorageService.cacheRemoteProfilePhoto(
+            userId: profile.id,
+            mediumPhotoUrl: profile.mediumProfilePictureUrl,
+            largePhotoUrl: profile.largeProfilePictureUrl,
+          ) ??
+          '';
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to persist remote current user profile assets offline.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return '';
+    }
+  }
+
+  bool _hasRemoteProfilePhoto(UserProfile profile) {
+    return profile.mediumProfilePictureUrl.trim().isNotEmpty ||
+        profile.largeProfilePictureUrl.trim().isNotEmpty;
+  }
+
+  bool _canReuseCachedProfilePhoto({
+    required UserProfile? previousProfile,
+    required UserProfile profile,
+  }) {
+    if (previousProfile == null ||
+        previousProfile.localProfilePicturePath.trim().isEmpty) {
+      return false;
+    }
+
+    return previousProfile.mediumProfilePictureUrl.trim() ==
+            profile.mediumProfilePictureUrl.trim() &&
+        previousProfile.largeProfilePictureUrl.trim() ==
+            profile.largeProfilePictureUrl.trim();
+  }
+}

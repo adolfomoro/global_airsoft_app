@@ -1,0 +1,171 @@
+import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/pages/google_account_setup_page.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/pages/login_page.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/pages/password_recovery_page.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/pages/password_recovery_success_page.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/pages/sign_up_page.dart';
+import 'package:global_airsoft_app/src/features/home/presentation/pages/home_page.dart';
+import 'package:global_airsoft_app/src/features/home/presentation/pages/user_menu_page.dart';
+import 'package:global_airsoft_app/src/features/users/presentation/pages/user_account_access_page.dart';
+import 'package:global_airsoft_app/src/features/users/presentation/pages/user_profile_edit_page.dart';
+import 'package:global_airsoft_app/src/features/users/presentation/pages/user_profile_privacy_page.dart';
+
+enum AppRouteAccess { public, authenticatedOnly, unauthenticatedOnly }
+
+typedef AppRoutePageBuilder =
+    Widget Function(BuildContext context, Object? arguments);
+
+final class AppRoutes {
+  AppRoutes._();
+
+  static List<Route<dynamic>> onGenerateInitialRoutes(
+    String initialRouteName, {
+    required bool Function() isAuthenticated,
+  }) {
+    return <Route<dynamic>>[
+      onGenerateRoute(
+        RouteSettings(name: initialRouteName),
+        isAuthenticated: isAuthenticated,
+      ),
+    ];
+  }
+
+  static Route<dynamic> onGenerateRoute(
+    RouteSettings settings, {
+    required bool Function() isAuthenticated,
+  }) {
+    final bool authenticated = isAuthenticated();
+    final String routeName = settings.name ?? _defaultRouteName(authenticated);
+    final _AppRouteDefinition definition =
+        _routes[routeName] ?? _routes[_defaultRouteName(authenticated)]!;
+
+    if (!_canAccess(definition.access, authenticated)) {
+      return _buildFallbackRoute(authenticated);
+    }
+
+    return MaterialPageRoute<dynamic>(
+      settings: RouteSettings(name: routeName, arguments: settings.arguments),
+      builder: (BuildContext context) =>
+          definition.builder(context, settings.arguments),
+    );
+  }
+
+  static String _defaultRouteName(bool isAuthenticated) {
+    return isAuthenticated ? AppRoutePaths.home : AppRoutePaths.login;
+  }
+
+  static bool _canAccess(AppRouteAccess access, bool isAuthenticated) {
+    switch (access) {
+      case AppRouteAccess.public:
+        return true;
+      case AppRouteAccess.authenticatedOnly:
+        return isAuthenticated;
+      case AppRouteAccess.unauthenticatedOnly:
+        return !isAuthenticated;
+    }
+  }
+
+  static Route<dynamic> _buildFallbackRoute(bool isAuthenticated) {
+    final String fallbackRoute = _defaultRouteName(isAuthenticated);
+    final _AppRouteDefinition definition = _routes[fallbackRoute]!;
+
+    return MaterialPageRoute<dynamic>(
+      settings: RouteSettings(name: fallbackRoute),
+      builder: (BuildContext context) => definition.builder(context, null),
+    );
+  }
+
+  static final Map<String, _AppRouteDefinition> _routes =
+      <String, _AppRouteDefinition>{
+        AppRoutePaths.login: _AppRouteDefinition(
+          access: AppRouteAccess.unauthenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return const LoginPage();
+          },
+        ),
+        AppRoutePaths.signUp: _AppRouteDefinition(
+          access: AppRouteAccess.unauthenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return const SignUpPage();
+          },
+        ),
+        AppRoutePaths.googleAccountSetup: _AppRouteDefinition(
+          access: AppRouteAccess.unauthenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return switch (arguments) {
+              final ({
+                String challengeToken,
+                String profilePictureUrl,
+                String profileName,
+              })
+              value =>
+                GoogleAccountSetupPage(
+                  challengeToken: value.challengeToken,
+                  profilePictureUrl: value.profilePictureUrl,
+                  profileName: value.profileName,
+                ),
+              _ => const GoogleAccountSetupPage(
+                challengeToken: '',
+                profilePictureUrl: '',
+                profileName: '',
+              ),
+            };
+          },
+        ),
+        AppRoutePaths.passwordRecovery: _AppRouteDefinition(
+          access: AppRouteAccess.unauthenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return const PasswordRecoveryPage();
+          },
+        ),
+        AppRoutePaths.passwordRecoverySuccess: _AppRouteDefinition(
+          access: AppRouteAccess.unauthenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            final String email = arguments is String ? arguments : '';
+            if (email.trim().isEmpty) {
+              return const PasswordRecoveryPage();
+            }
+
+            return PasswordRecoverySuccessPage(email: email);
+          },
+        ),
+        AppRoutePaths.home: _AppRouteDefinition(
+          access: AppRouteAccess.authenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return const HomePage();
+          },
+        ),
+        AppRoutePaths.userMenu: _AppRouteDefinition(
+          access: AppRouteAccess.authenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return const UserMenuPage();
+          },
+        ),
+        AppRoutePaths.userMenuProfileEdit: _AppRouteDefinition(
+          access: AppRouteAccess.authenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return const UserProfileEditPage();
+          },
+        ),
+        AppRoutePaths.userMenuPrivacy: _AppRouteDefinition(
+          access: AppRouteAccess.authenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return const UserProfilePrivacyPage();
+          },
+        ),
+        AppRoutePaths.userMenuAccountAccess: _AppRouteDefinition(
+          access: AppRouteAccess.authenticatedOnly,
+          builder: (BuildContext context, Object? arguments) {
+            return const UserAccountAccessPage();
+          },
+        ),
+      };
+}
+
+final class _AppRouteDefinition {
+  const _AppRouteDefinition({required this.access, required this.builder});
+
+  final AppRouteAccess access;
+  final AppRoutePageBuilder builder;
+}

@@ -1,0 +1,49 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:global_airsoft_app/src/app/global_airsoft_app.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
+import 'package:global_airsoft_app/src/core/storage/key_value_store.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+
+final class _InMemoryStore implements KeyValueStore {
+  final Map<String, String> _data = <String, String>{};
+
+  @override
+  String? getString(String key) {
+    return _data[key];
+  }
+
+  @override
+  Future<void> setString(String key, String value) async {
+    _data[key] = value;
+  }
+
+  @override
+  Future<void> remove(String key) async {
+    _data.remove(key);
+  }
+}
+
+void main() {
+  testWidgets('renders login page when not authenticated', (
+    WidgetTester tester,
+  ) async {
+    final _InMemoryStore store = _InMemoryStore();
+    final AppLocaleService localeService = AppLocaleService(store: store);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appLocaleServiceProvider.overrideWithValue(localeService),
+          initialIsAuthenticatedProvider.overrideWithValue(false),
+        ],
+        child: const GlobalAirsoftApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Login'), findsOneWidget);
+    expect(find.text('Sign In'), findsWidgets);
+  });
+}

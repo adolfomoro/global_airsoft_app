@@ -1,0 +1,348 @@
+abstract final class AppLocaleKeys {
+  static String withPluralSuffix({
+    required String baseKey,
+    required bool isSingular,
+  }) {
+    final String suffix = isSingular ? 'one' : 'other';
+    return '$baseKey.$suffix';
+  }
+
+  static const String appTitle = 'app.title';
+  static const String appStartupFailedTitle = 'app.startupFailedTitle';
+  static const String appStartupFailedMessage = 'app.startupFailedMessage';
+  static const String homeTitle = 'home.title';
+  static const String homeMainLabel = 'home.mainLabel';
+  static const String homeDiscoveryTabLabel = 'home.discoveryTabLabel';
+  static const String homeTimelineTabLabel = 'home.timelineTabLabel';
+  static const String homeProfileTabLabel = 'home.profileTabLabel';
+  static const String homeDiscoveryPlaceholderMessage =
+      'home.discoveryPlaceholderMessage';
+  static const String homeTimelinePlaceholderMessage =
+      'home.timelinePlaceholderMessage';
+  static const String homeProfilePreviewBadge = 'home.profilePreviewBadge';
+  static const String homeProfilePreviewDescription =
+      'home.profilePreviewDescription';
+  static const String homeProfileFullNameLabel = 'home.profileFullNameLabel';
+  static const String homeProfileNameLabel = 'home.profileNameLabel';
+  static const String homeProfileUsernameLabel = 'home.profileUsernameLabel';
+  static const String homeProfileBioLabel = 'home.profileBioLabel';
+  static const String homeProfileEmptyBioLabel = 'home.profileEmptyBioLabel';
+  static const String homeProfileLoadFailedMessage =
+      'home.profileLoadFailedMessage';
+  static const String homeProfilePhotoUpdateSuccessMessage =
+      'home.profilePhotoUpdateSuccessMessage';
+  static const String homeProfilePhotoUpdateFailedMessage =
+      'home.profilePhotoUpdateFailedMessage';
+  static const String homeProfileRefreshHint = 'home.profileRefreshHint';
+  static const String homeUserMenuAction = 'home.userMenuAction';
+  static const String homeUserMenuTitle = 'home.userMenuTitle';
+  static const String homeUserMenuDescription = 'home.userMenuDescription';
+  static const String homeUserMenuSettingsSectionTitle =
+      'home.userMenuSettingsSectionTitle';
+  static const String homeUserMenuAccountAccessSectionTitle =
+      'home.userMenuAccountAccessSectionTitle';
+  static const String homeEditProfileAction = 'home.editProfileAction';
+  static const String homeProfileEditTitle = 'home.profileEditTitle';
+  static const String homeProfileEditDescription =
+      'home.profileEditDescription';
+  static const String homeProfileEditSaveAction = 'home.profileEditSaveAction';
+  static const String homeProfileEditCancelAction =
+      'home.profileEditCancelAction';
+  static const String homeProfileEditRetryAction =
+      'home.profileEditRetryAction';
+  static const String homeProfileEditLoadFailedMessage =
+      'home.profileEditLoadFailedMessage';
+  static const String homeProfileEditUpdateSuccessMessage =
+      'home.profileEditUpdateSuccessMessage';
+  static const String homeProfileEditUpdateFailedMessage =
+      'home.profileEditUpdateFailedMessage';
+  static const String homePrivacyAction = 'home.privacyAction';
+  static const String homePrivacyTitle = 'home.privacyTitle';
+  static const String homePrivacyDescription = 'home.privacyDescription';
+  static const String homePrivacyFullNameVisibleTitle =
+      'home.privacyFullNameVisibleTitle';
+  static const String homePrivacyFullNameVisibleDescription =
+      'home.privacyFullNameVisibleDescription';
+  static const String homePrivacyFullNamePrivateTitle =
+      'home.privacyFullNamePrivateTitle';
+  static const String homePrivacyFullNamePrivateDescription =
+      'home.privacyFullNamePrivateDescription';
+  static const String homePrivacySaveAction = 'home.privacySaveAction';
+  static const String homePrivacyRetryAction = 'home.privacyRetryAction';
+  static const String homePrivacyLoadFailedMessage =
+      'home.privacyLoadFailedMessage';
+  static const String homePrivacyUpdateSuccessMessage =
+      'home.privacyUpdateSuccessMessage';
+  static const String homePrivacyUpdateFailedMessage =
+      'home.privacyUpdateFailedMessage';
+  static const String homeAccountAccessAction = 'home.accountAccessAction';
+  static const String homeAccountAccessTitle = 'home.accountAccessTitle';
+  static const String homeAccountAccessHeroTitle =
+      'home.accountAccessHeroTitle';
+  static const String homeAccountAccessDescription =
+      'home.accountAccessDescription';
+  static const String homeAccountAccessIdentitySection =
+      'home.accountAccessIdentitySection';
+  static const String homeAccountAccessMethodsSection =
+      'home.accountAccessMethodsSection';
+  static const String homeAccountAccessPhoneLabel =
+      'home.accountAccessPhoneLabel';
+  static const String homeAccountAccessVerifiedLabel =
+      'home.accountAccessVerifiedLabel';
+  static const String homeAccountAccessUnverifiedLabel =
+      'home.accountAccessUnverifiedLabel';
+  static const String homeAccountAccessNotConfiguredLabel =
+      'home.accountAccessNotConfiguredLabel';
+  static const String homeAccountAccessUnknownStatusLabel =
+      'home.accountAccessUnknownStatusLabel';
+  static const String homeAccountAccessActiveLabel =
+      'home.accountAccessActiveLabel';
+  static const String homeAccountAccessConnectedLabel =
+      'home.accountAccessConnectedLabel';
+  static const String homeAccountAccessNotConnectedLabel =
+      'home.accountAccessNotConnectedLabel';
+  static const String homeAccountAccessSetPasswordActionLabel =
+      'home.accountAccessSetPasswordActionLabel';
+  static const String homeAccountAccessConnectActionLabel =
+      'home.accountAccessConnectActionLabel';
+  static const String homeAccountAccessAddEmailAction =
+      'home.accountAccessAddEmailAction';
+  static const String homeAccountAccessVerifyEmailAction =
+      'home.accountAccessVerifyEmailAction';
+  static const String homeAccountAccessAddPhoneAction =
+      'home.accountAccessAddPhoneAction';
+  static const String homeAccountAccessVerifyPhoneAction =
+      'home.accountAccessVerifyPhoneAction';
+  static const String homeAccountAccessConnectGoogleAction =
+      'home.accountAccessConnectGoogleAction';
+  static const String homeAccountAccessConnectAppleAction =
+      'home.accountAccessConnectAppleAction';
+  static const String homeAccountAccessPasswordMethodLabel =
+      'home.accountAccessPasswordMethodLabel';
+  static const String homeAccountAccessExternalMethodLabel =
+      'home.accountAccessExternalMethodLabel';
+  static const String homeAccountAccessGoogleMethodLabel =
+      'home.accountAccessGoogleMethodLabel';
+  static const String homeAccountAccessAppleMethodLabel =
+      'home.accountAccessAppleMethodLabel';
+  static const String homeAccountAccessEmptyValueLabel =
+      'home.accountAccessEmptyValueLabel';
+  static const String homeAccountAccessEmptySectionMessage =
+      'home.accountAccessEmptySectionMessage';
+  static const String homeAccountAccessEmailVerifiedDescription =
+      'home.accountAccessEmailVerifiedDescription';
+  static const String homeAccountAccessEmailUnverifiedDescription =
+      'home.accountAccessEmailUnverifiedDescription';
+  static const String homeAccountAccessEmailNotConfiguredDescription =
+      'home.accountAccessEmailNotConfiguredDescription';
+  static const String homeAccountAccessPhoneVerifiedDescription =
+      'home.accountAccessPhoneVerifiedDescription';
+  static const String homeAccountAccessPhoneUnverifiedDescription =
+      'home.accountAccessPhoneUnverifiedDescription';
+  static const String homeAccountAccessPhoneNotConfiguredDescription =
+      'home.accountAccessPhoneNotConfiguredDescription';
+  static const String homeAccountAccessPasswordActiveDescription =
+      'home.accountAccessPasswordActiveDescription';
+  static const String homeAccountAccessPasswordNotConfiguredDescription =
+      'home.accountAccessPasswordNotConfiguredDescription';
+  static const String homeAccountAccessGoogleConnectedDescription =
+      'home.accountAccessGoogleConnectedDescription';
+  static const String homeAccountAccessGoogleNotConnectedDescription =
+      'home.accountAccessGoogleNotConnectedDescription';
+  static const String homeAccountAccessAppleConnectedDescription =
+      'home.accountAccessAppleConnectedDescription';
+  static const String homeAccountAccessAppleNotConnectedDescription =
+      'home.accountAccessAppleNotConnectedDescription';
+  static const String homeAccountAccessExternalConnectedDescription =
+      'home.accountAccessExternalConnectedDescription';
+  static const String homeAccountAccessExternalNotConnectedDescription =
+      'home.accountAccessExternalNotConnectedDescription';
+  static const String homeAccountAccessUnknownDescription =
+      'home.accountAccessUnknownDescription';
+  static const String homeAccountAccessActionUnavailableMessage =
+      'home.accountAccessActionUnavailableMessage';
+  static const String homeAccountAccessLoginEnabledLabel =
+      'home.accountAccessLoginEnabledLabel';
+  static const String homeAccountAccessLoadFailedMessage =
+      'home.accountAccessLoadFailedMessage';
+  static const String homeAccountAccessRetryAction =
+      'home.accountAccessRetryAction';
+  static const String homeLogoutAction = 'home.logoutAction';
+  static const String homeLogoutConfirmTitle = 'home.logoutConfirmTitle';
+  static const String homeLogoutConfirmMessage = 'home.logoutConfirmMessage';
+  static const String homeLogoutConfirmAction = 'home.logoutConfirmAction';
+  static const String homeLogoutErrorMessage = 'home.logoutErrorMessage';
+  static const String deviceRegistrationFailed = 'device.registrationFailed';
+  static const String deviceRegistrationEmptyResponse =
+      'device.registrationEmptyResponse';
+  static const String deviceRegistrationInvalidPayloadFormat =
+      'device.registrationInvalidPayloadFormat';
+  static const String authLoginTitle = 'auth.loginTitle';
+  static const String authLoginSubtitle = 'auth.loginSubtitle';
+  static const String authLoginIdentifierLabel = 'auth.loginIdentifierLabel';
+  static const String authLoginNoAccount = 'auth.loginNoAccount';
+  static const String authGoogleContinueAction = 'auth.googleContinueAction';
+  static const String authForgotPasswordAction = 'auth.forgotPasswordAction';
+  static const String authSignInAction = 'auth.signInAction';
+  static const String authGoogleSignInFailed = 'auth.googleSignInFailed';
+  static const String authLogoutFailed = 'auth.logoutFailed';
+  static const String authSessionEndedForSecurityMessage =
+      'auth.sessionEndedForSecurityMessage';
+  static const String authSecurityChangeDetectedMessage =
+      'auth.securityChangeDetectedMessage';
+  static const String authPermissionDeniedMessage =
+      'auth.permissionDeniedMessage';
+  static const String authTooManyAttemptsMessage =
+      'auth.tooManyAttemptsMessage';
+  static const String authServerUnavailableMessage =
+      'auth.serverUnavailableMessage';
+  static const String authPasswordRecoveryTitle = 'auth.passwordRecoveryTitle';
+  static const String authPasswordRecoveryHeading =
+      'auth.passwordRecoveryHeading';
+  static const String authPasswordRecoverySubtitle =
+      'auth.passwordRecoverySubtitle';
+  static const String authPasswordRecoverySendAction =
+      'auth.passwordRecoverySendAction';
+  static const String authPasswordRecoverySuccessTitle =
+      'auth.passwordRecoverySuccessTitle';
+  static const String authPasswordRecoverySuccessMessage =
+      'auth.passwordRecoverySuccessMessage';
+  static const String authSignUpHeading = 'auth.signUpHeading';
+  static const String authSignUpSubtitle = 'auth.signUpSubtitle';
+  static const String authSignUpAction = 'auth.signUpAction';
+  static const String authBackToLoginAction = 'auth.backToLoginAction';
+  static const String authFullNameLabel = 'auth.fullNameLabel';
+  static const String authUsernameLabel = 'auth.usernameLabel';
+  static const String authGoogleAccountSetupTitle =
+      'auth.googleAccountSetupTitle';
+  static const String authGoogleAccountSetupSubtitle =
+      'auth.googleAccountSetupSubtitle';
+  static const String authGoogleAccountSetupGoogleConnected =
+      'auth.googleAccountSetupGoogleConnected';
+  static const String authGoogleAccountSetupPhotoHint =
+      'auth.googleAccountSetupPhotoHint';
+  static const String authPasswordLabel = 'auth.passwordLabel';
+  static const String authEmailLabel = 'auth.emailLabel';
+  static const String authUsernameRestrictionHint =
+      'auth.usernameRestrictionHint';
+  static const String authUsernameReady = 'auth.usernameReady';
+  static const String authUsernameExampleHint = 'auth.usernameExampleHint';
+  static const String authUsernameChecking = 'auth.usernameChecking';
+  static const String authUsernameUnavailable = 'auth.usernameUnavailable';
+  static const String authUsernameSuggestionsLabel =
+      'auth.usernameSuggestionsLabel';
+  static const String authUsernameAvailabilityFailed =
+      'auth.usernameAvailabilityFailed';
+  static const String authConfirmPasswordLabel = 'auth.confirmPasswordLabel';
+  static const String authConfirmPasswordRequired =
+      'auth.confirmPasswordRequired';
+  static const String authConfirmPasswordMismatch =
+      'auth.confirmPasswordMismatch';
+  static const String authPasswordRulesTitle = 'auth.passwordRulesTitle';
+  static const String authPasswordRulesMinimumLength =
+      'auth.passwordRulesMinimumLength';
+  static const String authPasswordRulesLetterAndNumber =
+      'auth.passwordRulesLetterAndNumber';
+  static const String authPasswordRulesSpecialCharacter =
+      'auth.passwordRulesSpecialCharacter';
+  static const String authLoginFailed = 'auth.loginFailed';
+  static const String authSignUpFailed = 'auth.signUpFailed';
+  static const String authPasswordRecoveryFailed =
+      'auth.passwordRecoveryFailed';
+  static const String notificationPermissionPrePromptTitle =
+      'notification.permissionPrePromptTitle';
+  static const String notificationPermissionPrePromptSubtitle =
+      'notification.permissionPrePromptSubtitle';
+  static const String
+  notificationPermissionPrePromptBenefitFriendRequestsTitle =
+      'notification.permissionPrePromptBenefitFriendRequestsTitle';
+  static const String
+  notificationPermissionPrePromptBenefitFriendRequestsDescription =
+      'notification.permissionPrePromptBenefitFriendRequestsDescription';
+  static const String notificationPermissionPrePromptBenefitGamesTitle =
+      'notification.permissionPrePromptBenefitGamesTitle';
+  static const String notificationPermissionPrePromptBenefitGamesDescription =
+      'notification.permissionPrePromptBenefitGamesDescription';
+  static const String notificationPermissionPrePromptBenefitTeamsTitle =
+      'notification.permissionPrePromptBenefitTeamsTitle';
+  static const String notificationPermissionPrePromptBenefitTeamsDescription =
+      'notification.permissionPrePromptBenefitTeamsDescription';
+  static const String notificationPermissionAllow =
+      'notification.permissionAllow';
+  static const String notificationPermissionDismiss =
+      'notification.permissionDismiss';
+  static const String notificationPermissionDeniedTitle =
+      'notification.permissionDeniedTitle';
+  static const String notificationPermissionDeniedBody =
+      'notification.permissionDeniedBody';
+  static const String notificationPermissionOpenSettings =
+      'notification.permissionOpenSettings';
+  static const String notificationPermissionError =
+      'notification.permissionError';
+  static const String notificationChannelMessages =
+      'notification.channel.messages';
+  static const String notificationChannelMessagesDescription =
+      'notification.channel.messagesDescription';
+  static const String notificationChannelSocial = 'notification.channel.social';
+  static const String notificationChannelSocialDescription =
+      'notification.channel.socialDescription';
+  static const String notificationChannelOthers = 'notification.channel.others';
+  static const String notificationChannelOthersDescription =
+      'notification.channel.othersDescription';
+  static const String notificationPermissionStatus =
+      'notification.permissionStatus';
+  static const String validationRequired = 'validation.required';
+  static const String validationMinLength = 'validation.minLength';
+  static const String validationMaxLength = 'validation.maxLength';
+  static const String validationPattern = 'validation.pattern';
+  static const String validationFullNameComplete =
+      'validation.fullNameComplete';
+  static const String validationPasswordLetterAndNumber =
+      'validation.passwordLetterAndNumber';
+  static const String validationPasswordSpecialCharacter =
+      'validation.passwordSpecialCharacter';
+  static const String validationUsernameLowercaseOnly =
+      'validation.usernameLowercaseOnly';
+  static const String commonShowPassword = 'common.showPassword';
+  static const String commonHidePassword = 'common.hidePassword';
+  static const String commonCancel = 'common.cancel';
+  static const String commonKeepEditing = 'common.keepEditing';
+  static const String commonDiscardChangesTitle = 'common.discardChangesTitle';
+  static const String commonDiscardChangesMessage =
+      'common.discardChangesMessage';
+  static const String commonDiscardChangesAction =
+      'common.discardChangesAction';
+  static const String commonGenericApiErrorMessage =
+      'common.genericApiErrorMessage';
+  static const String commonValidationError = 'common.validationError';
+  static const String profilePhotoSelectPhotoTitle =
+      'profilePhoto.selectPhotoTitle';
+  static const String profilePhotoCropTitle = 'profilePhoto.cropTitle';
+  static const String profilePhotoTakePhoto = 'profilePhoto.takePhoto';
+  static const String profilePhotoSelectFromGallery =
+      'profilePhoto.selectFromGallery';
+  static const String profilePhotoDeletePhoto = 'profilePhoto.deletePhoto';
+  static const String profilePhotoCancel = 'profilePhoto.cancel';
+  static const String profilePhotoCameraUnavailable =
+      'profilePhoto.cameraUnavailable';
+  static const String profilePhotoNoCameraAvailable =
+      'profilePhoto.noCameraAvailable';
+  static const String profilePhotoCameraOpenFailed =
+      'profilePhoto.cameraOpenFailed';
+  static const String profilePhotoCameraPreviewFailed =
+      'profilePhoto.cameraPreviewFailed';
+  static const String profilePhotoCameraCaptureFailed =
+      'profilePhoto.cameraCaptureFailed';
+  static const String profilePhotoTryAgain = 'profilePhoto.tryAgain';
+  static const String profilePhotoSwitchCamera = 'profilePhoto.switchCamera';
+  static const String profilePhotoCameraPermissionDeniedTitle =
+      'profilePhoto.cameraPermissionDeniedTitle';
+  static const String profilePhotoCameraPermissionDeniedMessage =
+      'profilePhoto.cameraPermissionDeniedMessage';
+  static const String profilePhotoGalleryPermissionDeniedTitle =
+      'profilePhoto.galleryPermissionDeniedTitle';
+  static const String profilePhotoGalleryPermissionDeniedMessage =
+      'profilePhoto.galleryPermissionDeniedMessage';
+  static const String profilePhotoPermissionOpenSettings =
+      'profilePhoto.permissionOpenSettings';
+}

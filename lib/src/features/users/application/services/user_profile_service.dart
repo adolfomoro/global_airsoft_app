@@ -1,0 +1,75 @@
+import 'dart:io';
+
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_output_dto.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/user_profile_privacy_settings_output_dto.dart';
+import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/user_profile_repository.dart';
+import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
+import 'package:global_airsoft_app/src/features/users/domain/models/user_profile_privacy_settings.dart';
+
+final class UserProfileService {
+  const UserProfileService({required UserProfileRepository repository})
+    : _repository = repository;
+
+  final UserProfileRepository _repository;
+
+  Future<UserProfile> getCurrentUserProfile() async {
+    final UserProfileOutputDto profile = await _repository
+        .getCurrentUserProfile();
+    final List<String> profilePictureUrls = await Future.wait<String>(<Future<String>>[
+      _repository.getCurrentUserProfilePictureUrl(UserProfilePictureSize.medium),
+      _repository.getCurrentUserProfilePictureUrl(UserProfilePictureSize.large),
+    ]);
+    final String mediumPhotoUrl = profilePictureUrls[0];
+    final String largePhotoUrl = profilePictureUrls[1];
+
+    return UserProfile(
+      id: profile.id,
+      username: profile.userName.trim(),
+      fullName: profile.fullName?.trim() ?? '',
+      bio: profile.bio?.trim() ?? '',
+      mediumProfilePictureUrl: mediumPhotoUrl,
+      largeProfilePictureUrl: largePhotoUrl.isNotEmpty
+          ? largePhotoUrl
+          : mediumPhotoUrl,
+    );
+  }
+
+  Future<void> uploadCurrentUserProfilePicture(File file) {
+    return _repository.uploadCurrentUserProfilePicture(file);
+  }
+
+  Future<void> deleteCurrentUserProfilePicture() {
+    return _repository.deleteCurrentUserProfilePicture();
+  }
+
+  Future<void> updateCurrentUserProfile({
+    required String fullName,
+    required String bio,
+  }) async {
+    final String normalizedBio = bio.trim();
+    await _repository.updateCurrentUserProfile(
+      fullName: fullName.trim(),
+      bio: normalizedBio.isEmpty ? null : normalizedBio,
+    );
+  }
+
+  Future<UserProfilePrivacySettings> getCurrentUserPrivacySettings() async {
+    final UserProfilePrivacySettingsOutputDto settings = await _repository
+        .getCurrentUserPrivacySettings();
+    return UserProfilePrivacySettings(
+      fullNameVisible: settings.fullNameVisible,
+    );
+  }
+
+  Future<UserProfilePrivacySettings> updateCurrentUserPrivacySettings(
+    UserProfilePrivacySettings settings,
+  ) async {
+    final UserProfilePrivacySettingsOutputDto updatedSettings =
+        await _repository.updateCurrentUserPrivacySettings(
+          fullNameVisible: settings.fullNameVisible,
+        );
+    return UserProfilePrivacySettings(
+      fullNameVisible: updatedSettings.fullNameVisible,
+    );
+  }
+}
