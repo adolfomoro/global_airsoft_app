@@ -1,11 +1,9 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
-import 'package:global_airsoft_app/src/core/network/constants/app_network_headers.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/current_user_profile_offline_persistence_service.dart';
@@ -66,33 +64,13 @@ final Provider<UserProfileStorageService> userProfileStorageServiceProvider =
       );
     });
 
-final Provider<Dio> userProfileOfflineDownloadClientProvider = Provider<Dio>((
-  Ref ref,
-) {
-  final config = ref.watch(appConfigProvider);
-  return Dio(
-    BaseOptions(
-      connectTimeout: Duration(milliseconds: config.connectTimeoutMs),
-      receiveTimeout: Duration(milliseconds: config.receiveTimeoutMs),
-      sendTimeout: Duration(milliseconds: config.sendTimeoutMs),
-      headers: <String, Object>{
-        Headers.acceptHeader: 'image/*,*/*',
-        AppNetworkHeaders.userAgentHeader: AppNetworkHeaders.userAgentValue,
-      },
-    ),
-  );
-});
-
 final Provider<UserProfileOfflinePhotoStorageService>
 userProfileOfflinePhotoStorageServiceProvider =
     Provider<UserProfileOfflinePhotoStorageService>((Ref ref) {
       final fileStorage = ref.watch(appFileStorageServiceProvider);
-      final downloadClient = ref.watch(
-        userProfileOfflineDownloadClientProvider,
-      );
       return UserProfileOfflinePhotoStorageService(
         fileStorage: fileStorage,
-        downloadClient: downloadClient,
+        downloadClient: ref.watch(externalDioClientProvider),
         logger: AppLogger.instance,
       );
     });

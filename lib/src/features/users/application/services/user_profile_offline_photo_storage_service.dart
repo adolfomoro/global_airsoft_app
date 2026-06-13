@@ -116,6 +116,9 @@ final class UserProfileOfflinePhotoStorageService {
     final Response<List<int>> response = await _downloadClient.getUri<List<int>>(
       uri,
       options: Options(
+        headers: <String, Object>{
+          Headers.acceptHeader: 'image/*,*/*',
+        },
         responseType: ResponseType.bytes,
         receiveDataWhenStatusError: false,
       ),
