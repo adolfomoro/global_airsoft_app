@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
+import 'package:global_airsoft_app/src/core/network/remote_image_access_exception.dart';
 import 'package:global_airsoft_app/src/core/storage/app_file_storage_service.dart';
 import 'package:path/path.dart' as path;
 
@@ -106,32 +108,53 @@ final class UserProfileOfflinePhotoStorageService {
   }
 
   Future<List<int>> _downloadProfilePhotoBytes(String url) async {
-    final Uri uri = Uri.parse(url.trim());
-    if (!uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https')) {
-      throw ArgumentError.value(
-        url,
-        'url',
-        'Profile photo URL must use HTTP or HTTPS.',
+    final Uri? parsedUri = Uri.tryParse(url.trim());
+    if (parsedUri == null) {
+      throw const RemoteImageAccessException(
+        message: 'Profile photo URL is invalid.',
+        messageKey: AppLocaleKeys.profilePhotoRemoteLoadFailed,
       );
     }
 
-    final Response<List<int>> response = await _downloadClient
-        .getUri<List<int>>(
-          uri,
-          options: Options(
-            headers: <String, Object>{Headers.acceptHeader: 'image/*,*/*'},
-            responseType: ResponseType.bytes,
-            receiveDataWhenStatusError: false,
-          ),
-        );
-    final List<int>? bytes = response.data;
-    if (response.statusCode != HttpStatus.ok ||
-        bytes == null ||
-        bytes.isEmpty) {
-      throw StateError('Profile photo download returned no usable bytes.');
+    final Uri uri = parsedUri;
+    if (!uri.hasScheme || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      throw const RemoteImageAccessException(
+        message: 'Profile photo URL must use HTTP or HTTPS.',
+        messageKey: AppLocaleKeys.profilePhotoRemoteLoadFailed,
+      );
     }
 
-    return bytes;
+    try {
+      final Response<List<int>> response = await _downloadClient
+          .getUri<List<int>>(
+            uri,
+            options: Options(
+              headers: <String, Object>{Headers.acceptHeader: 'image/*,*/*'},
+              responseType: ResponseType.bytes,
+              receiveDataWhenStatusError: false,
+            ),
+          );
+      final int? statusCode = response.statusCode;
+      final List<int>? bytes = response.data;
+      if (statusCode != HttpStatus.ok || bytes == null || bytes.isEmpty) {
+        throw RemoteImageAccessException(
+          message: 'Profile photo download returned no usable bytes.',
+          messageKey: AppLocaleKeys.profilePhotoRemoteLoadFailed,
+          statusCode: statusCode,
+        );
+      }
+
+      return bytes;
+    } on RemoteImageAccessException {
+      rethrow;
+    } on DioException catch (error) {
+      throw RemoteImageAccessException(
+        message: 'Profile photo download request failed.',
+        messageKey: AppLocaleKeys.profilePhotoRemoteLoadFailed,
+        statusCode: error.response?.statusCode,
+        cause: error,
+      );
+    }
   }
 
   List<String> _profileDirectoryPathSegments(String userId) {

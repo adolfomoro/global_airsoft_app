@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
+import 'package:global_airsoft_app/src/core/network/remote_image_access_exception.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture.dart';
 
 class AppProfilePictureEditor extends StatelessWidget {
@@ -7,6 +9,8 @@ class AppProfilePictureEditor extends StatelessWidget {
     required String imageUrl,
     required this.onEditTap,
     this.onPhotoTap,
+    this.onImageLoadFailed,
+    this.imageLoadFailureMessageKey = AppLocaleKeys.commonRemoteImageLoadFailed,
     this.size = 126,
     this.badgeSize = 38,
     this.isLoading = false,
@@ -21,6 +25,8 @@ class AppProfilePictureEditor extends StatelessWidget {
     required ImageProvider imageProvider,
     required this.onEditTap,
     this.onPhotoTap,
+    this.onImageLoadFailed,
+    this.imageLoadFailureMessageKey = AppLocaleKeys.commonRemoteImageLoadFailed,
     this.size = 126,
     this.badgeSize = 38,
     this.isLoading = false,
@@ -35,6 +41,8 @@ class AppProfilePictureEditor extends StatelessWidget {
     required ProfilePhoto profilePhoto,
     required this.onEditTap,
     this.onPhotoTap,
+    this.onImageLoadFailed,
+    this.imageLoadFailureMessageKey = AppLocaleKeys.commonRemoteImageLoadFailed,
     this.size = 126,
     this.badgeSize = 38,
     this.isLoading = false,
@@ -49,6 +57,8 @@ class AppProfilePictureEditor extends StatelessWidget {
   final ImageProvider? _imageProvider;
   final ProfilePhoto? _profilePhoto;
   final VoidCallback? onPhotoTap;
+  final ValueChanged<RemoteImageAccessException>? onImageLoadFailed;
+  final String imageLoadFailureMessageKey;
   final VoidCallback onEditTap;
   final double size;
   final double badgeSize;
@@ -60,6 +70,8 @@ class AppProfilePictureEditor extends StatelessWidget {
       return AppProfilePicture.profilePhoto(
         profilePhoto: profilePhoto,
         onTap: onPhotoTap,
+        onImageLoadFailed: onImageLoadFailed,
+        imageLoadFailureMessageKey: imageLoadFailureMessageKey,
         size: size,
       );
     }
@@ -69,6 +81,8 @@ class AppProfilePictureEditor extends StatelessWidget {
       return AppProfilePicture.imageProvider(
         imageProvider: imageProvider,
         onTap: onPhotoTap,
+        onImageLoadFailed: onImageLoadFailed,
+        imageLoadFailureMessageKey: imageLoadFailureMessageKey,
         size: size,
       );
     }
@@ -76,6 +90,8 @@ class AppProfilePictureEditor extends StatelessWidget {
     return AppProfilePicture.network(
       imageUrl: _imageUrl!,
       onTap: onPhotoTap,
+      onImageLoadFailed: onImageLoadFailed,
+      imageLoadFailureMessageKey: imageLoadFailureMessageKey,
       size: size,
     );
   }

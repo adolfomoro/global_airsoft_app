@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -11,14 +12,13 @@ void main() {
   testWidgets('shows a skeleton until the first image frame is rendered', (
     WidgetTester tester,
   ) async {
+    final Completer<ImageInfo> imageCompleter = Completer<ImageInfo>();
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: AppProfilePicture.imageProvider(
-            imageProvider: _DelayedMemoryImage(
-              _transparentImageBytes,
-              const Duration(milliseconds: 50),
-            ),
+            imageProvider: _CompleterImageProvider(imageCompleter.future),
             onTap: () {},
           ),
         ),
@@ -27,7 +27,8 @@ void main() {
 
     expect(find.byType(AppSkeleton), findsOneWidget);
 
-    await tester.pump(const Duration(milliseconds: 60));
+    final ui.Image? image = await tester.runAsync<ui.Image>(createTestImage);
+    imageCompleter.complete(ImageInfo(image: image!));
     await tester.pump();
 
     expect(find.byType(AppSkeleton), findsNothing);
@@ -54,38 +55,22 @@ void main() {
   });
 }
 
-class _DelayedMemoryImage extends ImageProvider<_DelayedMemoryImage> {
-  const _DelayedMemoryImage(this.bytes, this.delay);
+class _CompleterImageProvider extends ImageProvider<_CompleterImageProvider> {
+  const _CompleterImageProvider(this.imageInfo);
 
-  final Uint8List bytes;
-  final Duration delay;
+  final Future<ImageInfo> imageInfo;
 
   @override
-  Future<_DelayedMemoryImage> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<_DelayedMemoryImage>(this);
+  Future<_CompleterImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<_CompleterImageProvider>(this);
   }
 
   @override
   ImageStreamCompleter loadImage(
-    _DelayedMemoryImage key,
+    _CompleterImageProvider key,
     ImageDecoderCallback decode,
   ) {
-    return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode),
-      scale: 1,
-      debugLabel: 'delayed-test-image',
-    );
-  }
-
-  Future<ui.Codec> _loadAsync(
-    _DelayedMemoryImage key,
-    ImageDecoderCallback decode,
-  ) async {
-    await Future<void>.delayed(delay);
-    final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(
-      key.bytes,
-    );
-    return decode(buffer);
+    return OneFrameImageStreamCompleter(key.imageInfo);
   }
 }
 

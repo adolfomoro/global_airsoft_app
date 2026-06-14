@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
+import 'package:global_airsoft_app/src/core/network/remote_image_access_exception.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_circular_profile_image.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_placeholder.dart';
@@ -8,6 +10,8 @@ class AppProfilePicture extends StatelessWidget {
   const AppProfilePicture.network({
     required String imageUrl,
     this.onTap,
+    this.onImageLoadFailed,
+    this.imageLoadFailureMessageKey = AppLocaleKeys.commonRemoteImageLoadFailed,
     this.size = 126,
     super.key,
   }) : assert(size > 0, 'size must be greater than zero.'),
@@ -18,6 +22,8 @@ class AppProfilePicture extends StatelessWidget {
   const AppProfilePicture.imageProvider({
     required ImageProvider imageProvider,
     this.onTap,
+    this.onImageLoadFailed,
+    this.imageLoadFailureMessageKey = AppLocaleKeys.commonRemoteImageLoadFailed,
     this.size = 126,
     super.key,
   }) : assert(size > 0, 'size must be greater than zero.'),
@@ -28,6 +34,8 @@ class AppProfilePicture extends StatelessWidget {
   const AppProfilePicture.profilePhoto({
     required ProfilePhoto profilePhoto,
     this.onTap,
+    this.onImageLoadFailed,
+    this.imageLoadFailureMessageKey = AppLocaleKeys.commonRemoteImageLoadFailed,
     this.size = 126,
     super.key,
   }) : assert(size > 0, 'size must be greater than zero.'),
@@ -39,6 +47,8 @@ class AppProfilePicture extends StatelessWidget {
   final ImageProvider? _imageProvider;
   final ProfilePhoto? _profilePhoto;
   final VoidCallback? onTap;
+  final ValueChanged<RemoteImageAccessException>? onImageLoadFailed;
+  final String imageLoadFailureMessageKey;
   final double size;
 
   bool get _hasImage {
@@ -59,7 +69,32 @@ class AppProfilePicture extends StatelessWidget {
     return AppSkeleton.circle(size: size);
   }
 
-  Widget _buildImageFromProvider(ImageProvider imageProvider) {
+  void _notifyRemoteImageLoadFailed({
+    required bool isRemoteImage,
+    required Object error,
+  }) {
+    if (!isRemoteImage || onImageLoadFailed == null) {
+      return;
+    }
+
+    final RemoteImageAccessException exception =
+        error is RemoteImageAccessException
+        ? error
+        : RemoteImageAccessException(
+            message: 'Remote profile image could not be loaded.',
+            messageKey: imageLoadFailureMessageKey,
+            cause: error,
+          );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      onImageLoadFailed?.call(exception);
+    });
+  }
+
+  Widget _buildImageFromProvider(
+    ImageProvider imageProvider, {
+    bool isRemoteImage = false,
+  }) {
     return Image(
       image: imageProvider,
       fit: BoxFit.cover,
@@ -78,6 +113,10 @@ class AppProfilePicture extends StatelessWidget {
           },
       errorBuilder:
           (BuildContext context, Object error, StackTrace? stackTrace) {
+            _notifyRemoteImageLoadFailed(
+              isRemoteImage: isRemoteImage,
+              error: error,
+            );
             return _buildPlaceholder();
           },
     );
@@ -91,7 +130,10 @@ class AppProfilePicture extends StatelessWidget {
       }
 
       if (profilePhoto.isNetwork) {
-        return _buildImageFromProvider(NetworkImage(profilePhoto.networkUrl!));
+        return _buildImageFromProvider(
+          NetworkImage(profilePhoto.networkUrl!),
+          isRemoteImage: true,
+        );
       }
 
       return _buildPlaceholder();
@@ -102,7 +144,10 @@ class AppProfilePicture extends StatelessWidget {
       return _buildImageFromProvider(imageProvider);
     }
 
-    return _buildImageFromProvider(NetworkImage(_imageUrl!));
+    return _buildImageFromProvider(
+      NetworkImage(_imageUrl!),
+      isRemoteImage: true,
+    );
   }
 
   @override

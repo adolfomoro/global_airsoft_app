@@ -5,6 +5,7 @@ import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
+import 'package:global_airsoft_app/src/core/network/remote_image_access_exception.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_section_box.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
@@ -143,7 +144,13 @@ class _EditableProfilePhotoSection extends ConsumerStatefulWidget {
 
 class _EditableProfilePhotoSectionState
     extends ConsumerState<_EditableProfilePhotoSection> {
+  static const Duration _photoLoadFailureNotificationDebounce = Duration(
+    seconds: 5,
+  );
+
   ProfilePhoto? _pendingPhoto;
+  String? _lastRemotePhotoLoadFailureUrl;
+  DateTime? _lastRemotePhotoLoadFailureAt;
   bool _isUploading = false;
 
   ProfilePhoto get _displayedPhoto =>
@@ -165,6 +172,37 @@ class _EditableProfilePhotoSectionState
     }
 
     AppProfileImageZoomViewer.showNetwork(context, imageUrl: zoomImageUrl);
+  }
+
+  void _handleDisplayedPhotoLoadFailed(RemoteImageAccessException error) {
+    if (!mounted) {
+      return;
+    }
+
+    final ProfilePhoto displayedPhoto = _displayedPhoto;
+    if (!displayedPhoto.isNetwork) {
+      return;
+    }
+
+    final String failedUrl = displayedPhoto.networkUrl!.trim();
+    if (failedUrl.isEmpty) {
+      return;
+    }
+
+    final DateTime now = DateTime.now();
+    final DateTime? lastFailureAt = _lastRemotePhotoLoadFailureAt;
+    final bool isDuplicateFailure =
+        _lastRemotePhotoLoadFailureUrl == failedUrl &&
+        lastFailureAt != null &&
+        now.difference(lastFailureAt) < _photoLoadFailureNotificationDebounce;
+    if (isDuplicateFailure) {
+      return;
+    }
+
+    _lastRemotePhotoLoadFailureUrl = failedUrl;
+    _lastRemotePhotoLoadFailureAt = now;
+
+    context.showErrorSnackBar(context.l10n.tr(error.messageKey), source: error);
   }
 
   Future<void> _handlePhotoChanged(ProfilePhoto photo) async {
@@ -251,6 +289,9 @@ class _EditableProfilePhotoSectionState
           enabled: !_isUploading,
           allowDelete: true,
           isLoading: _isUploading,
+          onImageLoadFailed: _handleDisplayedPhotoLoadFailed,
+          imageLoadFailureMessageKey:
+              AppLocaleKeys.profilePhotoRemoteLoadFailed,
         ),
       ],
     );
