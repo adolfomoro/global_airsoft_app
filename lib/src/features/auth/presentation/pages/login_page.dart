@@ -389,7 +389,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
                             ? null
                             : _submitGoogleSignIn,
                         variant: AppButtonVariant.secondary,
-                        icon: FontAwesomeIcons.google,
+                        iconWidget: const FaIcon(FontAwesomeIcons.google),
                         isLoading: _isGoogleLoading,
                       ),
                       const SizedBox(height: 18),

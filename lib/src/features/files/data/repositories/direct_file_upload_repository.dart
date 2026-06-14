@@ -35,10 +35,7 @@ final class DirectFileUploadRepository {
       final Response<dynamic> response = await _storageClient.putUri<dynamic>(
         authorization.uploadUrl,
         data: source.openRead(),
-        options: Options(
-          headers: headers,
-          contentType: source.contentType,
-        ),
+        options: Options(headers: headers, contentType: source.contentType),
         cancelToken: cancelToken,
         onSendProgress: onProgress,
       );
@@ -114,7 +111,8 @@ final class DirectFileUploadRepository {
         requiredContentType.trim().toLowerCase() !=
             source.contentType.trim().toLowerCase()) {
       throw const DirectFileUploadException(
-        message: 'Direct file upload content type does not match authorization.',
+        message:
+            'Direct file upload content type does not match authorization.',
       );
     }
   }

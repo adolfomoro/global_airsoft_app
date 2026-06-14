@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
@@ -7,11 +5,12 @@ import 'package:global_airsoft_app/src/core/network/api_exception.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/network/http_status_code_extensions.dart';
 import 'package:global_airsoft_app/src/core/network/message_resolution_policy.dart';
-import 'package:global_airsoft_app/src/core/network/multipart_upload_util.dart';
 import 'package:global_airsoft_app/src/features/files/data/dto/direct_file_upload_authorization_dto.dart';
+import 'package:global_airsoft_app/src/features/files/data/dto/direct_file_upload_status_dto.dart';
 import 'package:global_airsoft_app/src/features/files/data/dto/initiate_direct_file_upload_input_dto.dart';
 import 'package:global_airsoft_app/src/features/files/domain/models/direct_file_upload_authorization.dart';
 import 'package:global_airsoft_app/src/features/files/domain/models/direct_file_upload_source.dart';
+import 'package:global_airsoft_app/src/features/files/domain/models/direct_file_upload_status.dart';
 import 'package:global_airsoft_app/src/features/users/data/constants/user_profile_api_paths.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/dto/update_my_privacy_settings_input_dto.dart';
@@ -233,42 +232,7 @@ final class UserProfileRepository {
     }
   }
 
-  Future<void> uploadCurrentUserProfilePicture(File file) async {
-    try {
-      final MultipartFile multipartFile =
-          await MultipartUploadUtil.createFromFile(file);
-      final FormData data = MultipartUploadUtil.createFormData(
-        <String, dynamic>{'File': multipartFile},
-      );
-
-      final Response<dynamic> response = await _dioService.post<dynamic>(
-        UserProfileApiPaths.currentUserProfilePicture,
-        data: data,
-        options: Options(contentType: 'multipart/form-data'),
-      );
-
-      if (response.statusCode.isSuccessStatusCode) {
-        return;
-      }
-
-      await _throwLocalizedProfilePhotoUpdateFailure();
-    } on AbpApiException catch (error) {
-      await _throwLocalizedUserProfileException(
-        error: error,
-        failureMessageProvider: _profilePhotoUpdateFailedMessage,
-      );
-    } on ApiException catch (error) {
-      await _throwLocalizedUserProfileException(
-        error: error,
-        failureMessageProvider: _profilePhotoUpdateFailedMessage,
-      );
-    } on DioException {
-      await _throwLocalizedProfilePhotoUpdateFailure();
-    }
-  }
-
-  Future<DirectFileUploadAuthorization>
-  initiateCurrentUserProfilePictureUpload(
+  Future<DirectFileUploadAuthorization> initiateCurrentUserProfilePictureUpload(
     DirectFileUploadSource source, {
     String? expectedChecksum,
     String? checksumAlgorithm,
@@ -288,6 +252,76 @@ final class UserProfileRepository {
       if (response.statusCode.isSuccessStatusCode &&
           response.data is Map<String, dynamic>) {
         return DirectFileUploadAuthorizationDto.fromJson(
+          response.data as Map<String, dynamic>,
+        ).toDomain();
+      }
+
+      await _throwLocalizedProfilePhotoUpdateFailure();
+    } on AbpApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _profilePhotoUpdateFailedMessage,
+      );
+    } on ApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _profilePhotoUpdateFailedMessage,
+      );
+    } on DioException {
+      await _throwLocalizedProfilePhotoUpdateFailure();
+    } on FormatException {
+      await _throwLocalizedProfilePhotoUpdateFailure();
+    }
+  }
+
+  Future<DirectFileUploadStatus> completeCurrentUserProfilePictureUpload(
+    String uploadSessionId,
+  ) async {
+    try {
+      final Response<dynamic> response = await _dioService.post<dynamic>(
+        UserProfileApiPaths.currentUserProfilePictureUploadComplete(
+          uploadSessionId,
+        ),
+      );
+
+      if (response.statusCode.isSuccessStatusCode &&
+          response.data is Map<String, dynamic>) {
+        return DirectFileUploadStatusDto.fromJson(
+          response.data as Map<String, dynamic>,
+        ).toDomain();
+      }
+
+      await _throwLocalizedProfilePhotoUpdateFailure();
+    } on AbpApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _profilePhotoUpdateFailedMessage,
+      );
+    } on ApiException catch (error) {
+      await _throwLocalizedUserProfileException(
+        error: error,
+        failureMessageProvider: _profilePhotoUpdateFailedMessage,
+      );
+    } on DioException {
+      await _throwLocalizedProfilePhotoUpdateFailure();
+    } on FormatException {
+      await _throwLocalizedProfilePhotoUpdateFailure();
+    }
+  }
+
+  Future<DirectFileUploadStatus> getCurrentUserProfilePictureUploadStatus(
+    String uploadSessionId,
+  ) async {
+    try {
+      final Response<dynamic> response = await _dioService.get<dynamic>(
+        UserProfileApiPaths.currentUserProfilePictureUploadStatus(
+          uploadSessionId,
+        ),
+      );
+
+      if (response.statusCode.isSuccessStatusCode &&
+          response.data is Map<String, dynamic>) {
+        return DirectFileUploadStatusDto.fromJson(
           response.data as Map<String, dynamic>,
         ).toDomain();
       }

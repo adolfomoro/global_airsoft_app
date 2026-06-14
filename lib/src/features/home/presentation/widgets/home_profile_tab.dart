@@ -183,13 +183,13 @@ class _EditableProfilePhotoSectionState
         await userProfileService.uploadCurrentUserProfilePicture(
           photo.localFile!,
         );
+        await ref.read(currentUserProfileProvider.notifier).reload();
       } else if (photo.isEmpty) {
         await userProfileService.deleteCurrentUserProfilePicture();
+        await ref.read(currentUserProfileProvider.notifier).reload();
       } else {
         return;
       }
-
-      await ref.read(currentUserProfileProvider.notifier).reload();
 
       if (!mounted) {
         return;

@@ -13,10 +13,7 @@ import 'package:global_airsoft_app/src/features/files/domain/models/direct_file_
 final class _RecordingHttpClientAdapter implements HttpClientAdapter {
   _RecordingHttpClientAdapter({required this.respond});
 
-  final Future<ResponseBody> Function(
-    RequestOptions options,
-    List<int> body,
-  )
+  final Future<ResponseBody> Function(RequestOptions options, List<int> body)
   respond;
   RequestOptions? lastRequestOptions;
   List<int> lastBody = const <int>[];
@@ -79,36 +76,39 @@ DirectFileUploadSource _source({
 }
 
 void main() {
-  test('upload sends PUT to absolute storage URL with required headers', () async {
-    final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
-      respond: (RequestOptions options, List<int> body) async {
-        expect(options.method, 'PUT');
-        expect(body, <int>[1, 2, 3, 4]);
-        return ResponseBody.fromString('', HttpStatus.ok);
-      },
-    );
-    final Dio dio = Dio();
-    dio.httpClientAdapter = adapter;
-    final DirectFileUploadRepository repository = DirectFileUploadRepository(
-      storageClient: dio,
-    );
+  test(
+    'upload sends PUT to absolute storage URL with required headers',
+    () async {
+      final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
+        respond: (RequestOptions options, List<int> body) async {
+          expect(options.method, 'PUT');
+          expect(body, <int>[1, 2, 3, 4]);
+          return ResponseBody.fromString('', HttpStatus.ok);
+        },
+      );
+      final Dio dio = Dio();
+      dio.httpClientAdapter = adapter;
+      final DirectFileUploadRepository repository = DirectFileUploadRepository(
+        storageClient: dio,
+      );
 
-    await repository.upload(
-      authorization: _authorization(),
-      source: _source(),
-    );
+      await repository.upload(
+        authorization: _authorization(),
+        source: _source(),
+      );
 
-    final RequestOptions requestOptions = adapter.lastRequestOptions!;
-    expect(requestOptions.method, 'PUT');
-    expect(
-      requestOptions.uri.toString(),
-      'https://storage.example.com/files/photo.jpg?token=1',
-    );
-    expect(requestOptions.headers[Headers.contentTypeHeader], 'image/jpeg');
-    expect(requestOptions.headers[Headers.contentLengthHeader], 4);
-    expect(requestOptions.headers['x-amz-meta-checksum'], 'abc');
-    expect(adapter.lastBody, <int>[1, 2, 3, 4]);
-  });
+      final RequestOptions requestOptions = adapter.lastRequestOptions!;
+      expect(requestOptions.method, 'PUT');
+      expect(
+        requestOptions.uri.toString(),
+        'https://storage.example.com/files/photo.jpg?token=1',
+      );
+      expect(requestOptions.headers[Headers.contentTypeHeader], 'image/jpeg');
+      expect(requestOptions.headers[Headers.contentLengthHeader], 4);
+      expect(requestOptions.headers['x-amz-meta-checksum'], 'abc');
+      expect(adapter.lastBody, <int>[1, 2, 3, 4]);
+    },
+  );
 
   test('upload rejects unsupported authorization method', () async {
     final DirectFileUploadRepository repository = DirectFileUploadRepository(
@@ -167,10 +167,7 @@ void main() {
     );
 
     await expectLater(
-      repository.upload(
-        authorization: _authorization(),
-        source: _source(),
-      ),
+      repository.upload(authorization: _authorization(), source: _source()),
       throwsA(
         isA<DirectFileUploadException>().having(
           (DirectFileUploadException error) => error.statusCode,
@@ -191,7 +188,7 @@ void main() {
           'requiredHeaders': <String, dynamic>{
             Headers.contentTypeHeader: 'image/jpeg',
           },
-          'expiresAtUtc': '2026-06-13T12:00:00Z',
+          'expiresAtUtc': '2099-01-01T00:00:00Z',
           'maxFileSizeBytes': 1024,
         }).toDomain();
 
@@ -212,7 +209,7 @@ void main() {
           'uploadUrl': 'ftp://storage.example.com/file.jpg',
           'method': 'PUT',
           'requiredHeaders': <String, dynamic>{},
-          'expiresAtUtc': '2026-06-13T12:00:00Z',
+          'expiresAtUtc': '2099-01-01T00:00:00Z',
           'maxFileSizeBytes': 1024,
         });
 

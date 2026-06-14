@@ -61,7 +61,9 @@ final class UserProfileOfflinePhotoStorageService {
       return null;
     }
 
-    final String? existingPath = await getStoredProfilePhotoPath(userId: userId);
+    final String? existingPath = await getStoredProfilePhotoPath(
+      userId: userId,
+    );
     for (final String candidateUrl in candidateUrls) {
       try {
         final List<int> bytes = await _downloadProfilePhotoBytes(candidateUrl);
@@ -113,16 +115,15 @@ final class UserProfileOfflinePhotoStorageService {
       );
     }
 
-    final Response<List<int>> response = await _downloadClient.getUri<List<int>>(
-      uri,
-      options: Options(
-        headers: <String, Object>{
-          Headers.acceptHeader: 'image/*,*/*',
-        },
-        responseType: ResponseType.bytes,
-        receiveDataWhenStatusError: false,
-      ),
-    );
+    final Response<List<int>> response = await _downloadClient
+        .getUri<List<int>>(
+          uri,
+          options: Options(
+            headers: <String, Object>{Headers.acceptHeader: 'image/*,*/*'},
+            responseType: ResponseType.bytes,
+            receiveDataWhenStatusError: false,
+          ),
+        );
     final List<int>? bytes = response.data;
     if (response.statusCode != HttpStatus.ok ||
         bytes == null ||
@@ -148,7 +149,9 @@ final class UserProfileOfflinePhotoStorageService {
     ];
   }
 
-  Future<File?> _resolveLatestStoredProfilePhoto({required String userId}) async {
+  Future<File?> _resolveLatestStoredProfilePhoto({
+    required String userId,
+  }) async {
     final List<File> files = await _fileStorage.listFiles(
       pathSegments: _photoDirectoryPathSegments(userId),
     );

@@ -19,9 +19,7 @@ final class DirectFileUploadAuthorizationDto {
   final DateTime expiresAtUtc;
   final int maxFileSizeBytes;
 
-  factory DirectFileUploadAuthorizationDto.fromJson(
-    Map<String, dynamic> json,
-  ) {
+  factory DirectFileUploadAuthorizationDto.fromJson(Map<String, dynamic> json) {
     final Object? uploadSessionId = json['uploadSessionId'];
     final Object? fileId = json['fileId'];
     final Object? uploadUrl = json['uploadUrl'];
@@ -36,7 +34,9 @@ final class DirectFileUploadAuthorizationDto {
         method is! String ||
         expiresAtUtc is! String ||
         maxFileSizeBytes is! num) {
-      throw const FormatException('Invalid direct upload authorization payload.');
+      throw const FormatException(
+        'Invalid direct upload authorization payload.',
+      );
     }
 
     final DateTime? parsedExpiration = DateTime.tryParse(expiresAtUtc);

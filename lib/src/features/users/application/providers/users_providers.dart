@@ -6,6 +6,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_providers.da
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/files/application/providers/file_upload_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/current_user_profile_offline_persistence_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_account_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_offline_photo_storage_service.dart';
@@ -30,7 +31,11 @@ final Provider<UserProfileRepository> userProfileRepositoryProvider =
 final Provider<UserProfileService> userProfileServiceProvider =
     Provider<UserProfileService>((Ref ref) {
       final repository = ref.watch(userProfileRepositoryProvider);
-      return UserProfileService(repository: repository);
+      return UserProfileService(
+        repository: repository,
+        directFileUploadService: ref.watch(directFileUploadServiceProvider),
+        fileContentTypeResolver: ref.watch(fileContentTypeResolverProvider),
+      );
     });
 
 final Provider<UserAccountRepository> userAccountRepositoryProvider =

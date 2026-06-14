@@ -77,9 +77,6 @@ class _AccountAccessContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: AppFormPadding.standardScrollablePagePadding,
@@ -112,7 +109,7 @@ class _IdentitySection extends StatelessWidget {
       child: _SectionCardList(
         children: <Widget>[
           _AccountActionCard(
-            icon: Icons.email_outlined,
+            icon: const Icon(Icons.email_outlined),
             title: context.l10n.tr(AppLocaleKeys.authEmailLabel),
             value: identity.email,
             description: _emailDescription(context, identity.emailStatus),
@@ -123,7 +120,7 @@ class _IdentitySection extends StatelessWidget {
             action: _emailAction(context, identity.emailStatus),
           ),
           _AccountActionCard(
-            icon: Icons.phone_outlined,
+            icon: const Icon(Icons.phone_outlined),
             title: context.l10n.tr(AppLocaleKeys.homeAccountAccessPhoneLabel),
             value: identity.phoneNumber,
             description: _phoneDescription(context, identity.phoneStatus),
@@ -201,7 +198,7 @@ class _AccountAccessHeroCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppDimensions.spacingLg),
         child: Row(
           children: <Widget>[
-            _RowIcon(icon: Icons.admin_panel_settings_outlined),
+            const _RowIcon(child: Icon(Icons.admin_panel_settings_outlined)),
             const SizedBox(width: AppDimensions.spacingMd),
             Expanded(
               child: Column(
@@ -269,7 +266,7 @@ class _AccountActionCard extends StatelessWidget {
     this.value,
   });
 
-  final IconData icon;
+  final Widget icon;
   final String title;
   final String description;
   final String? value;
@@ -300,7 +297,7 @@ class _AccountActionCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _RowIcon(icon: icon),
+                _RowIcon(child: icon),
                 const SizedBox(width: AppDimensions.spacingMd),
                 Expanded(
                   child: Column(
@@ -414,9 +411,9 @@ class _AccountCardAction {
 }
 
 class _RowIcon extends StatelessWidget {
-  const _RowIcon({required this.icon});
+  const _RowIcon({required this.child});
 
-  final IconData icon;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -433,7 +430,10 @@ class _RowIcon extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
       ),
-      child: Icon(icon, color: colorScheme.primary, size: 19),
+      child: IconTheme(
+        data: IconThemeData(color: colorScheme.primary, size: 19),
+        child: child,
+      ),
     );
   }
 }
@@ -780,16 +780,16 @@ void _showUnavailableActionMessage(BuildContext context) {
   );
 }
 
-IconData _loginMethodIcon(UserAccountLoginMethod method) {
+Widget _loginMethodIcon(UserAccountLoginMethod method) {
   if (method.type == UserAccountLoginMethodType.password) {
-    return Icons.password_rounded;
+    return const Icon(Icons.password_rounded);
   }
 
   return switch (method.type) {
-    UserAccountLoginMethodType.google => FontAwesomeIcons.google,
-    UserAccountLoginMethodType.apple => FontAwesomeIcons.apple,
-    UserAccountLoginMethodType.unknown => Icons.link_rounded,
-    UserAccountLoginMethodType.password => Icons.password_rounded,
+    UserAccountLoginMethodType.google => const FaIcon(FontAwesomeIcons.google),
+    UserAccountLoginMethodType.apple => const FaIcon(FontAwesomeIcons.apple),
+    UserAccountLoginMethodType.unknown => const Icon(Icons.link_rounded),
+    UserAccountLoginMethodType.password => const Icon(Icons.password_rounded),
   };
 }
 

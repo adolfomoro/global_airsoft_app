@@ -8,7 +8,7 @@
             "flutterMode": "debug",
             "toolArgs": [
                 "--dart-define=APP_ENV=dev",
-                "--dart-define=API_BASE_URL=https://192.168.15.9:7137/api",
+                "--dart-define=API_BASE_URL=https://10.10.30.100:7137/api",
                 "--dart-define=GOOGLE_SIGN_IN_SERVER_CLIENT_ID=716569230649-75cfdr8e7ctqf4c6qjdipice7hqnkcop.apps.googleusercontent.com"
             ]
         }

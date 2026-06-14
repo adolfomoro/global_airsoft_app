@@ -11,6 +11,7 @@ import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/features/files/domain/models/direct_file_upload_authorization.dart';
 import 'package:global_airsoft_app/src/features/files/domain/models/direct_file_upload_source.dart';
+import 'package:global_airsoft_app/src/features/files/domain/models/direct_file_upload_status.dart';
 import 'package:global_airsoft_app/src/features/users/data/constants/user_profile_api_paths.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/data/repositories/user_profile_repository/user_profile_repository.dart';
@@ -91,7 +92,17 @@ DirectFileUploadSource _source() {
 
 ResponseBody _authorizationBody() {
   return ResponseBody.fromString(
-    '{"uploadSessionId":"session-1","fileId":"file-1","uploadUrl":"https://storage.example.com/profile.jpg","method":"PUT","requiredHeaders":{"Content-Type":"image/jpeg","x-amz-meta-checksum":"abc"},"expiresAtUtc":"2026-06-13T12:00:00Z","maxFileSizeBytes":1048576}',
+    '{"uploadSessionId":"session-1","fileId":"file-1","uploadUrl":"https://storage.example.com/profile.jpg","method":"PUT","requiredHeaders":{"Content-Type":"image/jpeg","x-amz-meta-checksum":"abc"},"expiresAtUtc":"2099-01-01T00:00:00Z","maxFileSizeBytes":1048576}',
+    HttpStatus.ok,
+    headers: <String, List<String>>{
+      Headers.contentTypeHeader: <String>[Headers.jsonContentType],
+    },
+  );
+}
+
+ResponseBody _statusBody() {
+  return ResponseBody.fromString(
+    '{"uploadSessionId":"session-1","fileId":"file-1","uploadStatus":"Uploaded","isComplete":true,"isTerminal":true,"failureReason":null,"confirmedAtUtc":"2099-01-01T00:00:01Z","expiresAtUtc":"2099-01-01T00:00:00Z"}',
     HttpStatus.ok,
     headers: <String, List<String>>{
       Headers.contentTypeHeader: <String>[Headers.jsonContentType],
@@ -144,6 +155,57 @@ void main() {
       expect(authorization.requiredHeaders['Content-Type'], 'image/jpeg');
     },
   );
+
+  test(
+    'complete profile picture upload posts session and parses status',
+    () async {
+      final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
+        respond: (RequestOptions options) async {
+          expect(
+            options.path,
+            UserProfileApiPaths.currentUserProfilePictureUploadComplete(
+              'session-1',
+            ),
+          );
+          return _statusBody();
+        },
+      );
+      final UserProfileRepository repository = await _buildRepository(adapter);
+
+      final DirectFileUploadStatus status = await repository
+          .completeCurrentUserProfilePictureUpload('session-1');
+
+      final RequestOptions requestOptions = adapter.lastRequestOptions!;
+      expect(requestOptions.method, 'POST');
+      expect(status.uploadSessionId, 'session-1');
+      expect(status.status, DirectFileUploadStatusValue.uploaded);
+      expect(status.isComplete, isTrue);
+    },
+  );
+
+  test('get profile picture upload status parses current status', () async {
+    final _RecordingHttpClientAdapter adapter = _RecordingHttpClientAdapter(
+      respond: (RequestOptions options) async {
+        expect(
+          options.path,
+          UserProfileApiPaths.currentUserProfilePictureUploadStatus(
+            'session-1',
+          ),
+        );
+        return _statusBody();
+      },
+    );
+    final UserProfileRepository repository = await _buildRepository(adapter);
+
+    final DirectFileUploadStatus status = await repository
+        .getCurrentUserProfilePictureUploadStatus('session-1');
+
+    final RequestOptions requestOptions = adapter.lastRequestOptions!;
+    expect(requestOptions.method, 'GET');
+    expect(status.uploadSessionId, 'session-1');
+    expect(status.status, DirectFileUploadStatusValue.uploaded);
+    expect(status.isTerminal, isTrue);
+  });
 
   test(
     'initiate profile picture upload maps invalid payload to profile exception',

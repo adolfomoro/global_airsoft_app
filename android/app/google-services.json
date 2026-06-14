@@ -12,7 +12,28 @@
           "package_name": "com.globalairsoft.global_airsoft_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "716569230649-2s0moasj1jeoqtd09oqkdk6lor2vak7j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.globalairsoft.global_airsoft_app",
+            "certificate_hash": "b2c88aae5f466f8725264d4de767bc5c016b70c3"
+          }
+        },
+        {
+          "client_id": "716569230649-qd64gho985hgdkqgrg28g8e5t35kbcqt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.globalairsoft.global_airsoft_app",
+            "certificate_hash": "12be265e6d7013eb0cf9b522e2902c4f490c60f9"
+          }
+        },
+        {
+          "client_id": "716569230649-75cfdr8e7ctqf4c6qjdipice7hqnkcop.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCcVNrm6zPnCVQWHpzLCQwEChlP8KUOdEw"
@@ -20,7 +41,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716569230649-75cfdr8e7ctqf4c6qjdipice7hqnkcop.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

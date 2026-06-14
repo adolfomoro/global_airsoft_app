@@ -376,7 +376,11 @@ class _GoogleConnectedPill extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(FontAwesomeIcons.google, size: 14, color: colorScheme.primary),
+            FaIcon(
+              FontAwesomeIcons.google,
+              size: 14,
+              color: colorScheme.primary,
+            ),
             const SizedBox(width: AppDimensions.spacingXs),
             Text(
               context.l10n.tr(
