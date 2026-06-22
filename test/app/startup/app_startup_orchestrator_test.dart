@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:global_airsoft_app/src/app/services/app_startup_service.dart';
+import 'package:global_airsoft_app/src/app/startup/app_startup_metrics.dart';
 import 'package:global_airsoft_app/src/app/startup/app_startup_orchestrator.dart';
 
 final class _FakeStartupService implements AppStartupServiceContract {
@@ -153,5 +154,129 @@ void main() {
     expect(fakeService.criticalCalls, 1);
     expect(state.phase, AppBootstrapPhase.degraded);
     expect(state.errorMessage, contains('critical failed'));
+  });
+
+  test('background initialization failure transitions to degraded', () async {
+    final _FakeStartupService fakeService = _FakeStartupService()
+      ..backgroundError = StateError('background failed');
+    final ProviderContainer container = ProviderContainer(
+      overrides: [
+        appStartupServiceProvider.overrideWithValue(fakeService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final AppStartupOrchestrator orchestrator = container.read(
+      appStartupOrchestratorProvider.notifier,
+    );
+
+    await orchestrator.initializeCriticalState();
+    await orchestrator.initializeBackgroundServices();
+
+    final AppBootstrapState state = container.read(appBootstrapStateProvider);
+    expect(state.phase, AppBootstrapPhase.degraded);
+    expect(state.errorMessage, contains('background failed'));
+  });
+
+  test('metrics are available after critical phase completes', () async {
+    final _FakeStartupService fakeService = _FakeStartupService();
+    final ProviderContainer container = ProviderContainer(
+      overrides: [
+        appStartupServiceProvider.overrideWithValue(fakeService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final AppStartupOrchestrator orchestrator = container.read(
+      appStartupOrchestratorProvider.notifier,
+    );
+
+    await orchestrator.initializeCriticalState();
+
+    final AppBootstrapState state = container.read(appBootstrapStateProvider);
+    final metrics = state.metrics;
+
+    expect(metrics, isNotNull);
+    expect(metrics!.criticalDurationMs, greaterThanOrEqualTo(0));
+    expect(metrics.criticalPhaseTiming, isNotNull);
+  });
+
+  test('health check reflects startup timing', () async {
+    final _FakeStartupService fakeService = _FakeStartupService();
+    final ProviderContainer container = ProviderContainer(
+      overrides: [
+        appStartupServiceProvider.overrideWithValue(fakeService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final AppStartupOrchestrator orchestrator = container.read(
+      appStartupOrchestratorProvider.notifier,
+    );
+
+    await orchestrator.initializeCriticalState();
+
+    final AppBootstrapState state = container.read(appBootstrapStateProvider);
+    final health = state.checkCriticalHealth(budgetMs: 5000);
+
+    expect(health, isNotNull);
+    expect(health!.status, AppBootstrapHealthStatus.healthy);
+    expect(health.percentageUsed, lessThan(100));
+  });
+
+  test('idempotent calls when already ready', () async {
+    final _FakeStartupService fakeService = _FakeStartupService();
+    final ProviderContainer container = ProviderContainer(
+      overrides: [
+        appStartupServiceProvider.overrideWithValue(fakeService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final AppStartupOrchestrator orchestrator = container.read(
+      appStartupOrchestratorProvider.notifier,
+    );
+
+    await orchestrator.initializeCriticalState();
+    final criticalCalls1 = fakeService.criticalCalls;
+
+    // Second call should be idempotent
+    await orchestrator.initializeCriticalState();
+    final criticalCalls2 = fakeService.criticalCalls;
+
+    expect(criticalCalls2, criticalCalls1);
+  });
+
+  test('background initialization single-flight when called concurrently',
+      () async {
+    final _FakeStartupService fakeService = _FakeStartupService()
+      ..backgroundCompleter = Completer<void>();
+    final ProviderContainer container = ProviderContainer(
+      overrides: [
+        appStartupServiceProvider.overrideWithValue(fakeService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final AppStartupOrchestrator orchestrator = container.read(
+      appStartupOrchestratorProvider.notifier,
+    );
+
+    await orchestrator.initializeCriticalState();
+
+    final Future<void> first = orchestrator.initializeBackgroundServices();
+    final Future<void> second = orchestrator.initializeBackgroundServices();
+
+    await Future<void>.delayed(Duration.zero);
+    expect(fakeService.backgroundCalls, 1);
+
+    fakeService.backgroundCompleter?.complete();
+    await Future.wait<void>(<Future<void>>[first, second]);
+
+    expect(fakeService.backgroundCalls, 1);
+    expect(
+      container.read(appBootstrapStateProvider).phase,
+      AppBootstrapPhase.ready,
+    );
   });
 }
