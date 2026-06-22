@@ -12,7 +12,7 @@ import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_zoom
 import 'package:global_airsoft_app/src/core/widgets/image/profile_photo_editor.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/providers/home_profile_controller.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/widgets/current_user_profile_identity_header.dart';
-import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
+import 'package:global_airsoft_app/src/features/users/application/providers/current_user_profile_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
 import 'package:global_airsoft_app/src/features/users/presentation/support/user_profile_presentation_error_resolver.dart';

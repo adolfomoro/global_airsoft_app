@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
+import 'package:global_airsoft_app/src/features/users/application/providers/current_user_profile_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_service.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
 
