@@ -40,8 +40,10 @@ final class AuthSecurityBootstrapper {
       clearSession: () async {
         await _authStorageService.clearAll();
         await _keyValueStore.remove(_userIdBackupKey);
-        await _clearLocalSessionData();
         _setUnauthenticated();
+        await Future<void>(() async {
+          await _clearLocalSessionData();
+        });
       },
       refreshTokens: _refreshTokens,
       translateMessage: translateMessage,
