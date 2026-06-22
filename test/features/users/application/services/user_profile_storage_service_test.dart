@@ -315,6 +315,94 @@ void main() {
     expect(File(firstProfile.localProfilePicturePath).existsSync(), isFalse);
   });
 
+  test(
+    'refreshes offline profile photo when remote URL stays the same',
+    () async {
+      final _InMemorySecureStorageService secureStorage =
+          _InMemorySecureStorageService();
+      final AuthStorageService authStorageService = AuthStorageService(
+        secureStorage: secureStorage,
+      );
+      await authStorageService.saveProfile(
+        const AuthProfile(userId: 'user-1', username: 'tester'),
+      );
+
+      final Map<String, List<int>> bodyByUrl = <String, List<int>>{
+        'https://cdn.example.com/profile-large-stable.jpg': <int>[7, 7, 7],
+      };
+      final Dio dio = Dio();
+      dio.httpClientAdapter = _FakeDownloadHttpClientAdapter(
+        bodyByUrl: bodyByUrl,
+      );
+
+      final UserProfileOfflinePhotoStorageService offlinePhotoStorageService =
+          UserProfileOfflinePhotoStorageService(
+            fileStorage: AppFileStorageService(
+              rootDirectoryResolver: () async => tempDirectory,
+            ),
+            downloadClient: dio,
+            logger: AppLogger.instance,
+          );
+
+      final UserProfileStorageService storageService = UserProfileStorageService(
+        secureStorage: secureStorage,
+        authStorageService: authStorageService,
+        offlinePhotoStorageService: offlinePhotoStorageService,
+        logger: AppLogger.instance,
+      );
+      final CurrentUserProfileOfflinePersistenceService persistenceService =
+          CurrentUserProfileOfflinePersistenceService(
+            storageService: storageService,
+            offlinePhotoStorageService: offlinePhotoStorageService,
+            logger: AppLogger.instance,
+          );
+
+      final UserProfile firstProfile = await persistenceService.persistRemoteProfile(
+        const UserProfile(
+          id: 'user-1',
+          username: 'tester',
+          fullName: 'Test User',
+          bio: '',
+          mediumProfilePictureUrl: '',
+          largeProfilePictureUrl:
+              'https://cdn.example.com/profile-large-stable.jpg',
+        ),
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      bodyByUrl['https://cdn.example.com/profile-large-stable.jpg'] = <int>[
+        8,
+        8,
+        8,
+      ];
+
+      final UserProfile secondProfile = await persistenceService
+          .persistRemoteProfile(
+            const UserProfile(
+              id: 'user-1',
+              username: 'tester',
+              fullName: 'Test User',
+              bio: '',
+              mediumProfilePictureUrl: '',
+              largeProfilePictureUrl:
+                  'https://cdn.example.com/profile-large-stable.jpg',
+            ),
+          );
+
+      expect(firstProfile.localProfilePicturePath, isNotEmpty);
+      expect(secondProfile.localProfilePicturePath, isNotEmpty);
+      expect(
+        secondProfile.localProfilePicturePath,
+        isNot(equals(firstProfile.localProfilePicturePath)),
+      );
+      expect(
+        await File(secondProfile.localProfilePicturePath).readAsBytes(),
+        <int>[8, 8, 8],
+      );
+      expect(File(firstProfile.localProfilePicturePath).existsSync(), isFalse);
+    },
+  );
+
   test('deletes the local profile photo when the refreshed remote profile has no photo', () async {
     final _InMemorySecureStorageService secureStorage =
         _InMemorySecureStorageService();
