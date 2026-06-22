@@ -1,5 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/core/forms/forms.dart' as app_forms;
+import 'package:global_airsoft_app/src/core/validation/full_name_validation.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/validation/password_validation_policy.dart';
+import 'package:global_airsoft_app/src/features/auth/domain/validation/username_validation.dart';
 
 /// Full name field notifier for sign-up
 final class SignUpFullNameFieldNotifier
@@ -88,8 +92,8 @@ final signUpFullNameErrorProvider = Provider<String?>((ref) {
 });
 
 final signUpFullNameIsValidProvider = Provider<bool>((ref) {
-  final state = ref.watch(signUpFullNameFieldProvider);
-  return state.isValid;
+  final value = ref.watch(signUpFullNameValueProvider);
+  return FullNameValidation.rules.validate(value) == null;
 });
 
 // ============================================================================
@@ -107,8 +111,8 @@ final signUpUsernameErrorProvider = Provider<String?>((ref) {
 });
 
 final signUpUsernameIsValidProvider = Provider<bool>((ref) {
-  final state = ref.watch(signUpUsernameFieldProvider);
-  return state.isValid;
+  final value = ref.watch(signUpUsernameValueProvider);
+  return UsernameValidation.rules.validate(value) == null;
 });
 
 // ============================================================================
@@ -126,8 +130,8 @@ final signUpEmailErrorProvider = Provider<String?>((ref) {
 });
 
 final signUpEmailIsValidProvider = Provider<bool>((ref) {
-  final state = ref.watch(signUpEmailFieldProvider);
-  return state.isValid;
+  final value = ref.watch(signUpEmailValueProvider);
+  return EmailValidation.rules.validate(value) == null;
 });
 
 // ============================================================================
@@ -145,8 +149,8 @@ final signUpPasswordErrorProvider = Provider<String?>((ref) {
 });
 
 final signUpPasswordIsValidProvider = Provider<bool>((ref) {
-  final state = ref.watch(signUpPasswordFieldProvider);
-  return state.isValid;
+  final value = ref.watch(signUpPasswordValueProvider);
+  return PasswordValidationPolicy.rules.validate(value) == null;
 });
 
 // ============================================================================
@@ -164,8 +168,8 @@ final signUpConfirmPasswordErrorProvider = Provider<String?>((ref) {
 });
 
 final signUpConfirmPasswordIsValidProvider = Provider<bool>((ref) {
-  final state = ref.watch(signUpConfirmPasswordFieldProvider);
-  return state.isValid;
+  final value = ref.watch(signUpConfirmPasswordValueProvider);
+  return value.trim().isNotEmpty;
 });
 
 // ============================================================================
@@ -201,12 +205,14 @@ final signUpFormIsValidProvider = Provider<bool>((ref) {
   final usernameValid = ref.watch(signUpUsernameIsValidProvider);
   final emailValid = ref.watch(signUpEmailIsValidProvider);
   final passwordValid = ref.watch(signUpPasswordIsValidProvider);
+  final confirmPasswordValid = ref.watch(signUpConfirmPasswordIsValidProvider);
   final passwordsMatch = ref.watch(signUpPasswordsMatchProvider);
 
   return fullNameValid &&
       usernameValid &&
       emailValid &&
       passwordValid &&
+      confirmPasswordValid &&
       passwordsMatch;
 });
 

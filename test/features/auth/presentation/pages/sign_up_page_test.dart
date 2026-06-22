@@ -36,6 +36,7 @@ void main() {
 
     expect(find.byType(SignUpPage), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
+    expect(find.text('Create your account'), findsOneWidget);
     expect(find.byType(TextFormField), findsNWidgets(5));
     expect(find.widgetWithText(ElevatedButton, 'Create account'), findsOneWidget);
   });
@@ -52,7 +53,21 @@ void main() {
     await tester.enterText(passwordFields.at(4), 'Mismatch1!');
     await tester.pump();
 
-    expect(find.text('Passwords do not match'), findsOneWidget);
+    expect(find.text('Passwords do not match.'), findsOneWidget);
+  });
+
+  testWidgets('SignUpPage shows password requirements while editing password', (
+    WidgetTester tester,
+  ) async {
+    await pumpSignUpPage(tester);
+    await tester.pumpAndSettle();
+
+    final passwordField = find.byType(TextFormField).at(3);
+    await tester.tap(passwordField);
+    await tester.enterText(passwordField, 'abc');
+    await tester.pump();
+
+    expect(find.text('Your password must contain:'), findsOneWidget);
   });
 
   testWidgets('SignUpPage sign in action pops back to previous route', (
@@ -73,7 +88,8 @@ void main() {
     unawaited(navigatorKey.currentState!.pushNamed(AppRoutePaths.signUp));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(TextButton, 'Sign In'));
+    await tester.ensureVisible(find.widgetWithText(TextButton, 'Back to login'));
+    await tester.tap(find.widgetWithText(TextButton, 'Back to login'));
     await tester.pumpAndSettle();
 
     expect(find.text('Login route'), findsOneWidget);

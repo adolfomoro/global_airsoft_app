@@ -93,6 +93,17 @@ void main() {
 
       expect(container.read(signUpFormErrorProvider), 'Network error');
     });
+
+    test('form becomes valid only when all values satisfy the rules', () {
+      container.read(signUpFullNameFieldProvider.notifier).setValue('John Doe');
+      container.read(signUpUsernameFieldProvider.notifier).setValue('john.doe');
+      container.read(signUpEmailFieldProvider.notifier).setValue('john@example.com');
+      container.read(signUpPasswordFieldProvider.notifier).setValue('Abcdef1!');
+      container.read(signUpConfirmPasswordFieldProvider.notifier).setValue('Abcdef1!');
+
+      expect(container.read(signUpFormIsValidProvider), true);
+      expect(container.read(signUpSubmitEnabledProvider), true);
+    });
   });
 
   group('PasswordRecoveryFormProviders', () {

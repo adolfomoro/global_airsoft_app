@@ -7,8 +7,10 @@ import 'package:global_airsoft_app/src/core/localization/app_localizations.dart'
 import 'package:global_airsoft_app/src/core/localization/app_validation_localizations.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/validation/backend_validation_error_mapper.dart';
+import 'package:global_airsoft_app/src/core/validation/full_name_validation.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_bar/app_page_header.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_form_padding.dart';
@@ -22,6 +24,7 @@ import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/sign_up_form_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_presentation_extensions.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/app_password_field.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_requirements_hint.dart';
 
 class SignUpPage extends ConsumerWidget {
   const SignUpPage({super.key});
@@ -34,29 +37,85 @@ class SignUpPage extends ConsumerWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: AppFormPadding(
-            padding: AppFormPadding.standardScrollablePagePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                const SizedBox(height: AppDimensions.spacingXl),
-                _FullNameFieldConsumer(),
-                const SizedBox(height: AppDimensions.spacingLg),
-                _UsernameFieldConsumer(),
-                const SizedBox(height: AppDimensions.spacingLg),
-                _EmailFieldConsumer(),
-                const SizedBox(height: AppDimensions.spacingLg),
-                _PasswordFieldConsumer(),
-                const SizedBox(height: AppDimensions.spacingLg),
-                _ConfirmPasswordFieldConsumer(),
-                const SizedBox(height: AppDimensions.spacingXl),
-                _SubmitButtonConsumer(),
-                const SizedBox(height: AppDimensions.spacingMd),
-                _SignInLinkSection(),
-                const SizedBox(height: AppDimensions.spacingXl),
-              ],
+          child: AutofillGroup(
+            child: AppFormPadding(
+              padding: AppFormPadding.standardScrollablePagePadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const SizedBox(height: AppDimensions.spacingXl),
+                  const _SignUpHeaderSection(),
+                  const SizedBox(height: AppDimensions.spacingXl),
+                  _FullNameFieldConsumer(),
+                  const SizedBox(height: AppDimensions.spacingLg),
+                  _UsernameFieldConsumer(),
+                  const SizedBox(height: AppDimensions.spacingLg),
+                  _EmailFieldConsumer(),
+                  const SizedBox(height: AppDimensions.spacingLg),
+                  _PasswordFieldConsumer(),
+                  const SizedBox(height: AppDimensions.spacingLg),
+                  _ConfirmPasswordFieldConsumer(),
+                  const SizedBox(height: AppDimensions.spacingXl),
+                  _SubmitButtonConsumer(),
+                  const SizedBox(height: AppDimensions.spacingMd),
+                  _SignInLinkSection(),
+                  const SizedBox(height: AppDimensions.spacingXl),
+                ],
+              ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SignUpHeaderSection extends StatelessWidget {
+  const _SignUpHeaderSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return AppPageHeader(
+      title: context.l10n.tr(AppLocaleKeys.authSignUpHeading),
+      subtitle: context.l10n.tr(AppLocaleKeys.authSignUpSubtitle),
+      titleStyle: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      leading: Container(
+        width: 58,
+        height: 58,
+        decoration: BoxDecoration(
+          color: colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.person_add_alt_1_rounded,
+              color: colorScheme.primary,
+              size: 28,
+            ),
+            Positioned(
+              bottom: 6,
+              right: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'GA',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -76,6 +135,7 @@ class _FullNameFieldConsumer extends ConsumerStatefulWidget {
 
 class _FullNameFieldConsumerState extends ConsumerState<_FullNameFieldConsumer> {
   late final TextEditingController _controller;
+  static final ValidationRuleSet _fullNameValidationRules = FullNameValidation.rules;
 
   @override
   void initState() {
@@ -106,9 +166,14 @@ class _FullNameFieldConsumerState extends ConsumerState<_FullNameFieldConsumer> 
         ref.read(signUpFullNameFieldProvider.notifier).setValue(v);
       },
       onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+      isRequired: _fullNameValidationRules.hasRequiredRule,
+      validator: _fullNameValidationRules.asValidator(
+        context.resolveValidationMessage,
+      ),
       keyboardType: TextInputType.name,
       textInputAction: TextInputAction.next,
       autofillHints: const <String>[AutofillHints.name],
+      textCapitalization: TextCapitalization.words,
     );
   }
 }
@@ -149,20 +214,40 @@ class _UsernameFieldConsumerState extends ConsumerState<_UsernameFieldConsumer> 
       _controller.text = value;
     }
 
-    return AppTextField(
-      labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
-      controller: _controller,
-      errorText: error,
-      onChanged: (v) {
-        ref.read(signUpUsernameFieldProvider.notifier).setValue(v);
-      },
-      onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
-      isRequired: _usernameValidationRules.hasRequiredRule,
-      validator: _usernameValidationRules.asValidator(
-        context.resolveValidationMessage,
-      ),
-      keyboardType: TextInputType.text,
-      textInputAction: TextInputAction.next,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        AppTextField(
+          labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
+          hintText: context.l10n.tr(AppLocaleKeys.authUsernameExampleHint),
+          controller: _controller,
+          errorText: error,
+          onChanged: (v) {
+            ref.read(signUpUsernameFieldProvider.notifier).setValue(v);
+          },
+          onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+          isRequired: _usernameValidationRules.hasRequiredRule,
+          validator: _usernameValidationRules.asValidator(
+            context.resolveValidationMessage,
+          ),
+          keyboardType: TextInputType.text,
+          textInputAction: TextInputAction.next,
+          autocorrect: false,
+          enableSuggestions: false,
+          enableIMEPersonalizedLearning: false,
+        ),
+        const SizedBox(height: AppDimensions.spacingXs),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            context.l10n.tr(AppLocaleKeys.authUsernameRestrictionHint),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.35,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -244,13 +329,21 @@ class _PasswordFieldConsumerState extends ConsumerState<_PasswordFieldConsumer> 
     super.initState();
     _controller = TextEditingController();
     _focusNode = FocusNode();
+    _focusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
+    _focusNode.removeListener(_handleFocusChange);
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -262,20 +355,29 @@ class _PasswordFieldConsumerState extends ConsumerState<_PasswordFieldConsumer> 
       _controller.text = value;
     }
 
-    return AppPasswordField(
-      labelText: context.l10n.tr(AppLocaleKeys.authPasswordLabel),
-      controller: _controller,
-      focusNode: _focusNode,
-      errorText: error,
-      onChanged: (v) {
-        ref.read(signUpPasswordFieldProvider.notifier).setValue(v);
-      },
-      onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
-      isRequired: _passwordValidationRules.hasRequiredRule,
-      validator: _passwordValidationRules.asValidator(
-        context.resolveValidationMessage,
-      ),
-      textInputAction: TextInputAction.next,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        AppPasswordField(
+          labelText: context.l10n.tr(AppLocaleKeys.authPasswordLabel),
+          controller: _controller,
+          focusNode: _focusNode,
+          errorText: error,
+          onChanged: (v) {
+            ref.read(signUpPasswordFieldProvider.notifier).setValue(v);
+          },
+          onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
+          isRequired: _passwordValidationRules.hasRequiredRule,
+          validator: _passwordValidationRules.asValidator(
+            context.resolveValidationMessage,
+          ),
+          textInputAction: TextInputAction.next,
+        ),
+        PasswordRequirementsHint(
+          currentPassword: value,
+          isFocused: _focusNode.hasFocus,
+        ),
+      ],
     );
   }
 }
@@ -320,7 +422,10 @@ class _ConfirmPasswordFieldConsumerState extends ConsumerState<_ConfirmPasswordF
     return AppPasswordField(
       labelText: context.l10n.tr(AppLocaleKeys.authConfirmPasswordLabel),
       controller: _controller,
-      errorText: error ?? (!passwordsMatch && value.isNotEmpty ? 'Passwords do not match' : null),
+      errorText: error ??
+          (!passwordsMatch && value.isNotEmpty
+              ? context.l10n.tr(AppLocaleKeys.authConfirmPasswordMismatch)
+              : null),
       onChanged: (v) {
         ref.read(signUpConfirmPasswordFieldProvider.notifier).setValue(v);
       },
@@ -366,18 +471,11 @@ class _SignInLinkSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isSubmitting = ref.watch(signUpIsSubmittingProvider);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          context.l10n.tr(AppLocaleKeys.authBackToLoginAction),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        TextButton(
-          onPressed: isSubmitting ? null : () => Navigator.of(context).pop(),
-          child: Text(context.l10n.tr(AppLocaleKeys.authSignInAction)),
-        ),
-      ],
+    return Center(
+      child: TextButton(
+        onPressed: isSubmitting ? null : () => Navigator.of(context).pop(),
+        child: Text(context.l10n.tr(AppLocaleKeys.authBackToLoginAction)),
+      ),
     );
   }
 }
@@ -389,6 +487,23 @@ class _SignInLinkSection extends ConsumerWidget {
 abstract final class _SignUpSubmissionLogic {
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
+  static final ValidationRuleSet _fullNameValidationRules = FullNameValidation.rules;
+  static final ValidationRuleSet _usernameValidationRules = UsernameValidation.rules;
+  static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
+  static final ValidationRuleSet _passwordValidationRules = PasswordValidationPolicy.rules;
+
+  static String? _resolveValidationError(
+    BuildContext context,
+    ValidationRuleSet rules,
+    String value,
+  ) {
+    final failure = rules.validate(value);
+    if (failure == null) {
+      return null;
+    }
+
+    return context.resolveValidationMessage(failure);
+  }
 
   static Future<void> submit(BuildContext context, WidgetRef ref) async {
     FocusScope.of(context).unfocus();
@@ -401,40 +516,78 @@ abstract final class _SignUpSubmissionLogic {
     ref.read(signUpConfirmPasswordFieldProvider.notifier).clearError();
     ref.read(signUpFormStateProvider.notifier).setError(null);
 
-    // Validate all fields
-    final isFullNameValid = ref.read(signUpFullNameFieldProvider.notifier).validate();
-    final isUsernameValid = ref.read(signUpUsernameFieldProvider.notifier).validate();
-    final isEmailValid = ref.read(signUpEmailFieldProvider.notifier).validate();
-    final isPasswordValid = ref.read(signUpPasswordFieldProvider.notifier).validate();
-    final isConfirmPasswordValid =
-        ref.read(signUpConfirmPasswordFieldProvider.notifier).validate();
+    final fullName = ref.read(signUpFullNameValueProvider).trim();
+    final username = ref.read(signUpUsernameValueProvider).trim();
+    final email = ref.read(signUpEmailValueProvider).trim();
+    final password = ref.read(signUpPasswordValueProvider);
+    final confirmPassword = ref.read(signUpConfirmPasswordValueProvider);
 
-    // Check cross-field validation (passwords match)
+    final fullNameError = _resolveValidationError(
+      context,
+      _fullNameValidationRules,
+      fullName,
+    );
+    final usernameError = _resolveValidationError(
+      context,
+      _usernameValidationRules,
+      username,
+    );
+    final emailError = _resolveValidationError(
+      context,
+      _emailValidationRules,
+      email,
+    );
+    final passwordError = _resolveValidationError(
+      context,
+      _passwordValidationRules,
+      password,
+    );
+    final confirmPasswordError = confirmPassword.trim().isEmpty
+        ? context.l10n.tr(AppLocaleKeys.authConfirmPasswordRequired)
+        : null;
+
+    if (fullNameError != null) {
+      ref.read(signUpFullNameFieldProvider.notifier).setError(fullNameError);
+    }
+    if (usernameError != null) {
+      ref.read(signUpUsernameFieldProvider.notifier).setError(usernameError);
+    }
+    if (emailError != null) {
+      ref.read(signUpEmailFieldProvider.notifier).setError(emailError);
+    }
+    if (passwordError != null) {
+      ref.read(signUpPasswordFieldProvider.notifier).setError(passwordError);
+    }
+    if (confirmPasswordError != null) {
+      ref.read(signUpConfirmPasswordFieldProvider.notifier).setError(
+        confirmPasswordError,
+      );
+    }
+
     final passwordsMatch = ref.read(signUpPasswordsMatchProvider);
+    if (!passwordsMatch && confirmPassword.trim().isNotEmpty) {
+      ref.read(signUpConfirmPasswordFieldProvider.notifier).setError(
+        context.l10n.tr(AppLocaleKeys.authConfirmPasswordMismatch),
+      );
+    }
 
-    if (!isFullNameValid ||
-        !isUsernameValid ||
-        !isEmailValid ||
-        !isPasswordValid ||
-        !isConfirmPasswordValid ||
+    if (fullNameError != null ||
+        usernameError != null ||
+        emailError != null ||
+        passwordError != null ||
+        confirmPasswordError != null ||
         !passwordsMatch) {
       return;
     }
-
-    // Get values for submission
-    final fullName = ref.read(signUpFullNameValueProvider);
-    final username = ref.read(signUpUsernameValueProvider);
-    final email = ref.read(signUpEmailValueProvider);
-    final password = ref.read(signUpPasswordValueProvider);
 
     ref.read(signUpFormStateProvider.notifier).setSubmitting(true);
 
     try {
       final authService = ref.read(authServiceProvider);
       await authService.signUp(
-        fullName: fullName.trim(),
-        username: username.trim(),
-        email: email.trim(),
+        fullName: fullName,
+        username: username.toLowerCase(),
+        email: email,
         password: password,
       );
 
