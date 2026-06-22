@@ -40,18 +40,26 @@ class _NotificationPermissionListenerState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _permissionActionSubscription = ref
-        .listenManual<AsyncValue<NotificationPermissionAction>>(
-          notificationPermissionManagerProvider,
-          (
-            AsyncValue<NotificationPermissionAction>? previous,
-            AsyncValue<NotificationPermissionAction> next,
-          ) {
-            next.whenData((NotificationPermissionAction action) {
-              unawaited(_handleNextAction(action));
-            });
-          },
-        );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      _permissionActionSubscription = ref
+          .listenManual<AsyncValue<NotificationPermissionAction>>(
+            notificationPermissionManagerProvider,
+            (
+              AsyncValue<NotificationPermissionAction>? previous,
+              AsyncValue<NotificationPermissionAction> next,
+            ) {
+              next.whenData(_scheduleActionHandling);
+            },
+          );
+
+      ref.read(notificationPermissionManagerProvider).whenData(
+        _scheduleActionHandling,
+      );
+    });
   }
 
   @override
@@ -75,6 +83,16 @@ class _NotificationPermissionListenerState
   @override
   Widget build(BuildContext context) {
     return widget.child;
+  }
+
+  void _scheduleActionHandling(NotificationPermissionAction action) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      unawaited(_handleNextAction(action));
+    });
   }
 
   Future<void> _handleNextAction(NotificationPermissionAction action) async {
