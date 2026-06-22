@@ -221,10 +221,14 @@ class _EditableProfilePhotoSectionState
         await userProfileService.uploadCurrentUserProfilePicture(
           photo.localFile!,
         );
-        await ref.read(currentUserProfileProvider.notifier).reload();
+        await ref
+            .read(currentUserProfileProvider.notifier)
+            .reload(bypassThrottle: true);
       } else if (photo.isEmpty) {
         await userProfileService.deleteCurrentUserProfilePicture();
-        await ref.read(currentUserProfileProvider.notifier).reload();
+        await ref
+            .read(currentUserProfileProvider.notifier)
+            .reload(bypassThrottle: true);
       } else {
         return;
       }

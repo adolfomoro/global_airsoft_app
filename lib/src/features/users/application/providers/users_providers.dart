@@ -8,6 +8,7 @@ import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/files/application/providers/file_upload_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/current_user_profile_offline_persistence_service.dart';
+import 'package:global_airsoft_app/src/features/users/application/services/current_user_profile_reload_throttle.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_account_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_offline_photo_storage_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/services/user_profile_service.dart';
@@ -121,10 +122,15 @@ currentUserProfileRefreshRequestProvider =
     );
 
 class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
+  static const Duration _reloadThrottleInterval = Duration(seconds: 10);
+
   UserProfileService get _service => ref.read(userProfileServiceProvider);
   CurrentUserProfileOfflinePersistenceService get _offlinePersistence =>
       ref.read(currentUserProfileOfflinePersistenceServiceProvider);
   AppLogger get _logger => AppLogger.instance;
+  final CurrentUserProfileReloadThrottle _reloadThrottle =
+      CurrentUserProfileReloadThrottle(minInterval: _reloadThrottleInterval);
+  Future<UserProfile>? _inFlightReload;
 
   @override
   Future<UserProfile> build() async {
@@ -138,9 +144,36 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
     return _fetchAndPersistRemoteProfile();
   }
 
-  Future<UserProfile> reload() async {
+  Future<UserProfile> reload({bool bypassThrottle = false}) async {
     final UserProfile? previousProfile = state.asData?.value;
 
+    if (!bypassThrottle &&
+        previousProfile != null &&
+        _reloadThrottle.shouldThrottleReload()) {
+      return previousProfile;
+    }
+
+    final Future<UserProfile>? inFlightReload = _inFlightReload;
+    if (inFlightReload != null) {
+      return inFlightReload;
+    }
+
+    final Future<UserProfile> reloadFuture =
+        _performReload(previousProfile: previousProfile);
+    _inFlightReload = reloadFuture;
+
+    try {
+      return await reloadFuture;
+    } finally {
+      if (identical(_inFlightReload, reloadFuture)) {
+        _inFlightReload = null;
+      }
+    }
+  }
+
+  Future<UserProfile> _performReload({
+    required UserProfile? previousProfile,
+  }) async {
     try {
       final UserProfile remoteProfile = await _fetchAndPersistRemoteProfile();
       if (ref.mounted) {
@@ -162,18 +195,22 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
       return false;
     }
 
-    await reload();
+    await reload(bypassThrottle: true);
     ref.read(currentUserProfileRefreshRequestProvider.notifier).clear();
     return true;
   }
 
-  Future<void> clearCachedProfile() {
-    return _offlinePersistence.clearCurrentUserProfile();
+  Future<void> clearCachedProfile() async {
+    _reloadThrottle.reset();
+    await _offlinePersistence.clearCurrentUserProfile();
   }
 
   Future<UserProfile> _fetchAndPersistRemoteProfile() async {
     final UserProfile remoteProfile = await _service.getCurrentUserProfile();
-    return _offlinePersistence.persistRemoteProfile(remoteProfile);
+    final UserProfile persistedProfile = await _offlinePersistence
+        .persistRemoteProfile(remoteProfile);
+    _reloadThrottle.markSuccessfulReload();
+    return persistedProfile;
   }
 
   Future<void> _refreshSilently() async {
