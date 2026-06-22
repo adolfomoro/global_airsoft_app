@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
@@ -29,6 +30,13 @@ final class AppTextField extends StatefulWidget {
     this.maxLines = 1,
     this.maxLength,
     this.textCapitalization = TextCapitalization.none,
+    this.enabled,
+    this.readOnly = false,
+    this.autofocus = false,
+    this.onTap,
+    this.onEditingComplete,
+    this.autovalidateMode,
+    this.inputFormatters,
   });
 
   final String labelText;
@@ -54,6 +62,13 @@ final class AppTextField extends StatefulWidget {
   final int? maxLines;
   final int? maxLength;
   final TextCapitalization textCapitalization;
+  final bool? enabled;
+  final bool readOnly;
+  final bool autofocus;
+  final VoidCallback? onTap;
+  final VoidCallback? onEditingComplete;
+  final AutovalidateMode? autovalidateMode;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -72,11 +87,16 @@ class _AppTextFieldState extends State<AppTextField> {
   bool _obscureText = false;
   bool _isFocused = false;
   bool _isPasswordTogglePressed = false;
+  FocusNode? _internalFocusNode;
+
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? _internalFocusNode!;
 
   @override
   void initState() {
     super.initState();
     _obscureText = widget.obscureText;
+    _internalFocusNode = widget.focusNode == null ? FocusNode() : null;
+    _effectiveFocusNode.addListener(_handleFocusNodeChange);
   }
 
   @override
@@ -86,6 +106,29 @@ class _AppTextFieldState extends State<AppTextField> {
     if (oldWidget.obscureText != widget.obscureText) {
       _obscureText = widget.obscureText;
     }
+
+    if (oldWidget.focusNode == widget.focusNode) {
+      return;
+    }
+
+    oldWidget.focusNode?.removeListener(_handleFocusNodeChange);
+    _internalFocusNode?.removeListener(_handleFocusNodeChange);
+    if (oldWidget.focusNode == null) {
+      _internalFocusNode?.dispose();
+      _internalFocusNode = null;
+    }
+
+    _internalFocusNode = widget.focusNode == null ? FocusNode() : null;
+    _effectiveFocusNode.addListener(_handleFocusNodeChange);
+    _isFocused = _effectiveFocusNode.hasFocus;
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode?.removeListener(_handleFocusNodeChange);
+    _internalFocusNode?.removeListener(_handleFocusNodeChange);
+    _internalFocusNode?.dispose();
+    super.dispose();
   }
 
   @override
@@ -97,44 +140,23 @@ class _AppTextFieldState extends State<AppTextField> {
         widget.enableSuggestions ?? !widget.obscureText;
     final bool effectiveEnableIMEPersonalizedLearning =
         widget.enableIMEPersonalizedLearning ?? !widget.obscureText;
-    final Widget obscureToggleIcon = Semantics(
-      button: true,
-      label: context.l10n.tr(
-        _obscureText
-            ? AppLocaleKeys.commonShowPassword
-            : AppLocaleKeys.commonHidePassword,
-      ),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: (_) {
-          if (_isPasswordTogglePressed) {
-            return;
-          }
-
-          setState(() {
-            _isPasswordTogglePressed = true;
-          });
-        },
-        onTapUp: (_) {
-          setState(() {
-            _isPasswordTogglePressed = false;
-            _obscureText = !_obscureText;
-          });
-        },
-        onTapCancel: () {
-          if (!_isPasswordTogglePressed) {
-            return;
-          }
-
-          setState(() {
-            _isPasswordTogglePressed = false;
-          });
-        },
-        child: AnimatedScale(
-          scale: _isPasswordTogglePressed ? 0.92 : 1,
-          duration: const Duration(milliseconds: 120),
-          curve: Curves.easeOut,
-          child: Icon(
+    final String passwordToggleLabel = context.l10n.tr(
+      _obscureText
+          ? AppLocaleKeys.commonShowPassword
+          : AppLocaleKeys.commonHidePassword,
+    );
+    final Widget obscureToggleIcon = Listener(
+      onPointerDown: (_) => _handlePasswordTogglePressed(),
+      onPointerCancel: (_) => _resetPasswordTogglePressed(),
+      onPointerUp: (_) => _resetPasswordTogglePressed(),
+      child: AnimatedScale(
+        scale: _isPasswordTogglePressed ? 0.92 : 1,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        child: IconButton(
+          tooltip: passwordToggleLabel,
+          onPressed: _toggleObscureText,
+          icon: Icon(
             _obscureText
                 ? Icons.visibility_off_outlined
                 : Icons.visibility_outlined,
@@ -151,72 +173,104 @@ class _AppTextFieldState extends State<AppTextField> {
                 ))
         : widget.suffixIcon;
 
-    return Focus(
-      onFocusChange: _handleFocusChange,
-      child: TextFormField(
-        controller: widget.controller,
-        focusNode: widget.focusNode,
-        onChanged: widget.onChanged,
-        obscureText: _obscureText,
-        autocorrect: effectiveAutocorrect,
-        enableSuggestions: effectiveEnableSuggestions,
-        enableIMEPersonalizedLearning: effectiveEnableIMEPersonalizedLearning,
-        keyboardType: widget.keyboardType,
-        textInputAction: widget.textInputAction,
-        textCapitalization: widget.textCapitalization,
-        autofillHints: widget.autofillHints,
-        onFieldSubmitted: widget.onFieldSubmitted,
-        minLines: widget.minLines,
-        maxLines: widget.obscureText ? 1 : widget.maxLines,
-        maxLength: widget.maxLength,
-        validator: (String? value) {
-          if (widget.isRequired) {
-            final String? requiredMessage = _requiredValidationRuleSet
-                .asValidator(
-                  (ValidationFailure failure) => context.l10n.trArgs(
-                    failure.messageKey,
-                    args: failure.arguments,
-                  ),
-                )
-                .call(value);
+    return TextFormField(
+      controller: widget.controller,
+      focusNode: _effectiveFocusNode,
+      onChanged: widget.onChanged,
+      obscureText: _obscureText,
+      autocorrect: effectiveAutocorrect,
+      enableSuggestions: effectiveEnableSuggestions,
+      enableIMEPersonalizedLearning: effectiveEnableIMEPersonalizedLearning,
+      keyboardType: widget.keyboardType,
+      textInputAction: widget.textInputAction,
+      textCapitalization: widget.textCapitalization,
+      autofillHints: widget.autofillHints,
+      onFieldSubmitted: widget.onFieldSubmitted,
+      onTap: widget.onTap,
+      onEditingComplete: widget.onEditingComplete,
+      minLines: widget.minLines,
+      maxLines: widget.obscureText ? 1 : widget.maxLines,
+      maxLength: widget.maxLength,
+      enabled: widget.enabled,
+      readOnly: widget.readOnly,
+      autofocus: widget.autofocus,
+      autovalidateMode: widget.autovalidateMode,
+      inputFormatters: widget.inputFormatters,
+      validator: (String? value) {
+        if (widget.isRequired) {
+          final String? requiredMessage = _requiredValidationRuleSet
+              .asValidator(
+                (ValidationFailure failure) => context.l10n.trArgs(
+                  failure.messageKey,
+                  args: failure.arguments,
+                ),
+              )
+              .call(value);
 
-            if (requiredMessage != null && requiredMessage.isNotEmpty) {
-              return requiredMessage;
-            }
+          if (requiredMessage != null && requiredMessage.isNotEmpty) {
+            return requiredMessage;
           }
+        }
 
-          final String? Function(String?)? customValidator = widget.validator;
-          if (customValidator == null) {
-            return null;
-          }
+        final String? Function(String?)? customValidator = widget.validator;
+        if (customValidator == null) {
+          return null;
+        }
 
-          return customValidator(value);
-        },
-        cursorColor: colorScheme.primary,
-        textAlignVertical: TextAlignVertical.center,
-        style: _inputTextStyle(theme),
-        decoration: InputDecoration(
-          label: _buildLabel(context),
-          hintText: widget.hintText,
-          errorText: widget.errorText,
-          errorMaxLines: widget.errorMaxLines,
-          prefixIcon: widget.prefixIcon,
-          suffixIcon: effectiveSuffixIcon,
-          prefixIconConstraints: _iconConstraints,
-          suffixIconConstraints: _iconConstraints,
-          errorStyle: TextStyle(color: colorScheme.error),
-        ),
+        return customValidator(value);
+      },
+      cursorColor: colorScheme.primary,
+      textAlignVertical: TextAlignVertical.center,
+      style: _inputTextStyle(theme),
+      decoration: InputDecoration(
+        label: _buildLabel(context),
+        hintText: widget.hintText,
+        errorText: widget.errorText,
+        errorMaxLines: widget.errorMaxLines,
+        prefixIcon: widget.prefixIcon,
+        suffixIcon: effectiveSuffixIcon,
+        prefixIconConstraints: _iconConstraints,
+        suffixIconConstraints: _iconConstraints,
+        errorStyle: TextStyle(color: colorScheme.error),
       ),
     );
   }
 
-  void _handleFocusChange(bool hasFocus) {
-    if (_isFocused == hasFocus) {
+  void _handleFocusNodeChange() {
+    final bool hasFocus = _effectiveFocusNode.hasFocus;
+    if (_isFocused == hasFocus || !mounted) {
       return;
     }
 
     setState(() {
       _isFocused = hasFocus;
+    });
+  }
+
+  void _toggleObscureText() {
+    setState(() {
+      _isPasswordTogglePressed = false;
+      _obscureText = !_obscureText;
+    });
+  }
+
+  void _handlePasswordTogglePressed() {
+    if (_isPasswordTogglePressed) {
+      return;
+    }
+
+    setState(() {
+      _isPasswordTogglePressed = true;
+    });
+  }
+
+  void _resetPasswordTogglePressed() {
+    if (!_isPasswordTogglePressed || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _isPasswordTogglePressed = false;
     });
   }
 

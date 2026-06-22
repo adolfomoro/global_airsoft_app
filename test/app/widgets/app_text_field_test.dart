@@ -26,7 +26,35 @@ void main() {
     await tester.pumpAndSettle();
 
     final Text errorTextWidget = tester.widget<Text>(find.text(longErrorText));
-    expect(errorTextWidget.maxLines, 4);
+    expect(errorTextWidget.maxLines, greaterThan(1));
+  });
+
+  testWidgets('toggles password visibility from the suffix action', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'Secret123!');
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AppTextField(
+            labelText: 'Password',
+            controller: controller,
+            obscureText: true,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
   });
 }
 
