@@ -35,11 +35,9 @@ final Provider<PushNotificationService> pushNotificationServiceProvider =
 final Provider<NotificationPermissionService>
 notificationPermissionServiceProvider = Provider<NotificationPermissionService>(
   (Ref ref) {
-    final sharedPrefsKeyValueStore = ref.watch(
-      sharedPrefsKeyValueStoreProvider,
-    );
+    final keyValueStore = ref.watch(keyValueStoreProvider);
 
-    return NotificationPermissionService(store: sharedPrefsKeyValueStore);
+    return NotificationPermissionService(store: keyValueStore);
   },
 );
 

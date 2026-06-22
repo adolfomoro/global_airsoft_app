@@ -7,6 +7,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_providers.da
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
+import 'package:global_airsoft_app/src/core/storage/key_value_store.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/providers/auth_security_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_bootstrapper.dart';
@@ -72,7 +73,7 @@ final Provider<AuthSecurityBootstrapper> authSecurityBootstrapperProvider =
         coordinator: ref.watch(authSecurityCoordinatorProvider),
         authStorageService: ref.watch(authStorageServiceProvider),
         refreshTokens: ref.watch(authTokenRefreshServiceProvider).refreshTokens,
-        keyValueStore: ref.watch(sharedPrefsKeyValueStoreProvider),
+        keyValueStore: ref.watch(keyValueStoreProvider),
         clearLocalSessionData: ref.watch(authLocalSessionCleanupProvider),
         setUnauthenticated: () {
           ref.read(isAuthenticatedProvider.notifier).setUnauthenticated();

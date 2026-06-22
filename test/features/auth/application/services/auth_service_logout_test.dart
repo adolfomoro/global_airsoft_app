@@ -11,6 +11,7 @@ import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
 import 'package:global_airsoft_app/src/core/storage/shared_prefs_key_value_store.dart';
+import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_coordinator.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
@@ -131,9 +132,13 @@ Future<AuthService> _buildAuthService({
     secureStorage: secureStorageService,
   );
 
+  final AuthSecurityCoordinator authSecurityCoordinator =
+      AuthSecurityCoordinator();
+
   return AuthService(
     authRepository: authRepository,
     authStorageService: authStorageService,
+    authSecurityCoordinator: authSecurityCoordinator,
     sharedPrefs: sharedPrefs,
     clearLocalSessionData:
         clearLocalSessionData ??
@@ -191,7 +196,7 @@ void main() {
     expect(sharedPrefs.getString('user_id_for_backup'), isNull);
   });
 
-  test('logout still clears local session when backend rejects', () async {
+  test('logout fails when backend rejects', () async {
     final List<String> events = <String>[];
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -218,16 +223,18 @@ void main() {
       sharedPrefs: sharedPrefs,
     );
 
-    await authService.logout();
+    // When backend fails, logout should throw and local session cleanup is not attempted
+    await expectLater(
+      authService.logout(),
+      throwsA(isA<Exception>()),
+    );
 
     expect(events.first, 'server:DELETE:/auth/logout');
-    expect(events.skip(1).toSet(), <String>{
-      'local-cleanup',
-      'secure-remove:auth_tokens',
-      'secure-remove:auth_profile',
-    });
-    expect(await authStorageService.getTokens(), isNull);
-    expect(await authStorageService.getProfile(), isNull);
-    expect(sharedPrefs.getString('user_id_for_backup'), isNull);
+    // No local cleanup should happen when backend fails
+    expect(events, hasLength(1));
+    // Session data should still be stored
+    expect(await authStorageService.getTokens(), isNotNull);
+    expect(await authStorageService.getProfile(), isNotNull);
+    expect(sharedPrefs.getString('user_id_for_backup'), 'user-1');
   });
 }
