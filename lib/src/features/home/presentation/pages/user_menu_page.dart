@@ -4,15 +4,14 @@ import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
-import 'package:global_airsoft_app/src/core/media/profile_photo.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_confirmation_dialog.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_section.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
-import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_zoom_viewer.dart';
-import 'package:global_airsoft_app/src/core/widgets/image/app_profile_picture.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/home/presentation/providers/home_profile_controller.dart';
+import 'package:global_airsoft_app/src/features/home/presentation/widgets/current_user_profile_identity_header.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
@@ -72,9 +71,7 @@ class _UserMenuPageState extends ConsumerState<UserMenuPage> {
     }
 
     try {
-      await ref
-          .read(currentUserProfileProvider.notifier)
-          .reloadIfRefreshRequested();
+      await ref.read(homeProfileControllerProvider).reloadIfRefreshRequested();
     } catch (error) {
       if (!mounted) {
         return;
@@ -288,80 +285,14 @@ class _UserMenuProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return profileState.when(
       data: (UserProfile profile) =>
-          _UserMenuProfileIdentity(profile: profile, photoSize: _photoSize),
+          CurrentUserProfileIdentityHeader(
+            profile: profile,
+            photoSize: _photoSize,
+          ),
       loading: () => const _UserMenuProfileLoadingHeader(photoSize: _photoSize),
       error: (Object error, StackTrace stackTrace) {
         return const _UserMenuProfileFallbackHeader(photoSize: _photoSize);
       },
-    );
-  }
-}
-
-class _UserMenuProfileIdentity extends StatelessWidget {
-  const _UserMenuProfileIdentity({
-    required this.profile,
-    required this.photoSize,
-  });
-
-  final UserProfile profile;
-  final double photoSize;
-
-  void _handlePhotoTap(BuildContext context) {
-    final ProfilePhoto profilePhoto = profile.profilePhoto;
-    if (profilePhoto.isLocal) {
-      AppProfileImageZoomViewer.showImageProvider(
-        context,
-        imageProvider: FileImage(profilePhoto.localFile!),
-      );
-      return;
-    }
-
-    final String zoomImageUrl = profile.resolvedZoomImageUrl;
-    if (zoomImageUrl.isEmpty) {
-      return;
-    }
-
-    AppProfileImageZoomViewer.showNetwork(context, imageUrl: zoomImageUrl);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        AppProfilePicture.profilePhoto(
-          profilePhoto: profile.profilePhoto,
-          onTap: () => _handlePhotoTap(context),
-          size: photoSize,
-        ),
-        const SizedBox(height: AppDimensions.spacingLg),
-        Text(
-          profile.resolvedFullName,
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: colorScheme.onSurface,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.1,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppDimensions.spacingXs),
-        Text(
-          '@${profile.username}',
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: colorScheme.primary,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.2,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }

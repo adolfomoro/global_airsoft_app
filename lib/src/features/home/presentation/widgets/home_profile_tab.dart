@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
@@ -11,6 +10,8 @@ import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/app_profile_image_zoom_viewer.dart';
 import 'package:global_airsoft_app/src/core/widgets/image/profile_photo_editor.dart';
+import 'package:global_airsoft_app/src/features/home/presentation/providers/home_profile_controller.dart';
+import 'package:global_airsoft_app/src/features/home/presentation/widgets/current_user_profile_identity_header.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile.dart';
@@ -28,7 +29,9 @@ class HomeProfileTab extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () async {
         try {
-          await ref.read(currentUserProfileProvider.notifier).reload();
+          await ref.read(homeProfileControllerProvider).refreshProfile(
+            bypassThrottle: true,
+          );
         } catch (error) {
           if (!context.mounted) {
             return;
@@ -81,26 +84,10 @@ class _ProfileContent extends StatelessWidget {
                 const SizedBox(height: AppDimensions.spacing2xl),
                 _EditableProfilePhotoSection(profile: profile),
                 const SizedBox(height: AppDimensions.spacingXl),
-                _ProfileHeadline(
-                  label: context.l10n.tr(
-                    AppLocaleKeys.homeProfileUsernameLabel,
-                  ),
-                  value: '@${profile.username}',
-                  valueStyle: theme.textTheme.headlineSmall?.copyWith(
-                    color: AppColors.secondaryLight,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-                const SizedBox(height: AppDimensions.spacingLg),
-                _ProfileHeadline(
-                  label: context.l10n.tr(
-                    AppLocaleKeys.homeProfileFullNameLabel,
-                  ),
-                  value: profile.resolvedFullName,
-                  valueStyle: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                CurrentUserProfileIdentityHeader(
+                  profile: profile,
+                  photoSize: 124,
+                  showPhoto: false,
                 ),
                 const SizedBox(height: AppDimensions.spacing2xl),
                 AppSectionBox(
@@ -216,19 +203,12 @@ class _EditableProfilePhotoSectionState
     });
 
     try {
-      final userProfileService = ref.read(userProfileServiceProvider);
       if (photo.isLocal) {
-        await userProfileService.uploadCurrentUserProfilePicture(
+        await ref.read(homeProfileControllerProvider).uploadCurrentUserProfilePhoto(
           photo.localFile!,
         );
-        await ref
-            .read(currentUserProfileProvider.notifier)
-            .reload(bypassThrottle: true);
       } else if (photo.isEmpty) {
-        await userProfileService.deleteCurrentUserProfilePicture();
-        await ref
-            .read(currentUserProfileProvider.notifier)
-            .reload(bypassThrottle: true);
+        await ref.read(homeProfileControllerProvider).deleteCurrentUserProfilePhoto();
       } else {
         return;
       }
@@ -395,39 +375,6 @@ class _ProfileErrorState extends StatelessWidget {
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _ProfileHeadline extends StatelessWidget {
-  const _ProfileHeadline({
-    required this.label,
-    required this.value,
-    required this.valueStyle,
-  });
-
-  final String label;
-  final String value;
-  final TextStyle? valueStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-
-    return Column(
-      children: <Widget>[
-        Text(
-          label,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.2,
-          ),
-        ),
-        const SizedBox(height: AppDimensions.spacingXs),
-        Text(value, style: valueStyle, textAlign: TextAlign.center),
       ],
     );
   }

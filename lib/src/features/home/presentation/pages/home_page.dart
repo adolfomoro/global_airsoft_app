@@ -8,6 +8,7 @@ import 'package:global_airsoft_app/src/core/localization/app_localizations.dart'
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_adaptive_app_bar.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/providers/home_providers.dart';
+import 'package:global_airsoft_app/src/features/home/presentation/providers/home_profile_controller.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/widgets/home_bottom_navigation_bar.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/widgets/home_placeholder_tab.dart';
 import 'package:global_airsoft_app/src/features/home/presentation/widgets/home_profile_tab.dart';
@@ -68,9 +69,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Future<void> _reloadProfileIfRequested() async {
     try {
-      await ref
-          .read(currentUserProfileProvider.notifier)
-          .reloadIfRefreshRequested();
+      await ref.read(homeProfileControllerProvider).reloadIfRefreshRequested();
     } catch (error) {
       if (!mounted) {
         return;
