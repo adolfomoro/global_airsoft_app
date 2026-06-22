@@ -174,7 +174,7 @@ void main() {
 
       final check = metrics.checkCriticalPhaseHealth(budgetMs: 1000);
       expect(check, isNotNull);
-      expect(check!.status, AppBootstrapHealthStatus.degraded);
+      expect(check!.status, AppBootstrapHealthStatus.unhealthy); // 200% of budget
       expect(check.budgetMs, 1000);
     });
 
@@ -215,37 +215,55 @@ void main() {
   });
 
   group('AppBootstrapHealthStatus determination', () {
-    test('determines healthy for <= 100% of budget', () {
-      expect(
-        AppStartupMetrics._determineHealth(1000, 1000),
-        AppBootstrapHealthStatus.healthy,
+    test('checkCriticalPhaseHealth marks healthy when within budget', () {
+      final now = DateTime.now().toUtc();
+      final criticalTiming = AppBootstrapPhaseTiming(
+        phaseName: 'critical',
+        startedAt: now,
+        completedAt: now.add(Duration(milliseconds: 1000)),
       );
-      expect(
-        AppStartupMetrics._determineHealth(500, 1000),
-        AppBootstrapHealthStatus.healthy,
+
+      final metrics = AppStartupMetrics(
+        criticalPhaseTiming: criticalTiming,
+        totalStartupTime: Duration(milliseconds: 1000),
       );
+
+      final check = metrics.checkCriticalPhaseHealth(budgetMs: 1000);
+      expect(check!.status, AppBootstrapHealthStatus.healthy);
     });
 
-    test('determines degraded for 100-150% of budget', () {
-      expect(
-        AppStartupMetrics._determineHealth(1001, 1000),
-        AppBootstrapHealthStatus.degraded,
+    test('checkCriticalPhaseHealth marks degraded when 100-150% over budget', () {
+      final now = DateTime.now().toUtc();
+      final criticalTiming = AppBootstrapPhaseTiming(
+        phaseName: 'critical',
+        startedAt: now,
+        completedAt: now.add(Duration(milliseconds: 1300)),
       );
-      expect(
-        AppStartupMetrics._determineHealth(1500, 1000),
-        AppBootstrapHealthStatus.degraded,
+
+      final metrics = AppStartupMetrics(
+        criticalPhaseTiming: criticalTiming,
+        totalStartupTime: Duration(milliseconds: 1300),
       );
+
+      final check = metrics.checkCriticalPhaseHealth(budgetMs: 1000);
+      expect(check!.status, AppBootstrapHealthStatus.degraded);
     });
 
-    test('determines unhealthy for > 150% of budget', () {
-      expect(
-        AppStartupMetrics._determineHealth(1501, 1000),
-        AppBootstrapHealthStatus.unhealthy,
+    test('checkCriticalPhaseHealth marks unhealthy when > 150% over budget', () {
+      final now = DateTime.now().toUtc();
+      final criticalTiming = AppBootstrapPhaseTiming(
+        phaseName: 'critical',
+        startedAt: now,
+        completedAt: now.add(Duration(milliseconds: 1600)),
       );
-      expect(
-        AppStartupMetrics._determineHealth(2000, 1000),
-        AppBootstrapHealthStatus.unhealthy,
+
+      final metrics = AppStartupMetrics(
+        criticalPhaseTiming: criticalTiming,
+        totalStartupTime: Duration(milliseconds: 1600),
       );
+
+      final check = metrics.checkCriticalPhaseHealth(budgetMs: 1000);
+      expect(check!.status, AppBootstrapHealthStatus.unhealthy);
     });
   });
 }

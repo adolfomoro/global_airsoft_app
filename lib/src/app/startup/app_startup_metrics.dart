@@ -1,5 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 /// Represents timing metrics for a single startup phase.
 final class AppBootstrapPhaseTiming {
   const AppBootstrapPhaseTiming({
