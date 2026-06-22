@@ -1,15 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
+import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/providers/auth_security_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_bootstrapper.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
+import 'package:global_airsoft_app/src/features/auth/application/services/auth_token_refresh_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/google_sign_in_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
+import 'package:global_airsoft_app/src/features/device/application/services/device_registration_service.dart';
 
 final Provider<Future<void> Function()> authLocalSessionCleanupProvider =
     Provider<Future<void> Function()>((Ref ref) => () async {});
@@ -20,11 +25,55 @@ final Provider<AuthStorageService> authStorageServiceProvider =
       return AuthStorageService(secureStorage: secureStorage);
     });
 
+final Provider<AppDioService> authRefreshDioServiceProvider =
+    Provider<AppDioService>((Ref ref) {
+      final AppConfig appConfig = ref.watch(appConfigProvider);
+      final AppLocalizationService appLocalizationService = ref.watch(
+        appLocalizationServiceProvider,
+      );
+      final DeviceRegistrationService deviceRegistrationService = ref.watch(
+        deviceRegistrationServiceProvider,
+      );
+
+      return AppDioService.create(
+        config: appConfig,
+        logger: AppLogger.instance,
+        getDeviceId: () {
+          return deviceRegistrationService.getStoredDeviceId();
+        },
+        ensureDeviceSynced: () {
+          return deviceRegistrationService.ensureRegisteredBeforeRequest();
+        },
+        getDeviceLanguage: () {
+          return ref.read(appOsLanguageTagProvider);
+        },
+        onContentLanguage: ref
+            .read(appLocaleControllerProvider.notifier)
+            .syncFromServerContentLanguage,
+        apiExceptionMessagesResolver: () {
+          return buildLocalizedApiExceptionMessages(appLocalizationService);
+        },
+        deviceSyncRequiredMessageResolver: () {
+          return appLocalizationService.tr(
+            AppLocaleKeys.commonGenericApiErrorMessage,
+          );
+        },
+      );
+    });
+
+final Provider<AuthTokenRefreshService> authTokenRefreshServiceProvider =
+    Provider<AuthTokenRefreshService>((Ref ref) {
+      return AuthTokenRefreshService(
+        dioService: ref.watch(authRefreshDioServiceProvider),
+      );
+    });
+
 final Provider<AuthSecurityBootstrapper> authSecurityBootstrapperProvider =
     Provider<AuthSecurityBootstrapper>((Ref ref) {
       return AuthSecurityBootstrapper(
         coordinator: ref.watch(authSecurityCoordinatorProvider),
         authStorageService: ref.watch(authStorageServiceProvider),
+        refreshTokens: ref.watch(authTokenRefreshServiceProvider).refreshTokens,
         keyValueStore: ref.watch(sharedPrefsKeyValueStoreProvider),
         clearLocalSessionData: ref.watch(authLocalSessionCleanupProvider),
         setUnauthenticated: () {

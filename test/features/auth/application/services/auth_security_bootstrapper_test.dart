@@ -73,6 +73,12 @@ void main() {
     final AuthSecurityBootstrapper bootstrapper = AuthSecurityBootstrapper(
       coordinator: coordinator,
       authStorageService: authStorageService,
+      refreshTokens: (String refreshToken) async {
+        return const AuthTokens(
+          jwtToken: 'jwt-next',
+          refreshToken: 'refresh-next',
+        );
+      },
       keyValueStore: keyValueStore,
       clearLocalSessionData: () async {
         localCleanupCalls += 1;
@@ -84,12 +90,6 @@ void main() {
 
     bootstrapper.configure(
       initialTokens: const AuthTokens(jwtToken: 'jwt', refreshToken: 'refresh'),
-      refreshTokens: (String refreshToken) async {
-        return const AuthTokens(
-          jwtToken: 'jwt-next',
-          refreshToken: 'refresh-next',
-        );
-      },
       translateMessage: (String key) async => key,
       showMessage: (String message, {Object? source}) async {},
     );

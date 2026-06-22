@@ -7,11 +7,13 @@ final class AuthSecurityBootstrapper {
   AuthSecurityBootstrapper({
     required AuthSecurityCoordinator coordinator,
     required AuthStorageService authStorageService,
+    required AuthTokensRefresher refreshTokens,
     required KeyValueStore keyValueStore,
     required Future<void> Function() clearLocalSessionData,
     required void Function() setUnauthenticated,
   }) : _coordinator = coordinator,
        _authStorageService = authStorageService,
+       _refreshTokens = refreshTokens,
        _keyValueStore = keyValueStore,
        _clearLocalSessionData = clearLocalSessionData,
        _setUnauthenticated = setUnauthenticated;
@@ -20,13 +22,13 @@ final class AuthSecurityBootstrapper {
 
   final AuthSecurityCoordinator _coordinator;
   final AuthStorageService _authStorageService;
+  final AuthTokensRefresher _refreshTokens;
   final KeyValueStore _keyValueStore;
   final Future<void> Function() _clearLocalSessionData;
   final void Function() _setUnauthenticated;
 
   void configure({
     required AuthTokens? initialTokens,
-    required AuthTokensRefresher refreshTokens,
     required AuthMessageTranslator translateMessage,
     required AuthMessagePresenter showMessage,
   }) {
@@ -41,7 +43,7 @@ final class AuthSecurityBootstrapper {
         await _clearLocalSessionData();
         _setUnauthenticated();
       },
-      refreshTokens: refreshTokens,
+      refreshTokens: _refreshTokens,
       translateMessage: translateMessage,
       showMessage: showMessage,
     );

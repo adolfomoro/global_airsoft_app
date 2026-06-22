@@ -8,13 +8,10 @@ import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/global_airsoft_app.dart';
 import 'package:global_airsoft_app/src/app/startup/app_startup_orchestrator.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
-import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_service.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
-import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/monitoring/app_telemetry.dart';
-import 'package:global_airsoft_app/src/core/network/app_dio_service.dart';
 import 'package:global_airsoft_app/src/core/notifications/notification_permission_service.dart';
 import 'package:global_airsoft_app/src/core/notifications/push_notification_service.dart';
 import 'package:global_airsoft_app/src/core/storage/secure_storage_service.dart';
@@ -22,10 +19,8 @@ import 'package:global_airsoft_app/src/core/storage/secure_storage_service_impl.
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
-import 'package:global_airsoft_app/src/features/auth/application/services/auth_token_refresh_service.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/models/auth_tokens.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
-import 'package:global_airsoft_app/src/features/device/application/services/device_registration_service.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/users_providers.dart';
 
 Future<void> main() async {
@@ -89,38 +84,8 @@ Future<void> main() async {
       );
       await appStartupOrchestrator.initializeCriticalState();
 
-      final DeviceRegistrationService deviceRegistrationService = container.read(
-        deviceRegistrationServiceProvider,
-      );
-      final AppDioService refreshDioService = AppDioService.create(
-        config: appConfig,
-        logger: AppLogger.instance,
-        getDeviceId: () {
-          return deviceRegistrationService.getStoredDeviceId();
-        },
-        ensureDeviceSynced: () {
-          return deviceRegistrationService.ensureRegisteredBeforeRequest();
-        },
-        getDeviceLanguage: () {
-          return container.read(appOsLanguageTagProvider);
-        },
-        onContentLanguage: container
-            .read(appLocaleControllerProvider.notifier)
-            .syncFromServerContentLanguage,
-        apiExceptionMessagesResolver: () {
-          return buildLocalizedApiExceptionMessages(appLocalizationService);
-        },
-        deviceSyncRequiredMessageResolver: () {
-          return appLocalizationService.tr(
-            AppLocaleKeys.commonGenericApiErrorMessage,
-          );
-        },
-      );
-      final AuthTokenRefreshService authTokenRefreshService =
-          AuthTokenRefreshService(dioService: refreshDioService);
       container.read(authSecurityBootstrapperProvider).configure(
         initialTokens: tokens,
-        refreshTokens: authTokenRefreshService.refreshTokens,
         translateMessage: appLocalizationService.tr,
         showMessage: (String message, {Object? source}) async {
           final NavigatorState? navigatorState = appNavigatorKey.currentState;
