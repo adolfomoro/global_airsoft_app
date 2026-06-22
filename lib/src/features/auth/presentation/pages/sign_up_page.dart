@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
@@ -595,8 +594,7 @@ abstract final class _SignUpSubmissionLogic {
         return;
       }
 
-      // Navigate to home on success
-      await Navigator.of(context).pushReplacementNamed(AppRoutePaths.home);
+      await ref.completeAuthenticatedSession();
     } on AuthenticationException catch (error) {
       if (context.mounted) {
         final mappedErrors = _validationErrorMapper.map(
