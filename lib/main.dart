@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_bootstrap.dart';
 import 'package:global_airsoft_app/src/app/app_navigator.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
-import 'package:global_airsoft_app/src/app/bootstrap/app_bootstrap_providers.dart';
+import 'package:global_airsoft_app/src/app/bootstrap/app_bootstrap_providers.dart'
+  hide initialAppLocaleProvider;
 import 'package:global_airsoft_app/src/app/bootstrap/app_dependencies_bootstrapper.dart';
 import 'package:global_airsoft_app/src/app/global_airsoft_app.dart';
 import 'package:global_airsoft_app/src/app/startup/app_startup_orchestrator.dart';
@@ -41,6 +42,12 @@ Future<void> main() async {
         overrides: [
           appConfigProvider.overrideWithValue(appConfig),
           appBootstrapDataProvider.overrideWithValue(bootstrapData),
+          appLocaleServiceProvider.overrideWithValue(
+            bootstrapData.appLocaleService,
+          ),
+          initialAppLocaleProvider.overrideWithValue(
+            bootstrapData.localeBootstrapData.initialUiLocale,
+          ),
           appLocalizationServiceProvider.overrideWithValue(
             appLocalizationService,
           ),
