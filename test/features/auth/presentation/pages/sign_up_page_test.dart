@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,7 +70,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    navigatorKey.currentState!.pushNamed(AppRoutePaths.signUp);
+    unawaited(navigatorKey.currentState!.pushNamed(AppRoutePaths.signUp));
     await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(TextButton, 'Sign In'));

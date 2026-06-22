@@ -11,6 +11,7 @@ import 'package:global_airsoft_app/src/core/widgets/app_skeleton.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_form_padding.dart';
+import 'package:global_airsoft_app/src/features/users/application/providers/current_user_profile_providers.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/user_account_providers.dart';
 import 'package:global_airsoft_app/src/features/users/data/exceptions/user_profile_exception.dart';
 import 'package:global_airsoft_app/src/features/users/domain/models/user_profile_privacy_settings.dart';

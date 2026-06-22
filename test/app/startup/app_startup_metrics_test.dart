@@ -155,7 +155,7 @@ void main() {
 
       final check = metrics.checkCriticalPhaseHealth();
       expect(check, isNotNull);
-      expect(check!.status, AppBootstrapHealthStatus.healthy);
+      expect(check.status, AppBootstrapHealthStatus.healthy);
       expect(check.budgetMs, 3000); // Default
     });
 
@@ -174,7 +174,7 @@ void main() {
 
       final check = metrics.checkCriticalPhaseHealth(budgetMs: 1000);
       expect(check, isNotNull);
-      expect(check!.status, AppBootstrapHealthStatus.unhealthy); // 200% of budget
+  expect(check.status, AppBootstrapHealthStatus.unhealthy); // 200% of budget
       expect(check.budgetMs, 1000);
     });
 
@@ -229,7 +229,7 @@ void main() {
       );
 
       final check = metrics.checkCriticalPhaseHealth(budgetMs: 1000);
-      expect(check!.status, AppBootstrapHealthStatus.healthy);
+  expect(check.status, AppBootstrapHealthStatus.healthy);
     });
 
     test('checkCriticalPhaseHealth marks degraded when 100-150% over budget', () {
@@ -246,7 +246,7 @@ void main() {
       );
 
       final check = metrics.checkCriticalPhaseHealth(budgetMs: 1000);
-      expect(check!.status, AppBootstrapHealthStatus.degraded);
+  expect(check.status, AppBootstrapHealthStatus.degraded);
     });
 
     test('checkCriticalPhaseHealth marks unhealthy when > 150% over budget', () {
@@ -263,7 +263,7 @@ void main() {
       );
 
       final check = metrics.checkCriticalPhaseHealth(budgetMs: 1000);
-      expect(check!.status, AppBootstrapHealthStatus.unhealthy);
+      expect(check.status, AppBootstrapHealthStatus.unhealthy);
     });
   });
 }

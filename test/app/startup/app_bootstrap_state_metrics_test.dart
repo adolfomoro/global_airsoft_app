@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:global_airsoft_app/src/app/startup/app_startup_orchestrator.dart';
 import 'package:global_airsoft_app/src/app/startup/app_startup_metrics.dart';
+import 'package:global_airsoft_app/src/app/startup/app_startup_orchestrator.dart';
 
 void main() {
   group('AppBootstrapState metrics', () {

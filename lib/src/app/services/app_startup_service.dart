@@ -24,10 +24,12 @@ final class AppStartupService implements AppStartupServiceContract {
   final void Function(String token) _onPushTokenReceived;
   final AppLogger _logger;
 
+  @override
   Future<void> initializeCriticalState() async {
     await _deviceRegistrationService.initialize();
   }
 
+  @override
   Future<void> initializeBackgroundServices() async {
     try {
       await _pushNotificationService.initialize(

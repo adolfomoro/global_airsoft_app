@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
@@ -12,14 +13,12 @@ import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart
 import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_form_padding.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_text_field.dart';
-import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/data/exceptions/authentication_exception.dart';
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/dto/request_password_recovery_input_dto.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/validation/email_validation.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/password_recovery_form_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/support/auth_presentation_extensions.dart';
-import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 
 class PasswordRecoveryPage extends ConsumerWidget {
   const PasswordRecoveryPage({super.key});
