@@ -13,9 +13,11 @@ extension AuthPresentationRefX on WidgetRef {
     ).forceApplyServerLocaleIfPending();
   }
 
-  Future<void> completeAuthenticatedSession() async {
-    await applyPendingAuthLocale();
-    read(isAuthenticatedProvider.notifier).setAuthenticated();
+  Future<void> completeAuthenticatedSession() {
+    return Future<void>(() async {
+      await applyPendingAuthLocale();
+      read(isAuthenticatedProvider.notifier).setAuthenticated();
+    });
   }
 }
 
