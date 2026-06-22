@@ -2,7 +2,13 @@ import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/notifications/push_notification_service.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_registration_service.dart';
 
-final class AppStartupService {
+abstract interface class AppStartupServiceContract {
+  Future<void> initializeCriticalState();
+
+  Future<void> initializeBackgroundServices();
+}
+
+final class AppStartupService implements AppStartupServiceContract {
   AppStartupService({
     required DeviceRegistrationService deviceRegistrationService,
     required PushNotificationService pushNotificationService,

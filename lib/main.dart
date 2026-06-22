@@ -6,7 +6,7 @@ import 'package:global_airsoft_app/src/app/app_bootstrap.dart';
 import 'package:global_airsoft_app/src/app/app_navigator.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/global_airsoft_app.dart';
-import 'package:global_airsoft_app/src/app/services/app_startup_service.dart';
+import 'package:global_airsoft_app/src/app/startup/app_startup_orchestrator.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
@@ -86,18 +86,14 @@ Future<void> main() async {
         ],
       );
 
+      final AppStartupOrchestrator appStartupOrchestrator = container.read(
+        appStartupOrchestratorProvider.notifier,
+      );
+      await appStartupOrchestrator.initializeCriticalState();
+
       final DeviceRegistrationService deviceRegistrationService = container.read(
         deviceRegistrationServiceProvider,
       );
-      final AppStartupService appStartupService = AppStartupService(
-        deviceRegistrationService: deviceRegistrationService,
-        pushNotificationService: container.read(pushNotificationServiceProvider),
-        onPushTokenReceived: (String token) {
-          container.read(pushTokenProvider.notifier).setToken(token);
-        },
-        logger: AppLogger.instance,
-      );
-      await appStartupService.initializeCriticalState();
       final AppDioService refreshDioService = AppDioService.create(
         config: appConfig,
         logger: AppLogger.instance,
@@ -152,7 +148,7 @@ Future<void> main() async {
         },
       );
 
-      unawaited(appStartupService.initializeBackgroundServices());
+      unawaited(appStartupOrchestrator.initializeBackgroundServices());
 
       return AppBootstrapPayload(
         initialBrightness: Brightness.dark,
