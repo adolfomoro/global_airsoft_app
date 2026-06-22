@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
+import 'package:global_airsoft_app/src/app/bootstrap/app_bootstrap_providers.dart';
 import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
@@ -16,13 +17,10 @@ import 'package:global_airsoft_app/src/features/auth/application/services/google
 import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repository/auth_repository.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_registration_service.dart';
 
-final Provider<Future<void> Function()> authLocalSessionCleanupProvider =
-    Provider<Future<void> Function()>((Ref ref) => () async {});
-
 final Provider<AuthStorageService> authStorageServiceProvider =
     Provider<AuthStorageService>((Ref ref) {
-      final secureStorage = ref.watch(secureStorageServiceProvider);
-      return AuthStorageService(secureStorage: secureStorage);
+      final bootstrapData = ref.watch(appBootstrapDataProvider);
+      return bootstrapData.authStorageService;
     });
 
 final Provider<AppDioService> authRefreshDioServiceProvider =
@@ -119,7 +117,10 @@ final Provider<GoogleSignInService> googleSignInServiceProvider =
     });
 
 final Provider<bool> initialIsAuthenticatedProvider = Provider<bool>(
-  (Ref ref) => false,
+  (Ref ref) {
+    final bootstrapData = ref.watch(appBootstrapDataProvider);
+    return bootstrapData.isAuthenticated;
+  },
 );
 
 final NotifierProvider<AuthSessionNotifier, bool> isAuthenticatedProvider =

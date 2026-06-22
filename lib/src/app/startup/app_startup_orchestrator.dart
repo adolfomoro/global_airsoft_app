@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/app_providers.dart';
 import 'package:global_airsoft_app/src/app/services/app_startup_service.dart';
+import 'package:global_airsoft_app/src/app/startup/app_startup_metrics.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 
 final Provider<AppStartupServiceContract> appStartupServiceProvider =
@@ -52,6 +53,60 @@ final class AppBootstrapState {
   }
 
   bool get isBackgroundReady => phase == AppBootstrapPhase.ready;
+
+  /// Calculates comprehensive metrics from timing data.
+  AppStartupMetrics? get metrics {
+    final criticalStart = criticalStartedAt;
+    final criticalEnd = criticalCompletedAt;
+
+    if (criticalStart == null || criticalEnd == null) {
+      return null;
+    }
+
+    final criticalTiming = AppBootstrapPhaseTiming(
+      phaseName: 'critical',
+      startedAt: criticalStart,
+      completedAt: criticalEnd,
+    );
+
+    final backgroundStart = backgroundStartedAt;
+    final backgroundEnd = backgroundCompletedAt;
+
+    AppBootstrapPhaseTiming? backgroundTiming;
+    if (backgroundStart != null && backgroundEnd != null) {
+      backgroundTiming = AppBootstrapPhaseTiming(
+        phaseName: 'background',
+        startedAt: backgroundStart,
+        completedAt: backgroundEnd,
+      );
+    }
+
+    // Total startup time: from critical start to UI ready (critical end)
+    final totalTime = Duration(
+      milliseconds: criticalTiming.duration.inMilliseconds,
+    );
+
+    return AppStartupMetrics(
+      criticalPhaseTiming: criticalTiming,
+      backgroundPhaseTiming: backgroundTiming,
+      totalStartupTime: totalTime,
+    );
+  }
+
+  /// Checks if critical startup phase is healthy.
+  AppBootstrapHealthCheck? checkCriticalHealth({int budgetMs = 3000}) {
+    return metrics?.checkCriticalPhaseHealth(budgetMs: budgetMs);
+  }
+
+  /// Checks if background startup phase is healthy.
+  AppBootstrapHealthCheck? checkBackgroundHealth({int budgetMs = 5000}) {
+    return metrics?.checkBackgroundPhaseHealth(budgetMs: budgetMs);
+  }
+
+  /// Returns overall health status based on critical phase.
+  AppBootstrapHealthStatus? get overallHealth {
+    return checkCriticalHealth()?.status;
+  }
 
   AppBootstrapState copyWith({
     AppBootstrapPhase? phase,
@@ -169,6 +224,18 @@ final class AppStartupOrchestrator extends Notifier<AppBootstrapState> {
       criticalCompletedAt: DateTime.now().toUtc(),
       errorMessage: null,
     );
+
+    // Log critical phase metrics
+    final metrics = state.metrics;
+    if (metrics != null) {
+      AppLogger.instance.info(
+        'Critical startup phase completed. ${metrics.summary}',
+      );
+      final healthCheck = state.checkCriticalHealth();
+      if (healthCheck != null) {
+        AppLogger.instance.info('Health check: $healthCheck');
+      }
+    }
   }
 
   Future<void> _initializeBackgroundServicesInternal() async {
@@ -204,5 +271,17 @@ final class AppStartupOrchestrator extends Notifier<AppBootstrapState> {
       backgroundCompletedAt: DateTime.now().toUtc(),
       errorMessage: null,
     );
+
+    // Log background phase metrics
+    final metrics = state.metrics;
+    if (metrics != null && metrics.backgroundPhaseTiming != null) {
+      AppLogger.instance.info(
+        'Background startup phase completed. ${metrics.backgroundPhaseTiming}',
+      );
+      final healthCheck = state.checkBackgroundHealth();
+      if (healthCheck != null) {
+        AppLogger.instance.info('Background health check: $healthCheck');
+      }
+    }
   }
 }
