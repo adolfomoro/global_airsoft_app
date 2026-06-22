@@ -55,44 +55,59 @@ final class AppPasswordField extends StatefulWidget {
 }
 
 final class _AppPasswordFieldState extends State<AppPasswordField> {
-  bool _obscureText = true;
+  late final ValueNotifier<bool> _obscureTextNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscureTextNotifier = ValueNotifier<bool>(true);
+  }
+
+  @override
+  void dispose() {
+    _obscureTextNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return AppTextField(
-      labelText: widget.labelText,
-      hintText: widget.hintText,
-      isRequired: widget.isRequired,
-      controller: widget.controller,
-      focusNode: widget.focusNode,
-      onChanged: widget.onChanged,
-      onFieldSubmitted: widget.onFieldSubmitted,
-      onTap: widget.onTap,
-      onEditingComplete: widget.onEditingComplete,
-      errorText: widget.errorText,
-      validator: widget.validator,
-      obscureText: _obscureText,
-      keyboardType: TextInputType.visiblePassword,
-      textInputAction: widget.textInputAction,
-      enabled: widget.enabled,
-      readOnly: widget.readOnly,
-      autofocus: widget.autofocus,
-      autovalidateMode: widget.autovalidateMode,
-      inputFormatters: widget.inputFormatters,
-      autofillHints: widget.autofillHints,
-      prefixIcon: widget.prefixIcon,
-      suffixIcon: _PasswordFieldSuffix(
-        obscureText: _obscureText,
-        onToggle: _toggleObscureText,
-        trailing: widget.suffixIcon,
-      ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: _obscureTextNotifier,
+      builder: (context, obscureText, _) {
+        return AppTextField(
+          labelText: widget.labelText,
+          hintText: widget.hintText,
+          isRequired: widget.isRequired,
+          controller: widget.controller,
+          focusNode: widget.focusNode,
+          onChanged: widget.onChanged,
+          onFieldSubmitted: widget.onFieldSubmitted,
+          onTap: widget.onTap,
+          onEditingComplete: widget.onEditingComplete,
+          errorText: widget.errorText,
+          validator: widget.validator,
+          obscureText: obscureText,
+          keyboardType: TextInputType.visiblePassword,
+          textInputAction: widget.textInputAction,
+          enabled: widget.enabled,
+          readOnly: widget.readOnly,
+          autofocus: widget.autofocus,
+          autovalidateMode: widget.autovalidateMode,
+          inputFormatters: widget.inputFormatters,
+          autofillHints: widget.autofillHints,
+          prefixIcon: widget.prefixIcon,
+          suffixIcon: _PasswordFieldSuffix(
+            obscureText: obscureText,
+            onToggle: _toggleObscureText,
+            trailing: widget.suffixIcon,
+          ),
+        );
+      },
     );
   }
 
   void _toggleObscureText() {
-    setState(() {
-      _obscureText = !_obscureText;
-    });
+    _obscureTextNotifier.value = !_obscureTextNotifier.value;
   }
 }
 
