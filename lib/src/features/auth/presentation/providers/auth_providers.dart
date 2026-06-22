@@ -5,6 +5,7 @@ import 'package:global_airsoft_app/src/core/localization/app_locale_providers.da
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/providers/auth_security_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_bootstrapper.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/google_sign_in_service.dart';
@@ -17,6 +18,19 @@ final Provider<AuthStorageService> authStorageServiceProvider =
     Provider<AuthStorageService>((Ref ref) {
       final secureStorage = ref.watch(secureStorageServiceProvider);
       return AuthStorageService(secureStorage: secureStorage);
+    });
+
+final Provider<AuthSecurityBootstrapper> authSecurityBootstrapperProvider =
+    Provider<AuthSecurityBootstrapper>((Ref ref) {
+      return AuthSecurityBootstrapper(
+        coordinator: ref.watch(authSecurityCoordinatorProvider),
+        authStorageService: ref.watch(authStorageServiceProvider),
+        keyValueStore: ref.watch(sharedPrefsKeyValueStoreProvider),
+        clearLocalSessionData: ref.watch(authLocalSessionCleanupProvider),
+        setUnauthenticated: () {
+          ref.read(isAuthenticatedProvider.notifier).setUnauthenticated();
+        },
+      );
     });
 
 final Provider<AuthRepository> authRepositoryProvider =
