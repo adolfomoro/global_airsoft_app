@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 
 class HomePlaceholderTab extends StatelessWidget {
@@ -37,7 +36,7 @@ class HomePlaceholderTab extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Icon(icon, size: 40, color: AppColors.secondaryLight),
+                Icon(icon, size: 40, color: colorScheme.primary),
                 const SizedBox(height: AppDimensions.spacingLg),
                 Text(
                   title,

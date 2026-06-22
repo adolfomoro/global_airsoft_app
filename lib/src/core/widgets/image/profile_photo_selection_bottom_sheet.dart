@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/media/image_crop_service.dart';
@@ -350,7 +351,7 @@ class _PhotoOption extends StatelessWidget {
         : colorScheme.onSurface;
 
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),

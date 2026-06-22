@@ -6,19 +6,19 @@ import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 final class AppTheme {
   AppTheme._();
 
-  static final ColorScheme _darkColorScheme = const ColorScheme(
+  static final ColorScheme _darkColorScheme = ColorScheme(
     brightness: Brightness.dark,
-    primary: AppColors.secondaryLight,
-    onPrimary: AppColors.background,
-    primaryContainer: AppColors.primary,
+    primary: AppColors.primary,
+    onPrimary: AppColors.onPrimary,
+    primaryContainer: AppColors.palette.accentTint,
     onPrimaryContainer: AppColors.onBackground,
     secondary: AppColors.secondary,
     onSecondary: AppColors.onSecondary,
-    secondaryContainer: AppColors.surfaceVariant,
+    secondaryContainer: AppColors.palette.surface2,
     onSecondaryContainer: AppColors.onBackground,
-    tertiary: AppColors.secondaryLight,
-    onTertiary: AppColors.background,
-    tertiaryContainer: AppColors.accentGreenDark,
+    tertiary: AppColors.success,
+    onTertiary: AppColors.onPrimary,
+    tertiaryContainer: AppColors.palette.warningTint,
     onTertiaryContainer: AppColors.onBackground,
     error: AppColors.error,
     onError: AppColors.onBackground,
@@ -90,7 +90,7 @@ final class AppTheme {
         systemOverlayStyle: overlayStyleFor(colorScheme.brightness),
       ),
       cardTheme: CardThemeData(
-        color: AppColors.backgroundMid,
+        color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
@@ -128,25 +128,25 @@ final class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.backgroundMid,
+        fillColor: AppColors.palette.surface2,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.spacingXl,
           vertical: 16,
         ),
         isDense: false,
         floatingLabelBehavior: FloatingLabelBehavior.auto,
-        labelStyle: const TextStyle(
+        labelStyle: TextStyle(
           color: AppColors.onSurfaceDim,
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
-        floatingLabelStyle: const TextStyle(
-          color: AppColors.secondaryLight,
+        floatingLabelStyle: TextStyle(
+          color: AppColors.primary,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
-        hintStyle: const TextStyle(color: AppColors.onSurfaceDim),
-        prefixIconColor: AppColors.secondaryLight,
+        hintStyle: TextStyle(color: AppColors.onSurfaceDim),
+        prefixIconColor: AppColors.primary,
         suffixIconColor: AppColors.onSurfaceDim,
         prefixIconConstraints: const BoxConstraints(
           minWidth: 48,
@@ -179,8 +179,8 @@ final class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.surfaceVariant,
-        contentTextStyle: const TextStyle(color: AppColors.onBackground),
+        backgroundColor: AppColors.surface,
+        contentTextStyle: TextStyle(color: AppColors.onBackground),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
     );

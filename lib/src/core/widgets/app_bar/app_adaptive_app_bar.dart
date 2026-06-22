@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 
 class AppAdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
   const AppAdaptiveAppBar({
@@ -68,10 +69,10 @@ class AppAdaptiveAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: centerTitle ?? false,
       automaticallyImplyLeading: automaticallyImplyLeading,
       backgroundColor: backgroundColor,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: AppColors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
-      shadowColor: Colors.transparent,
+      shadowColor: AppColors.transparent,
       shape: Border(bottom: BorderSide(color: separatorColor, width: 0)),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
+import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
@@ -389,7 +390,7 @@ class _UserMenuNavigationButton extends StatelessWidget {
     );
 
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: enabled ? onTap : null,
         borderRadius: borderRadius,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 
 final class AppGradientBackground extends StatefulWidget {
   const AppGradientBackground({
@@ -125,7 +126,9 @@ final class _AppGradientBackgroundState extends State<AppGradientBackground>
                         }
 
                         return ColoredBox(
-                          color: Colors.black.withValues(alpha: opacity),
+                          color: AppColors.accentBlack.withValues(
+                            alpha: opacity,
+                          ),
                           child: const SizedBox.expand(),
                         );
                       },

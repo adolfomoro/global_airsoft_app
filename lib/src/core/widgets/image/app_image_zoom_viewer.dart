@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 
 enum AppImageZoomViewerShape { rectangle, circle }
 
@@ -46,7 +47,7 @@ class AppImageZoomViewer extends StatelessWidget {
     return showGeneralDialog<T>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.transparent,
+      barrierColor: AppColors.transparent,
       transitionDuration: Duration.zero,
       transitionBuilder:
           (
@@ -77,7 +78,7 @@ class AppImageZoomViewer extends StatelessWidget {
     return showGeneralDialog<T>(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.transparent,
+      barrierColor: AppColors.transparent,
       transitionDuration: Duration.zero,
       transitionBuilder:
           (
@@ -426,7 +427,7 @@ class _AppImageZoomViewerBodyState extends State<_AppImageZoomViewerBody>
                         sigmaY: _blurSigma,
                       ),
                       child: ColoredBox(
-                        color: Colors.black.withValues(alpha: 0.22),
+                        color: AppColors.accentBlack.withValues(alpha: 0.22),
                       ),
                     ),
                   ),

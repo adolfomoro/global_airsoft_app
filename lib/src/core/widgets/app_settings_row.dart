@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/app/theme/app_dimensions.dart';
 
 class AppSettingsRow extends StatelessWidget {
@@ -34,7 +35,7 @@ class AppSettingsRow extends StatelessWidget {
         : colorScheme.onSurfaceVariant;
 
     return Material(
-      color: Colors.transparent,
+      color: AppColors.transparent,
       child: InkWell(
         onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(AppDimensions.radiusSm),

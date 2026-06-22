@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 
 enum AppButtonVariant { primary, secondary, tertiary }
 
@@ -46,9 +47,9 @@ final class AppButton extends StatelessWidget {
         break;
 
       case AppButtonVariant.secondary:
-        backgroundColor = Colors.transparent;
+        backgroundColor = AppColors.transparent;
         foregroundColor = colorScheme.onSurface;
-        disabledBackgroundColor = Colors.transparent;
+        disabledBackgroundColor = AppColors.transparent;
         disabledForegroundColor = colorScheme.onSurfaceVariant;
         break;
 

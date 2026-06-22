@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:global_airsoft_app/src/app/theme/app_colors.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/media/captured_image_mirror_service.dart';
@@ -237,7 +238,7 @@ class _ProfilePhotoCameraCapturePageState
             const Icon(
               Icons.error_outline_rounded,
               size: 48,
-              color: Colors.white70,
+              color: AppColors.white70,
             ),
             const SizedBox(height: 12),
             Text(
@@ -247,7 +248,7 @@ class _ProfilePhotoCameraCapturePageState
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(color: Colors.white),
+              ).textTheme.titleMedium?.copyWith(color: AppColors.white),
             ),
             const SizedBox(height: 20),
             FilledButton(
@@ -294,10 +295,10 @@ class _ProfilePhotoCameraCapturePageState
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: <Color>[
-                  Colors.transparent,
-                  Colors.white,
-                  Colors.white,
-                  Colors.transparent,
+                  AppColors.transparent,
+                  AppColors.white,
+                  AppColors.white,
+                  AppColors.transparent,
                 ],
                 stops: <double>[0.0, 0.02, 0.98, 1.0],
               ).createShader(bounds);
@@ -348,8 +349,8 @@ class _ProfilePhotoCameraCapturePageState
               icon: const Icon(Icons.close_rounded),
               label: Text(context.l10n.tr(AppLocaleKeys.profilePhotoCancel)),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.black.withValues(alpha: 0.18),
+                foregroundColor: AppColors.white,
+                backgroundColor: AppColors.accentBlack.withValues(alpha: 0.18),
               ),
             ),
             const Spacer(),
@@ -383,9 +384,9 @@ class _ProfilePhotoCameraCapturePageState
                 height: 78,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white,
+                  color: AppColors.white,
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: AppColors.white.withValues(alpha: 0.5),
                     width: 6,
                   ),
                 ),
@@ -396,7 +397,7 @@ class _ProfilePhotoCameraCapturePageState
                       )
                     : const Icon(
                         Icons.camera_alt_rounded,
-                        color: Colors.black87,
+                        color: AppColors.black87,
                       ),
               ),
             ),
@@ -410,7 +411,7 @@ class _ProfilePhotoCameraCapturePageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.accentBlack,
       body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
