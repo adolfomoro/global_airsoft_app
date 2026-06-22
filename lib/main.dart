@@ -52,9 +52,10 @@ Future<void> main() async {
             appLocalizationService,
           ),
           authLocalSessionCleanupProvider.overrideWithValue(() async {
-            await container.read(userProfileStorageServiceProvider)
-                .clearCurrentUserProfile();
-            container.invalidate(currentUserProfileProvider);
+            container.read(currentUserProfileRefreshRequestProvider.notifier)
+                .clear();
+            await container.read(currentUserProfileProvider.notifier)
+                .clearCachedProfile();
           }),
         ],
       );

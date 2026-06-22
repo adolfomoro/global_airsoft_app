@@ -98,10 +98,19 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
       CurrentUserProfileReloadThrottle(minInterval: _reloadThrottleInterval);
   Future<UserProfile>? _inFlightReload;
 
+  bool get _isAuthenticated => ref.read(isAuthenticatedProvider);
+
   @override
   Future<UserProfile> build() async {
+    final bool isAuthenticated = ref.watch(isAuthenticatedProvider);
     final UserProfile? cachedProfile = await _offlinePersistence
         .getCurrentUserProfile();
+
+    if (!isAuthenticated) {
+      _reloadThrottle.reset();
+      return _signedOutSnapshot(cachedProfile ?? state.asData?.value);
+    }
+
     if (cachedProfile != null) {
       unawaited(_refreshSilently());
       return cachedProfile;
@@ -112,6 +121,12 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
 
   Future<UserProfile> reload({bool bypassThrottle = false}) async {
     final UserProfile? previousProfile = state.asData?.value;
+
+    if (!_isAuthenticated) {
+      final UserProfile? cachedProfile = await _offlinePersistence
+          .getCurrentUserProfile();
+      return _signedOutSnapshot(cachedProfile ?? previousProfile);
+    }
 
     if (!bypassThrottle &&
         previousProfile != null &&
@@ -161,6 +176,11 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
       return false;
     }
 
+    if (!_isAuthenticated) {
+      ref.read(currentUserProfileRefreshRequestProvider.notifier).clear();
+      return false;
+    }
+
     try {
       await reload(bypassThrottle: true);
       return true;
@@ -171,11 +191,26 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
 
   Future<void> clearCachedProfile() async {
     _reloadThrottle.reset();
+    _inFlightReload = null;
     await _offlinePersistence.clearCurrentUserProfile();
+    if (ref.mounted) {
+      state = AsyncData<UserProfile>(_signedOutSnapshot(state.asData?.value));
+    }
   }
 
   Future<UserProfile> _fetchAndPersistRemoteProfile() async {
+    if (!_isAuthenticated) {
+      final UserProfile? cachedProfile = await _offlinePersistence
+          .getCurrentUserProfile();
+      return _signedOutSnapshot(cachedProfile ?? state.asData?.value);
+    }
+
     final UserProfile remoteProfile = await _service.getCurrentUserProfile();
+
+    if (!_isAuthenticated) {
+      return _signedOutSnapshot(state.asData?.value);
+    }
+
     final UserProfile persistedProfile = await _offlinePersistence
         .persistRemoteProfile(remoteProfile);
     _reloadThrottle.markSuccessfulReload();
@@ -183,6 +218,10 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
   }
 
   Future<void> _refreshSilently() async {
+    if (!_isAuthenticated) {
+      return;
+    }
+
     try {
       final UserProfile remoteProfile = await _fetchAndPersistRemoteProfile();
       if (ref.mounted) {
@@ -198,6 +237,25 @@ class CurrentUserProfileController extends AsyncNotifier<UserProfile> {
         stackTrace: stackTrace,
       );
     }
+  }
+
+  UserProfile _signedOutSnapshot(UserProfile? source) {
+    if (source != null) {
+      return source.copyWith(
+        mediumProfilePictureUrl: '',
+        largeProfilePictureUrl: '',
+        localProfilePicturePath: '',
+      );
+    }
+
+    return const UserProfile(
+      id: '',
+      username: '',
+      fullName: '',
+      bio: '',
+      mediumProfilePictureUrl: '',
+      largeProfilePictureUrl: '',
+    );
   }
 }
 
