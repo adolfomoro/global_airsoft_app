@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/validation/validation.dart';
 
@@ -84,9 +83,6 @@ class _AppTextFieldState extends State<AppTextField> {
     minHeight: 48,
   );
 
-  bool _obscureText = false;
-  bool _isFocused = false;
-  bool _isPasswordTogglePressed = false;
   FocusNode? _internalFocusNode;
 
   FocusNode get _effectiveFocusNode => widget.focusNode ?? _internalFocusNode!;
@@ -94,39 +90,27 @@ class _AppTextFieldState extends State<AppTextField> {
   @override
   void initState() {
     super.initState();
-    _obscureText = widget.obscureText;
     _internalFocusNode = widget.focusNode == null ? FocusNode() : null;
-    _effectiveFocusNode.addListener(_handleFocusNodeChange);
   }
 
   @override
   void didUpdateWidget(covariant AppTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.obscureText != widget.obscureText) {
-      _obscureText = widget.obscureText;
-    }
-
     if (oldWidget.focusNode == widget.focusNode) {
       return;
     }
 
-    oldWidget.focusNode?.removeListener(_handleFocusNodeChange);
-    _internalFocusNode?.removeListener(_handleFocusNodeChange);
     if (oldWidget.focusNode == null) {
       _internalFocusNode?.dispose();
       _internalFocusNode = null;
     }
 
     _internalFocusNode = widget.focusNode == null ? FocusNode() : null;
-    _effectiveFocusNode.addListener(_handleFocusNodeChange);
-    _isFocused = _effectiveFocusNode.hasFocus;
   }
 
   @override
   void dispose() {
-    widget.focusNode?.removeListener(_handleFocusNodeChange);
-    _internalFocusNode?.removeListener(_handleFocusNodeChange);
     _internalFocusNode?.dispose();
     super.dispose();
   }
@@ -140,44 +124,11 @@ class _AppTextFieldState extends State<AppTextField> {
         widget.enableSuggestions ?? !widget.obscureText;
     final bool effectiveEnableIMEPersonalizedLearning =
         widget.enableIMEPersonalizedLearning ?? !widget.obscureText;
-    final String passwordToggleLabel = context.l10n.tr(
-      _obscureText
-          ? AppLocaleKeys.commonShowPassword
-          : AppLocaleKeys.commonHidePassword,
-    );
-    final Widget obscureToggleIcon = Listener(
-      onPointerDown: (_) => _handlePasswordTogglePressed(),
-      onPointerCancel: (_) => _resetPasswordTogglePressed(),
-      onPointerUp: (_) => _resetPasswordTogglePressed(),
-      child: AnimatedScale(
-        scale: _isPasswordTogglePressed ? 0.92 : 1,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
-        child: IconButton(
-          tooltip: passwordToggleLabel,
-          onPressed: _toggleObscureText,
-          icon: Icon(
-            _obscureText
-                ? Icons.visibility_off_outlined
-                : Icons.visibility_outlined,
-          ),
-        ),
-      ),
-    );
-    final Widget? effectiveSuffixIcon = widget.obscureText
-        ? (widget.suffixIcon == null
-              ? obscureToggleIcon
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[widget.suffixIcon!, obscureToggleIcon],
-                ))
-        : widget.suffixIcon;
-
     return TextFormField(
       controller: widget.controller,
       focusNode: _effectiveFocusNode,
       onChanged: widget.onChanged,
-      obscureText: _obscureText,
+      obscureText: widget.obscureText,
       autocorrect: effectiveAutocorrect,
       enableSuggestions: effectiveEnableSuggestions,
       enableIMEPersonalizedLearning: effectiveEnableIMEPersonalizedLearning,
@@ -223,55 +174,21 @@ class _AppTextFieldState extends State<AppTextField> {
       textAlignVertical: TextAlignVertical.center,
       style: _inputTextStyle(theme),
       decoration: InputDecoration(
-        label: _buildLabel(context),
+        label: _AppTextFieldLabel(
+          labelText: widget.labelText,
+          isRequired: widget.isRequired,
+          focusNode: _effectiveFocusNode,
+        ),
         hintText: widget.hintText,
         errorText: widget.errorText,
         errorMaxLines: widget.errorMaxLines,
         prefixIcon: widget.prefixIcon,
-        suffixIcon: effectiveSuffixIcon,
+        suffixIcon: widget.suffixIcon,
         prefixIconConstraints: _iconConstraints,
         suffixIconConstraints: _iconConstraints,
         errorStyle: TextStyle(color: colorScheme.error),
       ),
     );
-  }
-
-  void _handleFocusNodeChange() {
-    final bool hasFocus = _effectiveFocusNode.hasFocus;
-    if (_isFocused == hasFocus || !mounted) {
-      return;
-    }
-
-    setState(() {
-      _isFocused = hasFocus;
-    });
-  }
-
-  void _toggleObscureText() {
-    setState(() {
-      _isPasswordTogglePressed = false;
-      _obscureText = !_obscureText;
-    });
-  }
-
-  void _handlePasswordTogglePressed() {
-    if (_isPasswordTogglePressed) {
-      return;
-    }
-
-    setState(() {
-      _isPasswordTogglePressed = true;
-    });
-  }
-
-  void _resetPasswordTogglePressed() {
-    if (!_isPasswordTogglePressed || !mounted) {
-      return;
-    }
-
-    setState(() {
-      _isPasswordTogglePressed = false;
-    });
   }
 
   TextStyle _inputTextStyle(ThemeData theme) {
@@ -280,44 +197,63 @@ class _AppTextFieldState extends State<AppTextField> {
     return baseStyle.copyWith(color: theme.colorScheme.onSurface);
   }
 
-  Widget _buildLabel(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final TextStyle normalLabelStyle =
-        theme.inputDecorationTheme.labelStyle ??
-        theme.textTheme.bodyMedium ??
-        const TextStyle();
-    final TextStyle floatingLabelStyle =
-        theme.inputDecorationTheme.floatingLabelStyle ??
-        theme.textTheme.bodySmall ??
-        normalLabelStyle;
-    final TextStyle effectiveLabelStyle = _isFocused
-        ? floatingLabelStyle
-        : normalLabelStyle;
+}
 
-    if (_isFocused || !widget.isRequired) {
-      return Text(widget.labelText, style: effectiveLabelStyle);
-    }
+final class _AppTextFieldLabel extends StatelessWidget {
+  const _AppTextFieldLabel({
+    required this.labelText,
+    required this.isRequired,
+    required this.focusNode,
+  });
 
-    final double baseFontSize =
-        effectiveLabelStyle.fontSize ?? normalLabelStyle.fontSize ?? 14;
+  final String labelText;
+  final bool isRequired;
+  final FocusNode focusNode;
 
-    return Text.rich(
-      TextSpan(
-        text: widget.labelText,
-        style: effectiveLabelStyle,
-        children: <InlineSpan>[
-          WidgetSpan(
-            alignment: PlaceholderAlignment.top,
-            child: Text(
-              ' *',
-              style: effectiveLabelStyle.copyWith(
-                fontSize: baseFontSize * 0.85,
-                height: 1,
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: focusNode,
+      builder: (context, _) {
+        final ThemeData theme = Theme.of(context);
+        final TextStyle normalLabelStyle =
+            theme.inputDecorationTheme.labelStyle ??
+            theme.textTheme.bodyMedium ??
+            const TextStyle();
+        final TextStyle floatingLabelStyle =
+            theme.inputDecorationTheme.floatingLabelStyle ??
+            theme.textTheme.bodySmall ??
+            normalLabelStyle;
+        final TextStyle effectiveLabelStyle = focusNode.hasFocus
+            ? floatingLabelStyle
+            : normalLabelStyle;
+
+        if (focusNode.hasFocus || !isRequired) {
+          return Text(labelText, style: effectiveLabelStyle);
+        }
+
+        final double baseFontSize =
+            effectiveLabelStyle.fontSize ?? normalLabelStyle.fontSize ?? 14;
+
+        return Text.rich(
+          TextSpan(
+            text: labelText,
+            style: effectiveLabelStyle,
+            children: <InlineSpan>[
+              WidgetSpan(
+                alignment: PlaceholderAlignment.top,
+                child: Text(
+                  ' *',
+                  style: effectiveLabelStyle.copyWith(
+                    fontSize: baseFontSize * 0.85,
+                    height: 1,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
