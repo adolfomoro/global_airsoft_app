@@ -1,43 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:global_airsoft_app/src/app/routing/app_route_paths.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/pages/sign_up_page.dart';
 
 void main() {
-  testWidgets('SignUpPage renders without errors', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
+  Future<void> pumpSignUpPage(
+    WidgetTester tester, {
+    Widget? home,
+    GlobalKey<NavigatorState>? navigatorKey,
+    Map<String, WidgetBuilder> routes = const <String, WidgetBuilder>{},
+  }) {
+    return tester.pumpWidget(
+      ProviderScope(
         child: MaterialApp(
-          locale: Locale('en'),
+          navigatorKey: navigatorKey,
+          locale: const Locale('en'),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: SignUpPage(),
+          routes: routes,
+          home: home ?? const SignUpPage(),
         ),
       ),
     );
+  }
+
+  testWidgets('SignUpPage renders key presentation fields', (
+    WidgetTester tester,
+  ) async {
+    await pumpSignUpPage(tester);
     await tester.pumpAndSettle();
 
-    // Verify main page elements are present
     expect(find.byType(SignUpPage), findsOneWidget);
     expect(find.byType(AppBar), findsOneWidget);
-    expect(find.byType(TextField), findsWidgets);
+    expect(find.byType(TextFormField), findsNWidgets(5));
+    expect(find.widgetWithText(ElevatedButton, 'Create account'), findsOneWidget);
   });
 
-  testWidgets('SignUpPage submit button exists', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
-          locale: Locale('en'),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: SignUpPage(),
-        ),
-      ),
+  testWidgets('SignUpPage shows password mismatch feedback', (
+    WidgetTester tester,
+  ) async {
+    await pumpSignUpPage(tester);
+    await tester.pumpAndSettle();
+
+    final passwordFields = find.byType(TextFormField);
+
+    await tester.enterText(passwordFields.at(3), 'Abcdef1!');
+    await tester.enterText(passwordFields.at(4), 'Mismatch1!');
+    await tester.pump();
+
+    expect(find.text('Passwords do not match'), findsOneWidget);
+  });
+
+  testWidgets('SignUpPage sign in action pops back to previous route', (
+    WidgetTester tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+
+    await pumpSignUpPage(
+      tester,
+      navigatorKey: navigatorKey,
+      home: const Scaffold(body: Center(child: Text('Login route'))),
+      routes: <String, WidgetBuilder>{
+        AppRoutePaths.signUp: (_) => const SignUpPage(),
+      },
     );
     await tester.pumpAndSettle();
 
-    // Find submit button and verify it exists
-    expect(find.byType(ElevatedButton), findsWidgets);
+    navigatorKey.currentState!.pushNamed(AppRoutePaths.signUp);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(TextButton, 'Sign In'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Login route'), findsOneWidget);
   });
 }
