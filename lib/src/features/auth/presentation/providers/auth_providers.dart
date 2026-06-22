@@ -4,6 +4,7 @@ import 'package:global_airsoft_app/src/core/config/app_config.dart';
 import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
 import 'package:global_airsoft_app/src/core/logging/app_logger.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/application/providers/auth_security_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/google_sign_in_service.dart';
@@ -33,11 +34,13 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
 ) {
   final authRepository = ref.watch(authRepositoryProvider);
   final authStorageService = ref.watch(authStorageServiceProvider);
+  final authSecurityCoordinator = ref.watch(authSecurityCoordinatorProvider);
   final sharedPrefs = ref.watch(sharedPrefsKeyValueStoreProvider);
   final clearLocalSessionData = ref.watch(authLocalSessionCleanupProvider);
   return AuthService(
     authRepository: authRepository,
     authStorageService: authStorageService,
+    authSecurityCoordinator: authSecurityCoordinator,
     sharedPrefs: sharedPrefs,
     clearLocalSessionData: clearLocalSessionData,
     logger: AppLogger.instance,

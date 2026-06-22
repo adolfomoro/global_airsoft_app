@@ -110,6 +110,7 @@ ResponseBody _errorBody({
 
 Future<AppDioService> _buildService(
   _RecordingHttpClientAdapter adapter, {
+  required AuthSecurityCoordinator coordinator,
   Locale locale = const Locale('en'),
   bool enableAuthSecurityInterceptor = true,
 }) async {
@@ -131,6 +132,9 @@ Future<AppDioService> _buildService(
       return localizationService.tr(AppLocaleKeys.commonGenericApiErrorMessage);
     },
     enableAuthSecurityInterceptor: enableAuthSecurityInterceptor,
+    authSecurityCoordinator: enableAuthSecurityInterceptor
+        ? coordinator
+        : null,
   );
 
   service.client.httpClientAdapter = adapter;
@@ -139,9 +143,14 @@ Future<AppDioService> _buildService(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  late AuthSecurityCoordinator coordinator;
+
+  setUp(() {
+    coordinator = AuthSecurityCoordinator();
+  });
 
   tearDown(() {
-    AuthSecurityCoordinator.instance.reset();
+    coordinator.reset();
   });
 
   test(
@@ -158,7 +167,7 @@ void main() {
       final Completer<void> refreshStarted = Completer<void>();
       int protectedRequestCount = 0;
 
-      AuthSecurityCoordinator.instance.configure(
+      coordinator.configure(
         getTokens: () async => currentTokens,
         saveTokens: (AuthTokens tokens) async {
           currentTokens = tokens;
@@ -209,7 +218,7 @@ void main() {
         },
       );
 
-      final AppDioService service = await _buildService(adapter);
+      final AppDioService service = await _buildService(adapter, coordinator: coordinator);
 
       final Future<Response<dynamic>> firstRequest = service.get<dynamic>(
         '/protected',
@@ -286,7 +295,7 @@ void main() {
     int refreshCalls = 0;
     int clearCalls = 0;
 
-    AuthSecurityCoordinator.instance.configure(
+    coordinator.configure(
       getTokens: () async => currentTokens,
       saveTokens: (AuthTokens tokens) async {
         currentTokens = tokens;
@@ -325,7 +334,7 @@ void main() {
       },
     );
 
-    final AppDioService service = await _buildService(adapter);
+    final AppDioService service = await _buildService(adapter, coordinator: coordinator);
 
     await expectLater(
       service.get<dynamic>('/protected'),
@@ -367,7 +376,7 @@ void main() {
     int refreshCalls = 0;
     int clearCalls = 0;
 
-    AuthSecurityCoordinator.instance.configure(
+    coordinator.configure(
       getTokens: () async => currentTokens,
       saveTokens: (AuthTokens tokens) async {
         currentTokens = tokens;
@@ -403,7 +412,7 @@ void main() {
       },
     );
 
-    final AppDioService service = await _buildService(adapter);
+    final AppDioService service = await _buildService(adapter, coordinator: coordinator);
 
     await expectLater(
       service.get<dynamic>('/protected'),
@@ -438,7 +447,7 @@ void main() {
     int refreshCalls = 0;
     int clearCalls = 0;
 
-    AuthSecurityCoordinator.instance.configure(
+    coordinator.configure(
       getTokens: () async => currentTokens,
       saveTokens: (AuthTokens tokens) async {
         currentTokens = tokens;
@@ -474,7 +483,7 @@ void main() {
       },
     );
 
-    final AppDioService service = await _buildService(adapter);
+    final AppDioService service = await _buildService(adapter, coordinator: coordinator);
 
     await expectLater(
       service.get<dynamic>('/protected'),
@@ -509,7 +518,7 @@ void main() {
     int refreshCalls = 0;
     int clearCalls = 0;
 
-    AuthSecurityCoordinator.instance.configure(
+    coordinator.configure(
       getTokens: () async => currentTokens,
       saveTokens: (AuthTokens tokens) async {
         currentTokens = tokens;
@@ -543,7 +552,7 @@ void main() {
       },
     );
 
-    final AppDioService service = await _buildService(adapter);
+    final AppDioService service = await _buildService(adapter, coordinator: coordinator);
 
     Object? caughtError;
     try {
@@ -574,7 +583,7 @@ void main() {
       int refreshCalls = 0;
       int clearCalls = 0;
 
-      AuthSecurityCoordinator.instance.configure(
+      coordinator.configure(
         getTokens: () async => currentTokens,
         saveTokens: (AuthTokens tokens) async {
           currentTokens = tokens;
@@ -613,7 +622,7 @@ void main() {
         },
       );
 
-      final AppDioService service = await _buildService(adapter);
+      final AppDioService service = await _buildService(adapter, coordinator: coordinator);
 
       await expectLater(
         service.get<dynamic>('/protected'),
@@ -656,7 +665,7 @@ void main() {
     int refreshCalls = 0;
     int clearCalls = 0;
 
-    AuthSecurityCoordinator.instance.configure(
+    coordinator.configure(
       getTokens: () async => currentTokens,
       saveTokens: (AuthTokens tokens) async {
         currentTokens = tokens;
@@ -693,7 +702,7 @@ void main() {
       },
     );
 
-    final AppDioService service = await _buildService(adapter);
+    final AppDioService service = await _buildService(adapter, coordinator: coordinator);
 
     await expectLater(
       service.get<dynamic>('/protected'),
@@ -730,7 +739,7 @@ void main() {
     int refreshCalls = 0;
     int clearCalls = 0;
 
-    AuthSecurityCoordinator.instance.configure(
+    coordinator.configure(
       getTokens: () async => currentTokens,
       saveTokens: (AuthTokens tokens) async {
         currentTokens = tokens;
@@ -764,7 +773,7 @@ void main() {
       },
     );
 
-    final AppDioService service = await _buildService(adapter);
+    final AppDioService service = await _buildService(adapter, coordinator: coordinator);
 
     await expectLater(
       service.get<dynamic>('/protected'),
@@ -804,6 +813,7 @@ void main() {
 
       final AppDioService service = await _buildService(
         adapter,
+        coordinator: coordinator,
         locale: const Locale('pt', 'BR'),
         enableAuthSecurityInterceptor: false,
       );
@@ -839,7 +849,7 @@ void main() {
       refreshToken: 'old-refresh-token',
     );
 
-    AuthSecurityCoordinator.instance.configure(
+    coordinator.configure(
       getTokens: () async => currentTokens,
       saveTokens: (AuthTokens tokens) async {
         currentTokens = tokens;
@@ -874,7 +884,7 @@ void main() {
       },
     );
 
-    final AppDioService service = await _buildService(adapter);
+    final AppDioService service = await _buildService(adapter, coordinator: coordinator);
 
     await expectLater(
       service.get<dynamic>('/protected'),

@@ -12,6 +12,7 @@ import 'package:global_airsoft_app/src/core/network/constants/app_network_header
 import 'package:global_airsoft_app/src/core/notifications/notification_permission_service.dart';
 import 'package:global_airsoft_app/src/core/notifications/push_notification_service.dart';
 import 'package:global_airsoft_app/src/core/storage/storage_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/application/providers/auth_security_providers.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_registration_service.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_storage_service.dart';
 import 'package:global_airsoft_app/src/features/device/data/constants/device_api_paths.dart';
@@ -110,6 +111,9 @@ AppDioService _buildAppDioService(
     },
     deviceSyncSkipPaths: deviceSyncSkipPaths,
     enableAuthSecurityInterceptor: enableAuthSecurityInterceptor,
+    authSecurityCoordinator: enableAuthSecurityInterceptor
+        ? ref.read(authSecurityCoordinatorProvider)
+        : null,
   );
 }
 

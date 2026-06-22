@@ -11,6 +11,7 @@ import 'package:global_airsoft_app/src/core/network/interceptors/api_exception_i
 import 'package:global_airsoft_app/src/core/network/interceptors/auth_security_interceptor.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/device_sync_interceptor.dart';
 import 'package:global_airsoft_app/src/core/network/interceptors/language_sync_interceptor.dart';
+import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_coordinator.dart';
 
 final class AppDioService {
   AppDioService._({required Dio dio}) : _dio = dio;
@@ -34,6 +35,7 @@ final class AppDioService {
     required Future<String> Function() deviceSyncRequiredMessageResolver,
     Set<String> deviceSyncSkipPaths = const <String>{},
     bool enableAuthSecurityInterceptor = false,
+    AuthSecurityCoordinator? authSecurityCoordinator,
   }) {
     final String versionedBaseUrl = _buildVersionedBaseUrl(config);
     final BaseOptions options = BaseOptions(
@@ -70,7 +72,16 @@ final class AppDioService {
     }
 
     if (enableAuthSecurityInterceptor) {
-      dio.interceptors.add(AuthSecurityInterceptor(dio: dio));
+      final AuthSecurityCoordinator? coordinator = authSecurityCoordinator;
+      if (coordinator == null) {
+        throw StateError(
+          'AuthSecurityCoordinator is required when auth security interceptor is enabled.',
+        );
+      }
+
+      dio.interceptors.add(
+        AuthSecurityInterceptor(dio: dio, coordinator: coordinator),
+      );
     }
 
     dio.interceptors.add(

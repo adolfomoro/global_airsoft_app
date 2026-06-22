@@ -24,6 +24,7 @@ import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_security_coordinator.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_storage_service.dart';
 import 'package:global_airsoft_app/src/features/auth/application/services/auth_token_refresh_service.dart';
+import 'package:global_airsoft_app/src/features/auth/application/providers/auth_security_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/domain/models/auth_tokens.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/device/application/services/device_registration_service.dart';
@@ -123,8 +124,11 @@ Future<void> main() async {
       );
       final AuthTokenRefreshService authTokenRefreshService =
           AuthTokenRefreshService(dioService: refreshDioService);
+      final AuthSecurityCoordinator authSecurityCoordinator = container.read(
+        authSecurityCoordinatorProvider,
+      );
 
-      AuthSecurityCoordinator.instance.configure(
+      authSecurityCoordinator.configure(
         getTokens: authStorageService.getTokens,
         saveTokens: authStorageService.saveTokens,
         initialTokens: tokens,

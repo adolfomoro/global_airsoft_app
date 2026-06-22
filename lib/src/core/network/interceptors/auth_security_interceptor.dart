@@ -37,10 +37,10 @@ final class AuthSecurityInterceptor extends Interceptor {
 
   AuthSecurityInterceptor({
     required Dio dio,
-    AuthSecurityCoordinator? coordinator,
+    required AuthSecurityCoordinator coordinator,
     AuthSecurityPolicy policy = const AuthSecurityPolicy(),
   }) : _dio = dio,
-       _coordinator = coordinator ?? AuthSecurityCoordinator.instance,
+       _coordinator = coordinator,
        _policy = policy;
 
   final Dio _dio;

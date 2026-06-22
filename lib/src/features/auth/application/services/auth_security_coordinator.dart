@@ -9,9 +9,7 @@ typedef AuthMessagePresenter =
     Future<void> Function(String message, {Object? source});
 
 final class AuthSecurityCoordinator {
-  AuthSecurityCoordinator._();
-
-  static final AuthSecurityCoordinator instance = AuthSecurityCoordinator._();
+  AuthSecurityCoordinator();
 
   AuthTokensReader? _getTokens;
   AuthTokensWriter? _saveTokens;

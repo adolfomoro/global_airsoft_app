@@ -3,8 +3,14 @@ import 'package:global_airsoft_app/src/features/auth/application/services/auth_s
 import 'package:global_airsoft_app/src/features/auth/domain/models/auth_tokens.dart';
 
 void main() {
+  late AuthSecurityCoordinator coordinator;
+
+  setUp(() {
+    coordinator = AuthSecurityCoordinator();
+  });
+
   tearDown(() {
-    AuthSecurityCoordinator.instance.reset();
+    coordinator.reset();
   });
 
   test('reuses cached tokens without repeated storage reads', () async {
@@ -14,7 +20,7 @@ void main() {
       refreshToken: 'boot-refresh',
     );
 
-    AuthSecurityCoordinator.instance.configure(
+    coordinator.configure(
       getTokens: () async {
         readerCalls += 1;
         return bootTokens;
@@ -30,10 +36,8 @@ void main() {
       cacheInitialTokens: true,
     );
 
-    final AuthTokens? first = await AuthSecurityCoordinator.instance
-        .readTokens();
-    final AuthTokens? second = await AuthSecurityCoordinator.instance
-        .readTokens();
+    final AuthTokens? first = await coordinator.readTokens();
+    final AuthTokens? second = await coordinator.readTokens();
 
     expect(readerCalls, 0);
     expect(first?.jwtToken, 'boot-jwt');
@@ -43,17 +47,15 @@ void main() {
       jwtToken: 'new-jwt',
       refreshToken: 'new-refresh',
     );
-    await AuthSecurityCoordinator.instance.saveTokens(refreshedTokens);
+    await coordinator.saveTokens(refreshedTokens);
 
-    final AuthTokens? afterSave = await AuthSecurityCoordinator.instance
-        .readTokens();
+    final AuthTokens? afterSave = await coordinator.readTokens();
     expect(afterSave?.jwtToken, 'new-jwt');
     expect(readerCalls, 0);
 
-    await AuthSecurityCoordinator.instance.clearSession();
+    await coordinator.clearSession();
 
-    final AuthTokens? afterClear = await AuthSecurityCoordinator.instance
-        .readTokens();
+    final AuthTokens? afterClear = await coordinator.readTokens();
     expect(afterClear, isNull);
     expect(readerCalls, 0);
   });

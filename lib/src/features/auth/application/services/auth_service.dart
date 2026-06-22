@@ -23,17 +23,20 @@ final class AuthService {
   AuthService({
     required AuthRepository authRepository,
     required AuthStorageService authStorageService,
+    required AuthSecurityCoordinator authSecurityCoordinator,
     required SharedPrefsKeyValueStore sharedPrefs,
     required Future<void> Function() clearLocalSessionData,
     required AppLogger logger,
   }) : _authRepository = authRepository,
        _authStorageService = authStorageService,
+       _authSecurityCoordinator = authSecurityCoordinator,
        _sharedPrefs = sharedPrefs,
        _clearLocalSessionData = clearLocalSessionData,
        _logger = logger;
 
   final AuthRepository _authRepository;
   final AuthStorageService _authStorageService;
+  final AuthSecurityCoordinator _authSecurityCoordinator;
   final SharedPrefsKeyValueStore _sharedPrefs;
   final Future<void> Function() _clearLocalSessionData;
   final AppLogger _logger;
@@ -56,8 +59,8 @@ final class AuthService {
     await _authStorageService.saveTokens(authTokens);
     await _authStorageService.saveProfile(authProfile);
     await _sharedPrefs.setString(_userIdBackupKey, profile.id);
-    AuthSecurityCoordinator.instance.cacheTokens(authTokens);
-    AuthSecurityCoordinator.instance.notifySessionChanged();
+    _authSecurityCoordinator.cacheTokens(authTokens);
+    _authSecurityCoordinator.notifySessionChanged();
 
     _logger.info(successLogMessage);
   }
@@ -82,8 +85,8 @@ final class AuthService {
   }
 
   Future<void> _clearLocalSession() async {
-    await AuthSecurityCoordinator.instance.clearSession();
-    if (AuthSecurityCoordinator.instance.isConfigured) {
+    await _authSecurityCoordinator.clearSession();
+    if (_authSecurityCoordinator.isConfigured) {
       return;
     }
 
