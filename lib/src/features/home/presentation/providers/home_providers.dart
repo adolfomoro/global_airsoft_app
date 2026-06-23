@@ -2,8 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum HomeTab { discovery, timeline, profile }
 
-final NotifierProvider<HomeTabNotifier, HomeTab> homeTabProvider =
-    NotifierProvider<HomeTabNotifier, HomeTab>(HomeTabNotifier.new);
+final homeTabProvider = NotifierProvider.autoDispose<HomeTabNotifier, HomeTab>(
+  HomeTabNotifier.new,
+);
 
 final class HomeTabNotifier extends Notifier<HomeTab> {
   @override

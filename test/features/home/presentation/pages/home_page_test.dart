@@ -92,8 +92,8 @@ void main() {
     'keeps home startup stable while current user profile resolves asynchronously',
     (WidgetTester tester) async {
       final Completer<UserProfile> profileCompleter = Completer<UserProfile>();
-      _ConfigurableCurrentUserProfileController.buildHandler =
-          () => profileCompleter.future;
+      _ConfigurableCurrentUserProfileController.buildHandler = () =>
+          profileCompleter.future;
       addTearDown(_ConfigurableCurrentUserProfileController.reset);
 
       await tester.pumpWidget(
@@ -137,6 +137,38 @@ void main() {
       expect(find.text('Olivia Ward'), findsOneWidget);
     },
   );
+
+  testWidgets('does not mutate refresh requests during home startup', (
+    WidgetTester tester,
+  ) async {
+    final ProviderContainer container = ProviderContainer(
+      overrides: [
+        currentUserProfileProvider.overrideWith(
+          _TestCurrentUserProfileController.new,
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    container
+        .read(currentUserProfileRefreshRequestProvider.notifier)
+        .requestRefresh();
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          locale: const Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: const HomePage(),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(container.read(currentUserProfileRefreshRequestProvider), isTrue);
+  });
 }
 
 final class _TestCurrentUserProfileController

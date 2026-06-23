@@ -5,6 +5,7 @@ import 'package:global_airsoft_app/src/core/localization/app_localizations.dart'
 import 'package:global_airsoft_app/src/core/validation/validation_mapping_result.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
+import 'package:global_airsoft_app/src/features/users/application/providers/current_user_profile_providers.dart';
 
 extension AuthPresentationRefX on WidgetRef {
   Future<void> applyPendingAuthLocale() {
@@ -16,6 +17,7 @@ extension AuthPresentationRefX on WidgetRef {
   Future<void> completeAuthenticatedSession() {
     return Future<void>(() async {
       await applyPendingAuthLocale();
+      read(currentUserProfileRefreshRequestProvider.notifier).clear();
       read(isAuthenticatedProvider.notifier).setAuthenticated();
     });
   }
