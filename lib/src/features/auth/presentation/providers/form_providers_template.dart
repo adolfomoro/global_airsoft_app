@@ -28,17 +28,13 @@ final exampleFieldProvider =
     NotifierProvider.autoDispose<
       ExampleFieldNotifier,
       app_forms.FormFieldState<String>
-    >(
-  () => ExampleFieldNotifier(),
-);
+    >(() => ExampleFieldNotifier());
 
 final exampleFormStateProvider =
     NotifierProvider.autoDispose<
       ExampleFormStateNotifier,
       app_forms.FormSubmissionState
-    >(
-  () => ExampleFormStateNotifier(),
-);
+    >(() => ExampleFormStateNotifier());
 
 // ============================================================================
 // SELECTORS - Fine-grained watches for optimal rebuilds
@@ -46,30 +42,30 @@ final exampleFormStateProvider =
 // ============================================================================
 
 // --- Value Selectors ---
-final exampleValueProvider = Provider<String>((ref) {
+final exampleValueProvider = Provider.autoDispose<String>((ref) {
   final state = ref.watch(exampleFieldProvider);
   return state.value;
 });
 
 // --- Error Selectors ---
-final exampleErrorProvider = Provider<String?>((ref) {
+final exampleErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(exampleFieldProvider);
   return state.error;
 });
 
 // --- Validation Selectors ---
-final exampleIsValidProvider = Provider<bool>((ref) {
+final exampleIsValidProvider = Provider.autoDispose<bool>((ref) {
   final state = ref.watch(exampleFieldProvider);
   return state.isValid;
 });
 
 // --- Submission Selectors ---
-final exampleIsSubmittingProvider = Provider<bool>((ref) {
+final exampleIsSubmittingProvider = Provider.autoDispose<bool>((ref) {
   final state = ref.watch(exampleFormStateProvider);
   return state.isSubmitting;
 });
 
-final exampleFormErrorProvider = Provider<String?>((ref) {
+final exampleFormErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(exampleFormStateProvider);
   return state.generalError;
 });
@@ -79,14 +75,14 @@ final exampleFormErrorProvider = Provider<String?>((ref) {
 // ============================================================================
 
 /// Derived: whether entire form is valid
-final exampleFormIsValidProvider = Provider<bool>((ref) {
+final exampleFormIsValidProvider = Provider.autoDispose<bool>((ref) {
   final exampleValid = ref.watch(exampleIsValidProvider);
   // Add other field validations here if needed
   return exampleValid;
 });
 
 /// Derived: whether submit button should be enabled
-final exampleSubmitEnabledProvider = Provider<bool>((ref) {
+final exampleSubmitEnabledProvider = Provider.autoDispose<bool>((ref) {
   final isValid = ref.watch(exampleFormIsValidProvider);
   final isSubmitting = ref.watch(exampleIsSubmittingProvider);
   return isValid && !isSubmitting;

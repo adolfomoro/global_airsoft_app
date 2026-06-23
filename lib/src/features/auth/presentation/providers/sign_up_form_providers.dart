@@ -50,63 +50,53 @@ final signUpFullNameFieldProvider =
     NotifierProvider.autoDispose<
       SignUpFullNameFieldNotifier,
       app_forms.FormFieldState<String>
-    >(
-  () => SignUpFullNameFieldNotifier(),
-);
+    >(() => SignUpFullNameFieldNotifier());
 
 final signUpUsernameFieldProvider =
     NotifierProvider.autoDispose<
       SignUpUsernameFieldNotifier,
       app_forms.FormFieldState<String>
-    >(
-  () => SignUpUsernameFieldNotifier(),
-);
+    >(() => SignUpUsernameFieldNotifier());
 
 final signUpEmailFieldProvider =
     NotifierProvider.autoDispose<
       SignUpEmailFieldNotifier,
       app_forms.FormFieldState<String>
-    >(
-  () => SignUpEmailFieldNotifier(),
-);
+    >(() => SignUpEmailFieldNotifier());
 
 final signUpPasswordFieldProvider =
     NotifierProvider.autoDispose<
       SignUpPasswordFieldNotifier,
       app_forms.FormFieldState<String>
-    >(
-  () => SignUpPasswordFieldNotifier(),
-);
+    >(() => SignUpPasswordFieldNotifier());
 
-final signUpConfirmPasswordFieldProvider = NotifierProvider.autoDispose<
-    SignUpConfirmPasswordFieldNotifier,
-    app_forms.FormFieldState<String>>(
-  () => SignUpConfirmPasswordFieldNotifier(),
-);
+final signUpConfirmPasswordFieldProvider =
+    NotifierProvider.autoDispose<
+      SignUpConfirmPasswordFieldNotifier,
+      app_forms.FormFieldState<String>
+    >(() => SignUpConfirmPasswordFieldNotifier());
 
 final signUpFormStateProvider =
     NotifierProvider.autoDispose<
       SignUpFormStateNotifier,
       app_forms.FormSubmissionState
-    >(
-  () => SignUpFormStateNotifier(),
-);
+    >(() => SignUpFormStateNotifier());
 
 // ============================================================================
 // FULL NAME SELECTORS
 // ============================================================================
 
-final signUpFullNameValueProvider = Provider<String>((ref) {
+final signUpFullNameValueProvider = Provider.autoDispose<String>((ref) {
   final state = ref.watch(signUpFullNameFieldProvider);
   return state.value;
 });
 
-final signUpFullNameErrorProvider = Provider<String?>((ref) {
+final signUpFullNameErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(signUpFullNameFieldProvider);
   return state.error;
 });
 
-final signUpFullNameIsValidProvider = Provider<bool>((ref) {
+final signUpFullNameIsValidProvider = Provider.autoDispose<bool>((ref) {
   final value = ref.watch(signUpFullNameValueProvider);
   return FullNameValidation.rules.validate(value) == null;
 });
@@ -115,17 +105,17 @@ final signUpFullNameIsValidProvider = Provider<bool>((ref) {
 // USERNAME SELECTORS
 // ============================================================================
 
-final signUpUsernameValueProvider = Provider<String>((ref) {
+final signUpUsernameValueProvider = Provider.autoDispose<String>((ref) {
   final state = ref.watch(signUpUsernameFieldProvider);
   return state.value;
 });
 
-final signUpUsernameErrorProvider = Provider<String?>((ref) {
+final signUpUsernameErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(signUpUsernameFieldProvider);
   return state.error;
 });
 
-final signUpUsernameIsValidProvider = Provider<bool>((ref) {
+final signUpUsernameIsValidProvider = Provider.autoDispose<bool>((ref) {
   final value = ref.watch(signUpUsernameValueProvider);
   return UsernameValidation.rules.validate(value) == null;
 });
@@ -134,17 +124,17 @@ final signUpUsernameIsValidProvider = Provider<bool>((ref) {
 // EMAIL SELECTORS
 // ============================================================================
 
-final signUpEmailValueProvider = Provider<String>((ref) {
+final signUpEmailValueProvider = Provider.autoDispose<String>((ref) {
   final state = ref.watch(signUpEmailFieldProvider);
   return state.value;
 });
 
-final signUpEmailErrorProvider = Provider<String?>((ref) {
+final signUpEmailErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(signUpEmailFieldProvider);
   return state.error;
 });
 
-final signUpEmailIsValidProvider = Provider<bool>((ref) {
+final signUpEmailIsValidProvider = Provider.autoDispose<bool>((ref) {
   final value = ref.watch(signUpEmailValueProvider);
   return EmailValidation.rules.validate(value) == null;
 });
@@ -153,17 +143,17 @@ final signUpEmailIsValidProvider = Provider<bool>((ref) {
 // PASSWORD SELECTORS
 // ============================================================================
 
-final signUpPasswordValueProvider = Provider<String>((ref) {
+final signUpPasswordValueProvider = Provider.autoDispose<String>((ref) {
   final state = ref.watch(signUpPasswordFieldProvider);
   return state.value;
 });
 
-final signUpPasswordErrorProvider = Provider<String?>((ref) {
+final signUpPasswordErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(signUpPasswordFieldProvider);
   return state.error;
 });
 
-final signUpPasswordIsValidProvider = Provider<bool>((ref) {
+final signUpPasswordIsValidProvider = Provider.autoDispose<bool>((ref) {
   final value = ref.watch(signUpPasswordValueProvider);
   return PasswordValidationPolicy.rules.validate(value) == null;
 });
@@ -172,17 +162,17 @@ final signUpPasswordIsValidProvider = Provider<bool>((ref) {
 // CONFIRM PASSWORD SELECTORS
 // ============================================================================
 
-final signUpConfirmPasswordValueProvider = Provider<String>((ref) {
+final signUpConfirmPasswordValueProvider = Provider.autoDispose<String>((ref) {
   final state = ref.watch(signUpConfirmPasswordFieldProvider);
   return state.value;
 });
 
-final signUpConfirmPasswordErrorProvider = Provider<String?>((ref) {
+final signUpConfirmPasswordErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(signUpConfirmPasswordFieldProvider);
   return state.error;
 });
 
-final signUpConfirmPasswordIsValidProvider = Provider<bool>((ref) {
+final signUpConfirmPasswordIsValidProvider = Provider.autoDispose<bool>((ref) {
   final value = ref.watch(signUpConfirmPasswordValueProvider);
   return value.trim().isNotEmpty;
 });
@@ -191,7 +181,7 @@ final signUpConfirmPasswordIsValidProvider = Provider<bool>((ref) {
 // PASSWORD MATCHING VALIDATOR
 // ============================================================================
 
-final signUpPasswordsMatchProvider = Provider<bool>((ref) {
+final signUpPasswordsMatchProvider = Provider.autoDispose<bool>((ref) {
   final password = ref.watch(signUpPasswordValueProvider);
   final confirmPassword = ref.watch(signUpConfirmPasswordValueProvider);
   return password.isNotEmpty && password == confirmPassword;
@@ -201,12 +191,12 @@ final signUpPasswordsMatchProvider = Provider<bool>((ref) {
 // FORM WIDE SELECTORS
 // ============================================================================
 
-final signUpIsSubmittingProvider = Provider<bool>((ref) {
+final signUpIsSubmittingProvider = Provider.autoDispose<bool>((ref) {
   final state = ref.watch(signUpFormStateProvider);
   return state.isSubmitting;
 });
 
-final signUpFormErrorProvider = Provider<String?>((ref) {
+final signUpFormErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(signUpFormStateProvider);
   return state.generalError;
 });
@@ -215,7 +205,7 @@ final signUpFormErrorProvider = Provider<String?>((ref) {
 // FORM VALIDATION STATE
 // ============================================================================
 
-final signUpFormIsValidProvider = Provider<bool>((ref) {
+final signUpFormIsValidProvider = Provider.autoDispose<bool>((ref) {
   final fullNameValid = ref.watch(signUpFullNameIsValidProvider);
   final usernameValid = ref.watch(signUpUsernameIsValidProvider);
   final emailValid = ref.watch(signUpEmailIsValidProvider);
@@ -231,7 +221,7 @@ final signUpFormIsValidProvider = Provider<bool>((ref) {
       passwordsMatch;
 });
 
-final signUpSubmitEnabledProvider = Provider<bool>((ref) {
+final signUpSubmitEnabledProvider = Provider.autoDispose<bool>((ref) {
   final isValid = ref.watch(signUpFormIsValidProvider);
   final isSubmitting = ref.watch(signUpIsSubmittingProvider);
   return isValid && !isSubmitting;

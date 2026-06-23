@@ -16,33 +16,33 @@ final class PasswordRecoveryFormStateNotifier
 // FIELD PROVIDERS
 // ============================================================================
 
-final passwordRecoveryEmailFieldProvider = NotifierProvider.autoDispose<
-    PasswordRecoveryEmailFieldNotifier,
-    app_forms.FormFieldState<String>>(
-  () => PasswordRecoveryEmailFieldNotifier(),
-);
+final passwordRecoveryEmailFieldProvider =
+    NotifierProvider.autoDispose<
+      PasswordRecoveryEmailFieldNotifier,
+      app_forms.FormFieldState<String>
+    >(() => PasswordRecoveryEmailFieldNotifier());
 
-final passwordRecoveryFormStateProvider = NotifierProvider.autoDispose<
-    PasswordRecoveryFormStateNotifier,
-    app_forms.FormSubmissionState>(
-  () => PasswordRecoveryFormStateNotifier(),
-);
+final passwordRecoveryFormStateProvider =
+    NotifierProvider.autoDispose<
+      PasswordRecoveryFormStateNotifier,
+      app_forms.FormSubmissionState
+    >(() => PasswordRecoveryFormStateNotifier());
 
 // ============================================================================
 // EMAIL SELECTORS
 // ============================================================================
 
-final passwordRecoveryEmailValueProvider = Provider<String>((ref) {
+final passwordRecoveryEmailValueProvider = Provider.autoDispose<String>((ref) {
   final state = ref.watch(passwordRecoveryEmailFieldProvider);
   return state.value;
 });
 
-final passwordRecoveryEmailErrorProvider = Provider<String?>((ref) {
+final passwordRecoveryEmailErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(passwordRecoveryEmailFieldProvider);
   return state.error;
 });
 
-final passwordRecoveryEmailIsValidProvider = Provider<bool>((ref) {
+final passwordRecoveryEmailIsValidProvider = Provider.autoDispose<bool>((ref) {
   final state = ref.watch(passwordRecoveryEmailFieldProvider);
   return state.isValid;
 });
@@ -51,12 +51,12 @@ final passwordRecoveryEmailIsValidProvider = Provider<bool>((ref) {
 // FORM WIDE SELECTORS
 // ============================================================================
 
-final passwordRecoveryIsSubmittingProvider = Provider<bool>((ref) {
+final passwordRecoveryIsSubmittingProvider = Provider.autoDispose<bool>((ref) {
   final state = ref.watch(passwordRecoveryFormStateProvider);
   return state.isSubmitting;
 });
 
-final passwordRecoveryFormErrorProvider = Provider<String?>((ref) {
+final passwordRecoveryFormErrorProvider = Provider.autoDispose<String?>((ref) {
   final state = ref.watch(passwordRecoveryFormStateProvider);
   return state.generalError;
 });
@@ -65,11 +65,11 @@ final passwordRecoveryFormErrorProvider = Provider<String?>((ref) {
 // FORM VALIDATION STATE
 // ============================================================================
 
-final passwordRecoveryFormIsValidProvider = Provider<bool>((ref) {
+final passwordRecoveryFormIsValidProvider = Provider.autoDispose<bool>((ref) {
   return ref.watch(passwordRecoveryEmailIsValidProvider);
 });
 
-final passwordRecoverySubmitEnabledProvider = Provider<bool>((ref) {
+final passwordRecoverySubmitEnabledProvider = Provider.autoDispose<bool>((ref) {
   final isValid = ref.watch(passwordRecoveryFormIsValidProvider);
   final isSubmitting = ref.watch(passwordRecoveryIsSubmittingProvider);
   return isValid && !isSubmitting;

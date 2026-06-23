@@ -103,6 +103,10 @@ class _GoogleAccountSetupPageState extends ConsumerState<GoogleAccountSetupPage>
     final String profilePictureUrl = widget.profilePictureUrl.trim();
     if (profilePictureUrl.isNotEmpty) {
       Future.microtask(() {
+        if (!mounted) {
+          return;
+        }
+
         ref
             .read(_googleSetupProfilePhotoProvider.notifier)
             .setNetworkPhoto(profilePictureUrl);
