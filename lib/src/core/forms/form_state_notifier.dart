@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+const Object _formSubmissionStateNoChange = Object();
+
 /// Represents the overall state of a form submission process
 /// (as opposed to individual field states)
 final class FormSubmissionState {
@@ -23,12 +25,14 @@ final class FormSubmissionState {
 
   FormSubmissionState copyWith({
     bool? isSubmitting,
-    String? generalError,
+    Object? generalError = _formSubmissionStateNoChange,
     bool? wasSubmitted,
   }) {
     return FormSubmissionState(
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      generalError: generalError,
+      generalError: identical(generalError, _formSubmissionStateNoChange)
+          ? this.generalError
+          : generalError as String?,
       wasSubmitted: wasSubmitted ?? this.wasSubmitted,
     );
   }
