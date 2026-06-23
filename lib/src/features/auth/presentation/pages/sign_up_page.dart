@@ -336,21 +336,13 @@ class _PasswordFieldConsumerState
     super.initState();
     _controller = TextEditingController();
     _focusNode = FocusNode();
-    _focusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
-    _focusNode.removeListener(_handleFocusChange);
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
-  }
-
-  void _handleFocusChange() {
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   @override
@@ -379,9 +371,14 @@ class _PasswordFieldConsumerState
           ),
           textInputAction: TextInputAction.next,
         ),
-        PasswordRequirementsHint(
-          currentPassword: value,
-          isFocused: _focusNode.hasFocus,
+        ListenableBuilder(
+          listenable: _focusNode,
+          builder: (context, _) {
+            return PasswordRequirementsHint(
+              currentPassword: value,
+              isFocused: _focusNode.hasFocus,
+            );
+          },
         ),
       ],
     );
