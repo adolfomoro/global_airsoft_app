@@ -18,6 +18,8 @@ extension AuthPresentationRefX on WidgetRef {
     return Future<void>(() async {
       await applyPendingAuthLocale();
       read(currentUserProfileRefreshRequestProvider.notifier).clear();
+      invalidate(currentUserProfileRefreshRequestProvider);
+      invalidate(currentUserProfileProvider);
       read(isAuthenticatedProvider.notifier).setAuthenticated();
     });
   }
