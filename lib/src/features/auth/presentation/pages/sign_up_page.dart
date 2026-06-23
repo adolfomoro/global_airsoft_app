@@ -80,7 +80,9 @@ class _SignUpHeaderSection extends StatelessWidget {
     return AppPageHeader(
       title: context.l10n.tr(AppLocaleKeys.authSignUpHeading),
       subtitle: context.l10n.tr(AppLocaleKeys.authSignUpSubtitle),
-      titleStyle: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      titleStyle: theme.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+      ),
       leading: Container(
         width: 58,
         height: 58,
@@ -129,12 +131,15 @@ class _FullNameFieldConsumer extends ConsumerStatefulWidget {
   const _FullNameFieldConsumer();
 
   @override
-  ConsumerState<_FullNameFieldConsumer> createState() => _FullNameFieldConsumerState();
+  ConsumerState<_FullNameFieldConsumer> createState() =>
+      _FullNameFieldConsumerState();
 }
 
-class _FullNameFieldConsumerState extends ConsumerState<_FullNameFieldConsumer> {
+class _FullNameFieldConsumerState
+    extends ConsumerState<_FullNameFieldConsumer> {
   late final TextEditingController _controller;
-  static final ValidationRuleSet _fullNameValidationRules = FullNameValidation.rules;
+  static final ValidationRuleSet _fullNameValidationRules =
+      FullNameValidation.rules;
 
   @override
   void initState() {
@@ -164,7 +169,6 @@ class _FullNameFieldConsumerState extends ConsumerState<_FullNameFieldConsumer> 
       onChanged: (v) {
         ref.read(signUpFullNameFieldProvider.notifier).setValue(v);
       },
-      onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
       isRequired: _fullNameValidationRules.hasRequiredRule,
       validator: _fullNameValidationRules.asValidator(
         context.resolveValidationMessage,
@@ -185,12 +189,15 @@ class _UsernameFieldConsumer extends ConsumerStatefulWidget {
   const _UsernameFieldConsumer();
 
   @override
-  ConsumerState<_UsernameFieldConsumer> createState() => _UsernameFieldConsumerState();
+  ConsumerState<_UsernameFieldConsumer> createState() =>
+      _UsernameFieldConsumerState();
 }
 
-class _UsernameFieldConsumerState extends ConsumerState<_UsernameFieldConsumer> {
+class _UsernameFieldConsumerState
+    extends ConsumerState<_UsernameFieldConsumer> {
   late final TextEditingController _controller;
-  static final ValidationRuleSet _usernameValidationRules = UsernameValidation.rules;
+  static final ValidationRuleSet _usernameValidationRules =
+      UsernameValidation.rules;
 
   @override
   void initState() {
@@ -224,7 +231,6 @@ class _UsernameFieldConsumerState extends ConsumerState<_UsernameFieldConsumer> 
           onChanged: (v) {
             ref.read(signUpUsernameFieldProvider.notifier).setValue(v);
           },
-          onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
           isRequired: _usernameValidationRules.hasRequiredRule,
           validator: _usernameValidationRules.asValidator(
             context.resolveValidationMessage,
@@ -259,7 +265,8 @@ class _EmailFieldConsumer extends ConsumerStatefulWidget {
   const _EmailFieldConsumer();
 
   @override
-  ConsumerState<_EmailFieldConsumer> createState() => _EmailFieldConsumerState();
+  ConsumerState<_EmailFieldConsumer> createState() =>
+      _EmailFieldConsumerState();
 }
 
 class _EmailFieldConsumerState extends ConsumerState<_EmailFieldConsumer> {
@@ -294,7 +301,6 @@ class _EmailFieldConsumerState extends ConsumerState<_EmailFieldConsumer> {
       onChanged: (v) {
         ref.read(signUpEmailFieldProvider.notifier).setValue(v);
       },
-      onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
       isRequired: _emailValidationRules.hasRequiredRule,
       validator: _emailValidationRules.asValidator(
         context.resolveValidationMessage,
@@ -314,10 +320,12 @@ class _PasswordFieldConsumer extends ConsumerStatefulWidget {
   const _PasswordFieldConsumer();
 
   @override
-  ConsumerState<_PasswordFieldConsumer> createState() => _PasswordFieldConsumerState();
+  ConsumerState<_PasswordFieldConsumer> createState() =>
+      _PasswordFieldConsumerState();
 }
 
-class _PasswordFieldConsumerState extends ConsumerState<_PasswordFieldConsumer> {
+class _PasswordFieldConsumerState
+    extends ConsumerState<_PasswordFieldConsumer> {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
   static final ValidationRuleSet _passwordValidationRules =
@@ -365,7 +373,6 @@ class _PasswordFieldConsumerState extends ConsumerState<_PasswordFieldConsumer> 
           onChanged: (v) {
             ref.read(signUpPasswordFieldProvider.notifier).setValue(v);
           },
-          onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
           isRequired: _passwordValidationRules.hasRequiredRule,
           validator: _passwordValidationRules.asValidator(
             context.resolveValidationMessage,
@@ -393,7 +400,8 @@ class _ConfirmPasswordFieldConsumer extends ConsumerStatefulWidget {
       _ConfirmPasswordFieldConsumerState();
 }
 
-class _ConfirmPasswordFieldConsumerState extends ConsumerState<_ConfirmPasswordFieldConsumer> {
+class _ConfirmPasswordFieldConsumerState
+    extends ConsumerState<_ConfirmPasswordFieldConsumer> {
   late final TextEditingController _controller;
 
   @override
@@ -421,7 +429,8 @@ class _ConfirmPasswordFieldConsumerState extends ConsumerState<_ConfirmPasswordF
     return AppPasswordField(
       labelText: context.l10n.tr(AppLocaleKeys.authConfirmPasswordLabel),
       controller: _controller,
-      errorText: error ??
+      errorText:
+          error ??
           (!passwordsMatch && value.isNotEmpty
               ? context.l10n.tr(AppLocaleKeys.authConfirmPasswordMismatch)
               : null),
@@ -453,7 +462,9 @@ class _SubmitButtonConsumer extends ConsumerWidget {
 
     return AppButton(
       label: context.l10n.tr(AppLocaleKeys.authSignUpAction),
-      onPressed: !isEnabled ? null : () => _SignUpSubmissionLogic.submit(context, ref),
+      onPressed: !isEnabled
+          ? null
+          : () => _SignUpSubmissionLogic.submit(context, ref),
       isLoading: isSubmitting,
     );
   }
@@ -486,10 +497,13 @@ class _SignInLinkSection extends ConsumerWidget {
 abstract final class _SignUpSubmissionLogic {
   static const BackendValidationErrorMapper _validationErrorMapper =
       BackendValidationErrorMapper();
-  static final ValidationRuleSet _fullNameValidationRules = FullNameValidation.rules;
-  static final ValidationRuleSet _usernameValidationRules = UsernameValidation.rules;
+  static final ValidationRuleSet _fullNameValidationRules =
+      FullNameValidation.rules;
+  static final ValidationRuleSet _usernameValidationRules =
+      UsernameValidation.rules;
   static final ValidationRuleSet _emailValidationRules = EmailValidation.rules;
-  static final ValidationRuleSet _passwordValidationRules = PasswordValidationPolicy.rules;
+  static final ValidationRuleSet _passwordValidationRules =
+      PasswordValidationPolicy.rules;
 
   static String? _resolveValidationError(
     BuildContext context,
@@ -558,16 +572,16 @@ abstract final class _SignUpSubmissionLogic {
       ref.read(signUpPasswordFieldProvider.notifier).setError(passwordError);
     }
     if (confirmPasswordError != null) {
-      ref.read(signUpConfirmPasswordFieldProvider.notifier).setError(
-        confirmPasswordError,
-      );
+      ref
+          .read(signUpConfirmPasswordFieldProvider.notifier)
+          .setError(confirmPasswordError);
     }
 
     final passwordsMatch = ref.read(signUpPasswordsMatchProvider);
     if (!passwordsMatch && confirmPassword.trim().isNotEmpty) {
-      ref.read(signUpConfirmPasswordFieldProvider.notifier).setError(
-        context.l10n.tr(AppLocaleKeys.authConfirmPasswordMismatch),
-      );
+      ref
+          .read(signUpConfirmPasswordFieldProvider.notifier)
+          .setError(context.l10n.tr(AppLocaleKeys.authConfirmPasswordMismatch));
     }
 
     if (fullNameError != null ||
@@ -614,23 +628,34 @@ abstract final class _SignUpSubmissionLogic {
         );
 
         // Apply field-specific errors
-        if (mappedErrors.fieldErrors[CreateUserInputDto.fullNameField] != null) {
-          ref.read(signUpFullNameFieldProvider.notifier).setError(
+        if (mappedErrors.fieldErrors[CreateUserInputDto.fullNameField] !=
+            null) {
+          ref
+              .read(signUpFullNameFieldProvider.notifier)
+              .setError(
                 mappedErrors.fieldErrors[CreateUserInputDto.fullNameField],
               );
         }
-        if (mappedErrors.fieldErrors[CreateUserInputDto.usernameField] != null) {
-          ref.read(signUpUsernameFieldProvider.notifier).setError(
+        if (mappedErrors.fieldErrors[CreateUserInputDto.usernameField] !=
+            null) {
+          ref
+              .read(signUpUsernameFieldProvider.notifier)
+              .setError(
                 mappedErrors.fieldErrors[CreateUserInputDto.usernameField],
               );
         }
         if (mappedErrors.fieldErrors[CreateUserInputDto.emailField] != null) {
-          ref.read(signUpEmailFieldProvider.notifier).setError(
+          ref
+              .read(signUpEmailFieldProvider.notifier)
+              .setError(
                 mappedErrors.fieldErrors[CreateUserInputDto.emailField],
               );
         }
-        if (mappedErrors.fieldErrors[CreateUserInputDto.passwordField] != null) {
-          ref.read(signUpPasswordFieldProvider.notifier).setError(
+        if (mappedErrors.fieldErrors[CreateUserInputDto.passwordField] !=
+            null) {
+          ref
+              .read(signUpPasswordFieldProvider.notifier)
+              .setError(
                 mappedErrors.fieldErrors[CreateUserInputDto.passwordField],
               );
         }
