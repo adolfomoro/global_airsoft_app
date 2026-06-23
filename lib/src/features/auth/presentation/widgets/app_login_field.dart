@@ -34,7 +34,7 @@ final class AppLoginField extends StatelessWidget {
       onFieldSubmitted: onFieldSubmitted,
       errorText: errorText,
       validator: validator,
-      keyboardType: TextInputType.emailAddress,
+      keyboardType: TextInputType.text,
       textInputAction: TextInputAction.next,
       autofillHints: const <String>[
         AutofillHints.username,

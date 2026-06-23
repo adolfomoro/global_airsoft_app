@@ -59,10 +59,6 @@ final class LoginFormController extends Notifier<LoginFormState> {
     );
   }
 
-  void reset() {
-    state = const LoginFormState();
-  }
-
   Future<void> submitCredentials() async {
     if (state.isSubmitting) {
       return;

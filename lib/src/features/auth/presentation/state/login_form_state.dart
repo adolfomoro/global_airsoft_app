@@ -33,6 +33,8 @@ final class LoginFormState {
 
   bool get hasGeneralError => generalError != null && generalError!.isNotEmpty;
 
+  bool get hasErrors => hasGeneralError || login.hasError || password.hasError;
+
   bool get isValid =>
       LoginFormValidator.isLoginValid(trimmedLogin) &&
       LoginFormValidator.isPasswordValid(password.value);
