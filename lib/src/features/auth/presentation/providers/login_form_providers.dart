@@ -24,19 +24,28 @@ final class LoginFormStateNotifier extends app_forms.FormStateNotifier {}
 
 /// Provider for login field state
 final loginFieldProvider =
-    NotifierProvider<LoginFieldNotifier, app_forms.FormFieldState<String>>(
+    NotifierProvider.autoDispose<
+      LoginFieldNotifier,
+      app_forms.FormFieldState<String>
+    >(
   () => LoginFieldNotifier(),
 );
 
 /// Provider for password field state
 final passwordFieldProvider =
-    NotifierProvider<PasswordFieldNotifier, app_forms.FormFieldState<String>>(
+    NotifierProvider.autoDispose<
+      PasswordFieldNotifier,
+      app_forms.FormFieldState<String>
+    >(
   () => PasswordFieldNotifier(),
 );
 
 /// Provider for login form submission state
 final loginFormStateProvider =
-    NotifierProvider<LoginFormStateNotifier, app_forms.FormSubmissionState>(
+    NotifierProvider.autoDispose<
+      LoginFormStateNotifier,
+      app_forms.FormSubmissionState
+    >(
   () => LoginFormStateNotifier(),
 );
 

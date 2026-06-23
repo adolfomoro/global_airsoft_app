@@ -47,33 +47,48 @@ final class SignUpFormStateNotifier extends app_forms.FormStateNotifier {}
 // ============================================================================
 
 final signUpFullNameFieldProvider =
-    NotifierProvider<SignUpFullNameFieldNotifier, app_forms.FormFieldState<String>>(
+    NotifierProvider.autoDispose<
+      SignUpFullNameFieldNotifier,
+      app_forms.FormFieldState<String>
+    >(
   () => SignUpFullNameFieldNotifier(),
 );
 
 final signUpUsernameFieldProvider =
-    NotifierProvider<SignUpUsernameFieldNotifier, app_forms.FormFieldState<String>>(
+    NotifierProvider.autoDispose<
+      SignUpUsernameFieldNotifier,
+      app_forms.FormFieldState<String>
+    >(
   () => SignUpUsernameFieldNotifier(),
 );
 
 final signUpEmailFieldProvider =
-    NotifierProvider<SignUpEmailFieldNotifier, app_forms.FormFieldState<String>>(
+    NotifierProvider.autoDispose<
+      SignUpEmailFieldNotifier,
+      app_forms.FormFieldState<String>
+    >(
   () => SignUpEmailFieldNotifier(),
 );
 
 final signUpPasswordFieldProvider =
-    NotifierProvider<SignUpPasswordFieldNotifier, app_forms.FormFieldState<String>>(
+    NotifierProvider.autoDispose<
+      SignUpPasswordFieldNotifier,
+      app_forms.FormFieldState<String>
+    >(
   () => SignUpPasswordFieldNotifier(),
 );
 
-final signUpConfirmPasswordFieldProvider = NotifierProvider<
+final signUpConfirmPasswordFieldProvider = NotifierProvider.autoDispose<
     SignUpConfirmPasswordFieldNotifier,
     app_forms.FormFieldState<String>>(
   () => SignUpConfirmPasswordFieldNotifier(),
 );
 
 final signUpFormStateProvider =
-    NotifierProvider<SignUpFormStateNotifier, app_forms.FormSubmissionState>(
+    NotifierProvider.autoDispose<
+      SignUpFormStateNotifier,
+      app_forms.FormSubmissionState
+    >(
   () => SignUpFormStateNotifier(),
 );
 

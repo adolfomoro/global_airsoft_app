@@ -16,13 +16,13 @@ final class PasswordRecoveryFormStateNotifier
 // FIELD PROVIDERS
 // ============================================================================
 
-final passwordRecoveryEmailFieldProvider = NotifierProvider<
+final passwordRecoveryEmailFieldProvider = NotifierProvider.autoDispose<
     PasswordRecoveryEmailFieldNotifier,
     app_forms.FormFieldState<String>>(
   () => PasswordRecoveryEmailFieldNotifier(),
 );
 
-final passwordRecoveryFormStateProvider = NotifierProvider<
+final passwordRecoveryFormStateProvider = NotifierProvider.autoDispose<
     PasswordRecoveryFormStateNotifier,
     app_forms.FormSubmissionState>(
   () => PasswordRecoveryFormStateNotifier(),
