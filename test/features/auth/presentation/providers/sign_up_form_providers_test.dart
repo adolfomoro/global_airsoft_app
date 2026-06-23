@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/providers/login_form_providers.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/providers/password_recovery_form_providers.dart';
-import 'package:global_airsoft_app/src/features/auth/presentation/providers/sign_up_form_providers.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/controllers/login_form_controller.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/controllers/password_recovery_form_controller.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/controllers/sign_up_form_controller.dart';
 
 void main() {
-  group('SignUpFormProviders', () {
+  group('SignUpFormControllerProvider', () {
     late ProviderContainer container;
 
     setUp(() {
@@ -16,125 +16,96 @@ void main() {
       container.dispose();
     });
 
-    test('all field providers initialize with empty string', () {
-      expect(container.read(signUpFullNameValueProvider), '');
-      expect(container.read(signUpUsernameValueProvider), '');
-      expect(container.read(signUpEmailValueProvider), '');
-      expect(container.read(signUpPasswordValueProvider), '');
-      expect(container.read(signUpConfirmPasswordValueProvider), '');
+    test('initializes all fields with empty values', () {
+      final state = container.read(signUpFormControllerProvider);
+
+      expect(state.fullName.value, '');
+      expect(state.username.value, '');
+      expect(state.email.value, '');
+      expect(state.password.value, '');
+      expect(state.confirmPassword.value, '');
     });
 
-    test('all fields have no error initially', () {
-      expect(container.read(signUpFullNameErrorProvider), null);
-      expect(container.read(signUpUsernameErrorProvider), null);
-      expect(container.read(signUpEmailErrorProvider), null);
-      expect(container.read(signUpPasswordErrorProvider), null);
-      expect(container.read(signUpConfirmPasswordErrorProvider), null);
+    test('initializes all fields without errors', () {
+      final state = container.read(signUpFormControllerProvider);
+
+      expect(state.fullName.error, null);
+      expect(state.username.error, null);
+      expect(state.email.error, null);
+      expect(state.password.error, null);
+      expect(state.confirmPassword.error, null);
     });
 
-    test('setValue updates field value', () {
-      container.read(signUpFullNameFieldProvider.notifier).setValue('John Doe');
-
-      expect(container.read(signUpFullNameValueProvider), 'John Doe');
-    });
-
-    test('passwords match validator works', () {
-      final notifier1 = container.read(signUpPasswordFieldProvider.notifier);
-      final notifier2 = container.read(
-        signUpConfirmPasswordFieldProvider.notifier,
-      );
-
-      notifier1.setValue('password123');
-      notifier2.setValue('password123');
-
-      expect(container.read(signUpPasswordsMatchProvider), true);
-    });
-
-    test('passwords not matching returns false', () {
-      final notifier1 = container.read(signUpPasswordFieldProvider.notifier);
-      final notifier2 = container.read(
-        signUpConfirmPasswordFieldProvider.notifier,
-      );
-
-      notifier1.setValue('password123');
-      notifier2.setValue('different');
-
-      expect(container.read(signUpPasswordsMatchProvider), false);
-    });
-
-    test(
-      'form is not valid when any field is invalid or passwords not match',
-      () {
-        expect(container.read(signUpFormIsValidProvider), false);
-      },
-    );
-
-    test('submit button disabled when form invalid', () {
-      expect(container.read(signUpSubmitEnabledProvider), false);
-    });
-
-    test('submit button disabled when submitting', () {
-      container.read(signUpFormStateProvider.notifier).setSubmitting(true);
-
-      expect(container.read(signUpSubmitEnabledProvider), false);
-    });
-
-    test('setError updates field error', () {
+    test('updateFullName updates field value', () {
       container
-          .read(signUpFullNameFieldProvider.notifier)
-          .setError('Name is required');
+          .read(signUpFormControllerProvider.notifier)
+          .updateFullName('John Doe');
 
-      expect(container.read(signUpFullNameErrorProvider), 'Name is required');
+      expect(container.read(signUpFormControllerProvider).fullName.value, 'John Doe');
     });
 
-    test('form error provider reflects general error', () {
-      container
-          .read(signUpFormStateProvider.notifier)
-          .setError('Network error');
+    test('passwordsMatch is true for matching passwords', () {
+      final notifier = container.read(signUpFormControllerProvider.notifier);
 
-      expect(container.read(signUpFormErrorProvider), 'Network error');
+      notifier.updatePassword('password123');
+      notifier.updateConfirmPassword('password123');
+
+      expect(container.read(signUpFormControllerProvider).passwordsMatch, true);
+    });
+
+    test('passwordsMatch is false for different passwords', () {
+      final notifier = container.read(signUpFormControllerProvider.notifier);
+
+      notifier.updatePassword('password123');
+      notifier.updateConfirmPassword('different');
+
+      expect(container.read(signUpFormControllerProvider).passwordsMatch, false);
+    });
+
+    test('form is invalid initially', () {
+      expect(container.read(signUpFormControllerProvider).isValid, false);
+    });
+
+    test('submit is disabled when form is invalid', () {
+      expect(container.read(signUpFormControllerProvider).canSubmit, false);
     });
 
     test('form becomes valid only when all values satisfy the rules', () {
-      container.read(signUpFullNameFieldProvider.notifier).setValue('John Doe');
-      container.read(signUpUsernameFieldProvider.notifier).setValue('john.doe');
-      container
-          .read(signUpEmailFieldProvider.notifier)
-          .setValue('john@example.com');
-      container.read(signUpPasswordFieldProvider.notifier).setValue('Abcdef1!');
-      container
-          .read(signUpConfirmPasswordFieldProvider.notifier)
-          .setValue('Abcdef1!');
+      final notifier = container.read(signUpFormControllerProvider.notifier);
 
-      expect(container.read(signUpFormIsValidProvider), true);
-      expect(container.read(signUpSubmitEnabledProvider), true);
+      notifier.updateFullName('John Doe');
+      notifier.updateUsername('john.doe');
+      notifier.updateEmail('john@example.com');
+      notifier.updatePassword('Abcdef1!');
+      notifier.updateConfirmPassword('Abcdef1!');
+
+      final state = container.read(signUpFormControllerProvider);
+      expect(state.isValid, true);
+      expect(state.canSubmit, true);
     });
 
     test('route-scoped state resets after last listener is closed', () async {
       final subscription = container.listen<String>(
-        signUpFullNameValueProvider,
+        signUpFormControllerProvider.select((state) => state.fullName.value),
         (_, _) {},
       );
 
       container
-          .read(signUpFullNameFieldProvider.notifier)
-          .setValue('Persistent Name');
-      container
-          .read(signUpFullNameFieldProvider.notifier)
-          .setError('Persistent error');
+          .read(signUpFormControllerProvider.notifier)
+          .updateFullName('Persistent Name');
 
-      expect(container.read(signUpFullNameValueProvider), 'Persistent Name');
-      expect(container.read(signUpFullNameErrorProvider), 'Persistent error');
+      expect(container.read(signUpFormControllerProvider).fullName.value, 'Persistent Name');
 
       subscription.close();
       await container.pump();
 
-      expect(container.read(signUpFullNameValueProvider), '');
-      expect(container.read(signUpFullNameErrorProvider), null);
+      final state = container.read(signUpFormControllerProvider);
+      expect(state.fullName.value, '');
+      expect(state.fullName.error, null);
     });
   });
 
-  group('LoginFormProviders', () {
+  group('LoginFormControllerProvider', () {
     late ProviderContainer container;
 
     setUp(() {
@@ -145,27 +116,48 @@ void main() {
       container.dispose();
     });
 
+    test('initializes with empty login and password', () {
+      final state = container.read(loginFormControllerProvider);
+
+      expect(state.login.value, '');
+      expect(state.password.value, '');
+      expect(state.canSubmitCredentials, false);
+      expect(state.canSubmitGoogle, true);
+    });
+
+    test('credentials submit becomes enabled only with valid values', () {
+      final notifier = container.read(loginFormControllerProvider.notifier);
+
+      notifier.updateLogin('user@example.com');
+      notifier.updatePassword('secret123');
+
+      final state = container.read(loginFormControllerProvider);
+      expect(state.isValid, true);
+      expect(state.canSubmitCredentials, true);
+    });
+
     test('route-scoped state resets after last listener is closed', () async {
       final subscription = container.listen<String>(
-        loginValueProvider,
+        loginFormControllerProvider.select((state) => state.login.value),
         (_, _) {},
       );
 
-      container.read(loginFieldProvider.notifier).setValue('user@example.com');
-      container.read(loginFieldProvider.notifier).setError('Invalid login');
+      container
+          .read(loginFormControllerProvider.notifier)
+          .updateLogin('user@example.com');
 
-      expect(container.read(loginValueProvider), 'user@example.com');
-      expect(container.read(loginErrorProvider), 'Invalid login');
+      expect(container.read(loginFormControllerProvider).login.value, 'user@example.com');
 
       subscription.close();
       await container.pump();
 
-      expect(container.read(loginValueProvider), '');
-      expect(container.read(loginErrorProvider), null);
+      final state = container.read(loginFormControllerProvider);
+      expect(state.login.value, '');
+      expect(state.login.error, null);
     });
   });
 
-  group('PasswordRecoveryFormProviders', () {
+  group('PasswordRecoveryFormControllerProvider', () {
     late ProviderContainer container;
 
     setUp(() {
@@ -177,103 +169,53 @@ void main() {
     });
 
     test('email field initializes with empty string', () {
-      expect(container.read(passwordRecoveryEmailValueProvider), '');
+      expect(container.read(passwordRecoveryFormControllerProvider).email.value, '');
     });
 
     test('email has no error initially', () {
-      expect(container.read(passwordRecoveryEmailErrorProvider), null);
+      expect(container.read(passwordRecoveryFormControllerProvider).email.error, null);
     });
 
-    test('setValue updates email value', () {
+    test('updateEmail updates email value', () {
       container
-          .read(passwordRecoveryEmailFieldProvider.notifier)
-          .setValue('user@example.com');
+          .read(passwordRecoveryFormControllerProvider.notifier)
+          .updateEmail('user@example.com');
 
-      expect(
-        container.read(passwordRecoveryEmailValueProvider),
-        'user@example.com',
-      );
+      expect(container.read(passwordRecoveryFormControllerProvider).email.value, 'user@example.com');
     });
 
-    test('form is not valid when email is invalid', () {
-      // Empty email field has no error (validator not attached), so it's considered "valid"
-      // Email is only invalid if an error is explicitly set or validator rejects it
-      final emailIsValid = container.read(passwordRecoveryEmailIsValidProvider);
-      expect(
-        emailIsValid,
-        true,
-      ); // No error set yet, so technically valid (no error)
+    test('form is invalid initially', () {
+      expect(container.read(passwordRecoveryFormControllerProvider).isValid, false);
     });
 
-    test('submit button disabled when form invalid', () {
-      // Form is considered valid (no errors), but submit should still be disabled
-      // because we're checking enabled state with isSubmitting=false
-      final submitEnabled = container.read(
-        passwordRecoverySubmitEnabledProvider,
-      );
-      expect(
-        submitEnabled,
-        true,
-      ); // Form is valid with no errors and not submitting
-    });
-
-    test('submit button disabled when submitting', () {
+    test('submit becomes enabled only with valid email', () {
       container
-          .read(passwordRecoveryFormStateProvider.notifier)
-          .setSubmitting(true);
+          .read(passwordRecoveryFormControllerProvider.notifier)
+          .updateEmail('user@example.com');
 
-      expect(container.read(passwordRecoverySubmitEnabledProvider), false);
-    });
-
-    test('setError updates email error', () {
-      container
-          .read(passwordRecoveryEmailFieldProvider.notifier)
-          .setError('Invalid email');
-
-      expect(
-        container.read(passwordRecoveryEmailErrorProvider),
-        'Invalid email',
-      );
-    });
-
-    test('form error provider reflects general error', () {
-      container
-          .read(passwordRecoveryFormStateProvider.notifier)
-          .setError('Network error');
-
-      expect(
-        container.read(passwordRecoveryFormErrorProvider),
-        'Network error',
-      );
+      final state = container.read(passwordRecoveryFormControllerProvider);
+      expect(state.isValid, true);
+      expect(state.canSubmit, true);
     });
 
     test('route-scoped state resets after last listener is closed', () async {
       final subscription = container.listen<String>(
-        passwordRecoveryEmailValueProvider,
+        passwordRecoveryFormControllerProvider.select((state) => state.email.value),
         (_, _) {},
       );
 
       container
-          .read(passwordRecoveryEmailFieldProvider.notifier)
-          .setValue('user@example.com');
-      container
-          .read(passwordRecoveryEmailFieldProvider.notifier)
-          .setError('Invalid email');
+          .read(passwordRecoveryFormControllerProvider.notifier)
+          .updateEmail('user@example.com');
 
-      expect(
-        container.read(passwordRecoveryEmailValueProvider),
-        'user@example.com',
-      );
-      expect(
-        container.read(passwordRecoveryEmailErrorProvider),
-        'Invalid email',
-      );
+      expect(container.read(passwordRecoveryFormControllerProvider).email.value, 'user@example.com');
 
       subscription.close();
       await container.pump();
 
-      expect(container.read(passwordRecoveryEmailValueProvider), '');
-      expect(container.read(passwordRecoveryEmailErrorProvider), null);
+      final state = container.read(passwordRecoveryFormControllerProvider);
+      expect(state.email.value, '');
+      expect(state.email.error, null);
     });
   });
 }

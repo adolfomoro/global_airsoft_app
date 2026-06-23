@@ -121,7 +121,7 @@ class _EmailInputState extends ConsumerState<_EmailInput> {
           .updateEmail,
       onFieldSubmitted: (_) {
         if (enabled) {
-          _submit(context);
+          _submit();
         }
       },
       isRequired: true,
@@ -131,7 +131,7 @@ class _EmailInputState extends ConsumerState<_EmailInput> {
     );
   }
 
-  Future<void> _submit(BuildContext context) async {
+  Future<void> _submit() async {
     FocusScope.of(context).unfocus();
 
     final String? email = await ref
