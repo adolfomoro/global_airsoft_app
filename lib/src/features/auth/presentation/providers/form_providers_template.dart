@@ -20,15 +20,23 @@ final class ExampleFormStateNotifier extends app_forms.FormStateNotifier {}
 
 // ============================================================================
 // PROVIDERS - Create one per field
+// Route-scoped form state must use autoDispose so reopening the page starts
+// from a clean state after pop/logout/redirect.
 // ============================================================================
 
 final exampleFieldProvider =
-    NotifierProvider<ExampleFieldNotifier, app_forms.FormFieldState<String>>(
+    NotifierProvider.autoDispose<
+      ExampleFieldNotifier,
+      app_forms.FormFieldState<String>
+    >(
   () => ExampleFieldNotifier(),
 );
 
 final exampleFormStateProvider =
-    NotifierProvider<ExampleFormStateNotifier, app_forms.FormSubmissionState>(
+    NotifierProvider.autoDispose<
+      ExampleFormStateNotifier,
+      app_forms.FormSubmissionState
+    >(
   () => ExampleFormStateNotifier(),
 );
 
