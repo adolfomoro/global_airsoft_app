@@ -96,6 +96,33 @@ void main() {
     expect(emailEditableText.focusNode.hasFocus, isTrue);
   });
 
+  testWidgets(
+    'SignUpPage moves focus from password to confirm password on next action',
+    (WidgetTester tester) async {
+      await pumpSignUpPage(tester);
+      await tester.pumpAndSettle();
+
+      final fields = find.byType(TextFormField);
+      final passwordField = fields.at(3);
+      final confirmPasswordField = fields.at(4);
+
+      await tester.tap(passwordField);
+      await tester.pump();
+
+      await tester.testTextInput.receiveAction(TextInputAction.next);
+      await tester.pump();
+
+      final confirmPasswordEditableText = tester.widget<EditableText>(
+        find.descendant(
+          of: confirmPasswordField,
+          matching: find.byType(EditableText),
+        ),
+      );
+
+      expect(confirmPasswordEditableText.focusNode.hasFocus, isTrue);
+    },
+  );
+
   testWidgets('SignUpPage sign in action pops back to previous route', (
     WidgetTester tester,
   ) async {

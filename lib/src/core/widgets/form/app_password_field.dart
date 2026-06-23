@@ -128,10 +128,7 @@ final class _PasswordFieldSuffix extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         ...[trailing].nonNulls,
-        _PasswordVisibilityToggle(
-          obscureText: obscureText,
-          onToggle: onToggle,
-        ),
+        _PasswordVisibilityToggle(obscureText: obscureText, onToggle: onToggle),
       ],
     );
   }
@@ -171,13 +168,15 @@ final class _PasswordVisibilityToggleState
         scale: _isPressed ? 0.92 : 1,
         duration: const Duration(milliseconds: 120),
         curve: Curves.easeOut,
-        child: IconButton(
-          tooltip: passwordToggleLabel,
-          onPressed: widget.onToggle,
-          icon: Icon(
-            widget.obscureText
-                ? Icons.visibility_off_outlined
-                : Icons.visibility_outlined,
+        child: ExcludeFocus(
+          child: IconButton(
+            tooltip: passwordToggleLabel,
+            onPressed: widget.onToggle,
+            icon: Icon(
+              widget.obscureText
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+            ),
           ),
         ),
       ),
