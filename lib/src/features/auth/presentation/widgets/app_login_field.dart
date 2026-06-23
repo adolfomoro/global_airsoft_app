@@ -12,6 +12,7 @@ final class AppLoginField extends StatelessWidget {
     this.errorText,
     this.validator,
     this.isRequired = false,
+    this.enabled = true,
   });
 
   final TextEditingController controller;
@@ -20,12 +21,14 @@ final class AppLoginField extends StatelessWidget {
   final String? errorText;
   final String? Function(String?)? validator;
   final bool isRequired;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return AppTextField(
       labelText: context.l10n.tr(AppLocaleKeys.authLoginIdentifierLabel),
       isRequired: isRequired,
+      enabled: enabled,
       controller: controller,
       onChanged: onChanged,
       onFieldSubmitted: onFieldSubmitted,
