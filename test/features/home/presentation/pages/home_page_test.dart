@@ -92,7 +92,10 @@ void main() {
     'keeps home startup stable while current user profile resolves asynchronously',
     (WidgetTester tester) async {
       final Completer<UserProfile> profileCompleter = Completer<UserProfile>();
+      var buildCallCount = 0;
       _ConfigurableCurrentUserProfileController.buildHandler = () =>
+          buildCallCount += 1;
+      _ConfigurableCurrentUserProfileController.profileHandler = () =>
           profileCompleter.future;
       addTearDown(_ConfigurableCurrentUserProfileController.reset);
 
@@ -111,12 +114,14 @@ void main() {
           ),
         ),
       );
+      await tester.pump();
 
       expect(tester.takeException(), isNull);
       expect(
         find.text('Game discovery will be connected here next.'),
         findsOneWidget,
       );
+      expect(buildCallCount, 1);
 
       profileCompleter.complete(
         const UserProfile(
@@ -189,15 +194,18 @@ final class _TestCurrentUserProfileController
 
 final class _ConfigurableCurrentUserProfileController
     extends CurrentUserProfileController {
-  static Future<UserProfile> Function()? buildHandler;
+  static void Function()? buildHandler;
+  static Future<UserProfile> Function()? profileHandler;
 
   static void reset() {
     buildHandler = null;
+    profileHandler = null;
   }
 
   @override
   Future<UserProfile> build() {
-    final Future<UserProfile> Function()? handler = buildHandler;
+    buildHandler?.call();
+    final Future<UserProfile> Function()? handler = profileHandler;
     if (handler == null) {
       throw StateError('Missing build handler for test current user profile.');
     }
