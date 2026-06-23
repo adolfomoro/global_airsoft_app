@@ -37,40 +37,40 @@ final class AppPalette {
     required this.mvp,
   });
 
-  static const AppPalette rangerGreen = AppPalette(
-    bg: Color(0xFF0E110A),
-    surface: Color(0xFF16190F),
-    surface2: Color(0xFF1E2316),
-    surface3: Color(0xFF2C331F),
-    surface4: Color(0xFF3A4329),
-    border: Color(0xFF2C331F),
-    borderSoft: Color(0xFF1E2316),
-    borderStrong: Color(0xFF3A4329),
-    text: Color(0xFFECEEE3),
-    text2: Color(0xFFC7CBB8),
-    muted: Color(0xFF8E947E),
-    muted2: Color(0xFF5F6552),
-    accent50: Color(0xFFEDF3DC),
-    accent100: Color(0xFFD6E4B0),
-    accent200: Color(0xFFBCD382),
-    accent300: Color(0xFFA3C26B),
-    accent400: Color(0xFF8FB551),
-    accent: Color(0xFF7FA942),
-    accent600: Color(0xFF688E32),
-    accentPress: Color(0xFF557528),
-    accent800: Color(0xFF3F571C),
-    accentTint: Color(0x297FA942),
-    success: Color(0xFF5BB85C),
-    successTint: Color(0x295BB85C),
-    warning: Color(0xFFE8A93C),
-    warningTint: Color(0x29E8A93C),
-    danger: Color(0xFFE0524E),
-    dangerTint: Color(0x24E0524E),
-    info: Color(0xFF4D9BD1),
-    infoTint: Color(0x294D9BD1),
-    win: Color(0xFF5BB85C),
-    loss: Color(0xFFE0524E),
-    mvp: Color(0xFFA3C26B),
+  static const AppPalette emberOrange = AppPalette(
+    bg: Color(0xFF120D08),
+    surface: Color(0xFF1A120C),
+    surface2: Color(0xFF241811),
+    surface3: Color(0xFF322118),
+    surface4: Color(0xFF432B1E),
+    border: Color(0xFF322118),
+    borderSoft: Color(0xFF241811),
+    borderStrong: Color(0xFF5A3924),
+    text: Color(0xFFF4E7DC),
+    text2: Color(0xFFD9C4B2),
+    muted: Color(0xFFB3957F),
+    muted2: Color(0xFF7A5E4A),
+    accent50: Color(0xFFFFF3E8),
+    accent100: Color(0xFFFFDEC2),
+    accent200: Color(0xFFFFC38F),
+    accent300: Color(0xFFF6A85A),
+    accent400: Color(0xFFEE9137),
+    accent: Color(0xFFE67E22),
+    accent600: Color(0xFFBF6518),
+    accentPress: Color(0xFF9B5014),
+    accent800: Color(0xFF6F390E),
+    accentTint: Color(0x29E67E22),
+    success: Color(0xFF63C174),
+    successTint: Color(0x2963C174),
+    warning: Color(0xFFF2B94B),
+    warningTint: Color(0x29F2B94B),
+    danger: Color(0xFFE6675E),
+    dangerTint: Color(0x24E6675E),
+    info: Color(0xFF63A8E2),
+    infoTint: Color(0x2963A8E2),
+    win: Color(0xFF63C174),
+    loss: Color(0xFFE6675E),
+    mvp: Color(0xFFF6A85A),
   );
 
   final Color bg;
@@ -109,7 +109,7 @@ final class AppPalette {
 }
 
 abstract final class AppColors {
-  static const AppPalette palette = AppPalette.rangerGreen;
+  static const AppPalette palette = AppPalette.emberOrange;
 
   static Color get background => palette.bg;
   static Color get backgroundMid => palette.surface;
