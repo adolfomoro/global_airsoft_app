@@ -22,9 +22,35 @@ class SignUpFormView extends ConsumerStatefulWidget {
 }
 
 class _SignUpFormViewState extends ConsumerState<SignUpFormView> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(
+      signUpFormControllerProvider.select((state) => state.generalError),
+      (String? previous, String? next) {
+        if (next == null || next.isEmpty || next == previous) {
+          return;
+        }
+
+        _scrollToTop();
+      },
+    );
+
     return SingleChildScrollView(
+      controller: _scrollController,
       child: AutofillGroup(
         child: AppFormPadding(
           padding: AppFormPadding.standardScrollablePagePadding,
@@ -59,6 +85,20 @@ class _SignUpFormViewState extends ConsumerState<SignUpFormView> {
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     await ref.read(signUpFormControllerProvider.notifier).submit();
+  }
+
+  void _scrollToTop() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) {
+        return;
+      }
+
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 }
 
