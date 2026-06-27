@@ -10,6 +10,7 @@ import 'package:global_airsoft_app/src/features/auth/data/repositories/auth_repo
 import 'package:global_airsoft_app/src/features/auth/presentation/providers/auth_providers.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/state/sign_up_form_state.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/validators/sign_up_form_validator.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 import 'package:global_airsoft_app/src/features/users/application/providers/current_user_profile_providers.dart';
 
 final signUpFormControllerProvider =
@@ -44,6 +45,14 @@ final class SignUpFormController extends Notifier<SignUpFormState> {
       username: _fieldChanged(state.username, value),
       generalError: null,
     );
+  }
+
+  void updateUsernameAvailabilityStatus(UsernameAvailabilityStatus status) {
+    if (state.usernameAvailabilityStatus == status) {
+      return;
+    }
+
+    state = state.copyWith(usernameAvailabilityStatus: status);
   }
 
   void updateEmail(String value) {
@@ -122,7 +131,8 @@ final class SignUpFormController extends Notifier<SignUpFormState> {
       wasSubmitted: true,
     );
 
-    if (!validationResult.isValid) {
+    if (!validationResult.isValid ||
+        state.usernameAvailabilityStatus.blocksSubmission) {
       return;
     }
 

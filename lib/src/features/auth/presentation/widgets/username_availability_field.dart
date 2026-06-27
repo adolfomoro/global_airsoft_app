@@ -39,6 +39,7 @@ final class UsernameAvailabilityField extends ConsumerStatefulWidget {
     required this.controller,
     super.key,
     this.errorText,
+    this.enabled = true,
     this.onChanged,
     this.onFieldSubmitted,
     this.onAvailabilityChanged,
@@ -48,6 +49,7 @@ final class UsernameAvailabilityField extends ConsumerStatefulWidget {
 
   final TextEditingController controller;
   final String? errorText;
+  final bool enabled;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onFieldSubmitted;
   final ValueChanged<UsernameAvailabilityStatus>? onAvailabilityChanged;
@@ -63,8 +65,11 @@ class _UsernameAvailabilityFieldState
     extends ConsumerState<UsernameAvailabilityField> {
   static final ValidationRuleSet _usernameValidationRules =
       UsernameValidation.rules;
+  static const double _statusIconSlotSize = 48;
+  static const double _statusIconSize = 18;
 
   Timer? _debounceTimer;
+  late final FocusNode _focusNode;
   UsernameAvailabilityStatus _status = UsernameAvailabilityStatus.idle;
   List<String> _suggestions = const <String>[];
   String? _unavailableUsername;
@@ -73,6 +78,7 @@ class _UsernameAvailabilityFieldState
   @override
   void initState() {
     super.initState();
+    _focusNode = FocusNode()..addListener(_handleFocusChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) {
         return;
@@ -95,7 +101,18 @@ class _UsernameAvailabilityFieldState
   @override
   void dispose() {
     _cancelPendingWork();
+    _focusNode
+      ..removeListener(_handleFocusChanged)
+      ..dispose();
     super.dispose();
+  }
+
+  void _handleFocusChanged() {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {});
   }
 
   void _cancelPendingWork() {
@@ -214,10 +231,52 @@ class _UsernameAvailabilityFieldState
     return value.trim().toLowerCase();
   }
 
+  bool get _showsFocusHint {
+    return _focusNode.hasFocus &&
+        (_status == UsernameAvailabilityStatus.idle ||
+            _status == UsernameAvailabilityStatus.waiting);
+  }
+
+  bool get _showsBottomFeedback {
+    return _showsFocusHint ||
+        _status == UsernameAvailabilityStatus.unavailable ||
+        _status == UsernameAvailabilityStatus.failed;
+  }
+
+  Widget? _buildStatusIcon(BuildContext context) {
+    if (_status == UsernameAvailabilityStatus.checking) {
+      return AppFieldLoadingIndicator(
+        slotSize: _statusIconSlotSize,
+        size: _statusIconSize,
+        semanticsLabel: context.l10n.tr(AppLocaleKeys.authUsernameChecking),
+      );
+    }
+
+    if (_status != UsernameAvailabilityStatus.available) {
+      return null;
+    }
+
+    final Color color = Theme.of(context).colorScheme.primary;
+
+    return Semantics(
+      label: context.l10n.tr(AppLocaleKeys.authUsernameReady),
+      liveRegion: true,
+      child: SizedBox.square(
+        dimension: _statusIconSlotSize,
+        child: Center(
+          child: Icon(
+            Icons.check_circle_rounded,
+            size: _statusIconSize,
+            color: color,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool hasExternalError = widget.errorText?.trim().isNotEmpty == true;
-    final bool isChecking = _status.showsLoadingIndicator;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -225,25 +284,29 @@ class _UsernameAvailabilityFieldState
         AppTextField(
           labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
           controller: widget.controller,
+          focusNode: _focusNode,
           onChanged: _handleChanged,
           errorText: widget.errorText,
+          enabled: widget.enabled,
           isRequired: _usernameValidationRules.hasRequiredRule,
           keyboardType: TextInputType.text,
           textInputAction: widget.textInputAction,
           autocorrect: false,
           enableSuggestions: false,
           enableIMEPersonalizedLearning: false,
-          suffixIcon: isChecking
-              ? AppFieldLoadingIndicator(
-                  semanticsLabel: context.l10n.tr(
-                    AppLocaleKeys.authUsernameChecking,
-                  ),
-                )
-              : null,
+          suffixIcon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 160),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            child: KeyedSubtree(
+              key: ValueKey<UsernameAvailabilityStatus>(_status),
+              child: _buildStatusIcon(context) ?? const SizedBox.shrink(),
+            ),
+          ),
           onFieldSubmitted: widget.onFieldSubmitted,
           validator: _validateUsername,
         ),
-        if (!hasExternalError && !isChecking) ...<Widget>[
+        if (!hasExternalError && _showsBottomFeedback) ...<Widget>[
           const SizedBox(height: AppDimensions.spacingSm),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 180),
@@ -251,7 +314,7 @@ class _UsernameAvailabilityFieldState
             switchOutCurve: Curves.easeIn,
             child: _UsernameFeedback(
               key: ValueKey<String>(
-                '${_status.name}:${_suggestions.join('|')}',
+                '${_status.name}:${_focusNode.hasFocus}:${_suggestions.join('|')}',
               ),
               status: _status,
               suggestions: _suggestions,

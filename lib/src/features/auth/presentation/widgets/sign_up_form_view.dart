@@ -5,13 +5,14 @@ import 'package:global_airsoft_app/src/core/forms/forms.dart' as app_forms;
 import 'package:global_airsoft_app/src/core/localization/app_locale_keys.dart';
 import 'package:global_airsoft_app/src/core/localization/app_localizations.dart';
 import 'package:global_airsoft_app/src/core/widgets/app_bar/app_page_header.dart';
-import 'package:global_airsoft_app/src/core/widgets/app_snack_bar_presenter.dart';
+import 'package:global_airsoft_app/src/core/widgets/app_feedback_message.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_button.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_form_padding.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_password_field.dart';
 import 'package:global_airsoft_app/src/core/widgets/form/app_text_field.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/controllers/sign_up_form_controller.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/widgets/password_requirements_hint.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
 class SignUpFormView extends ConsumerStatefulWidget {
   const SignUpFormView({super.key});
@@ -23,17 +24,6 @@ class SignUpFormView extends ConsumerStatefulWidget {
 class _SignUpFormViewState extends ConsumerState<SignUpFormView> {
   @override
   Widget build(BuildContext context) {
-    ref.listen<String?>(
-      signUpFormControllerProvider.select((state) => state.generalError),
-      (String? previous, String? next) {
-        if (next == null || next == previous || !context.mounted) {
-          return;
-        }
-
-        context.showErrorSnackBar(next);
-      },
-    );
-
     return SingleChildScrollView(
       child: AutofillGroup(
         child: AppFormPadding(
@@ -139,24 +129,10 @@ class _FormErrorMessage extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimensions.spacingLg),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.errorContainer,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.spacingMd),
-          child: Text(
-            generalError,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onErrorContainer,
-            ),
-          ),
-        ),
+      child: AppFeedbackMessage.error(
+        message: generalError
       ),
     );
   }
@@ -249,37 +225,14 @@ class _UsernameInputState extends ConsumerState<_UsernameInput> {
 
     _syncControllerValue(_controller, field.value);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        AppTextField(
-          labelText: context.l10n.tr(AppLocaleKeys.authUsernameLabel),
-          hintText: context.l10n.tr(AppLocaleKeys.authUsernameExampleHint),
-          controller: _controller,
-          errorText: _fieldErrorText(field, wasSubmitted),
-          enabled: enabled,
-          isRequired: true,
-          keyboardType: TextInputType.text,
-          textInputAction: TextInputAction.next,
-          autocorrect: false,
-          enableSuggestions: false,
-          enableIMEPersonalizedLearning: false,
-          onChanged: ref
-              .read(signUpFormControllerProvider.notifier)
-              .updateUsername,
-        ),
-        const SizedBox(height: AppDimensions.spacingXs),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            context.l10n.tr(AppLocaleKeys.authUsernameRestrictionHint),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.35,
-            ),
-          ),
-        ),
-      ],
+    return UsernameAvailabilityField(
+      controller: _controller,
+      errorText: _fieldErrorText(field, wasSubmitted),
+      enabled: enabled,
+      onChanged: ref.read(signUpFormControllerProvider.notifier).updateUsername,
+      onAvailabilityChanged: ref
+          .read(signUpFormControllerProvider.notifier)
+          .updateUsernameAvailabilityStatus,
     );
   }
 }

@@ -1,15 +1,26 @@
+import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:global_airsoft_app/src/core/localization/app_locale_providers.dart';
+import 'package:global_airsoft_app/src/core/localization/app_localization_service.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/controllers/login_form_controller.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/controllers/password_recovery_form_controller.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/controllers/sign_up_form_controller.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
 void main() {
   group('SignUpFormControllerProvider', () {
     late ProviderContainer container;
 
     setUp(() {
-      container = ProviderContainer();
+      container = ProviderContainer(
+        overrides: [
+          appLocalizationServiceProvider.overrideWithValue(
+            AppLocalizationService(locale: const Locale('en')),
+          ),
+        ],
+      );
     });
 
     tearDown(() {
@@ -70,6 +81,23 @@ void main() {
       expect(container.read(signUpFormControllerProvider).canSubmit, false);
     });
 
+    test('submit is disabled while username availability blocks submission', () {
+      final notifier = container.read(signUpFormControllerProvider.notifier);
+
+      notifier.updateFullName('John Doe');
+      notifier.updateUsername('john.doe');
+      notifier.updateEmail('john@example.com');
+      notifier.updatePassword('Abcdef1!');
+      notifier.updateConfirmPassword('Abcdef1!');
+      notifier.updateUsernameAvailabilityStatus(
+        UsernameAvailabilityStatus.checking,
+      );
+
+      final state = container.read(signUpFormControllerProvider);
+      expect(state.isValid, true);
+      expect(state.canSubmit, false);
+    });
+
     test('form becomes valid only when all values satisfy the rules', () {
       final notifier = container.read(signUpFormControllerProvider.notifier);
 
@@ -78,6 +106,9 @@ void main() {
       notifier.updateEmail('john@example.com');
       notifier.updatePassword('Abcdef1!');
       notifier.updateConfirmPassword('Abcdef1!');
+      notifier.updateUsernameAvailabilityStatus(
+        UsernameAvailabilityStatus.available,
+      );
 
       final state = container.read(signUpFormControllerProvider);
       expect(state.isValid, true);

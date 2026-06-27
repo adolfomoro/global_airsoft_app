@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:global_airsoft_app/src/core/forms/forms.dart';
 import 'package:global_airsoft_app/src/features/auth/presentation/validators/sign_up_form_validator.dart';
+import 'package:global_airsoft_app/src/features/auth/presentation/widgets/username_availability_field.dart';
 
 const Object _signUpFormStateNoChange = Object();
 
@@ -12,6 +13,7 @@ final class SignUpFormState {
     this.email = const FormFieldState<String>(value: ''),
     this.password = const FormFieldState<String>(value: ''),
     this.confirmPassword = const FormFieldState<String>(value: ''),
+    this.usernameAvailabilityStatus = UsernameAvailabilityStatus.idle,
     this.isSubmitting = false,
     this.generalError,
     this.wasSubmitted = false,
@@ -22,6 +24,7 @@ final class SignUpFormState {
   final FormFieldState<String> email;
   final FormFieldState<String> password;
   final FormFieldState<String> confirmPassword;
+  final UsernameAvailabilityStatus usernameAvailabilityStatus;
   final bool isSubmitting;
   final String? generalError;
   final bool wasSubmitted;
@@ -55,7 +58,8 @@ final class SignUpFormState {
       SignUpFormValidator.isConfirmPasswordFilled(confirmPassword.value) &&
       passwordsMatch;
 
-  bool get canSubmit => isValid && !isSubmitting;
+  bool get canSubmit =>
+      isValid && !isSubmitting && !usernameAvailabilityStatus.blocksSubmission;
 
   SignUpFormState copyWith({
     FormFieldState<String>? fullName,
@@ -63,6 +67,7 @@ final class SignUpFormState {
     FormFieldState<String>? email,
     FormFieldState<String>? password,
     FormFieldState<String>? confirmPassword,
+    UsernameAvailabilityStatus? usernameAvailabilityStatus,
     bool? isSubmitting,
     Object? generalError = _signUpFormStateNoChange,
     bool? wasSubmitted,
@@ -73,6 +78,8 @@ final class SignUpFormState {
       email: email ?? this.email,
       password: password ?? this.password,
       confirmPassword: confirmPassword ?? this.confirmPassword,
+        usernameAvailabilityStatus:
+          usernameAvailabilityStatus ?? this.usernameAvailabilityStatus,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       generalError: identical(generalError, _signUpFormStateNoChange)
           ? this.generalError
