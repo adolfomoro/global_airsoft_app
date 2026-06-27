@@ -724,7 +724,7 @@ final class _CupertinoNotificationOverlayState
                               _NotificationIconBadge(
                                 palette: widget.palette,
                                 fillOpacity: 0.14,
-                                size: 34,
+                                size: 32,
                                 iconSize: 18,
                               ),
                               const SizedBox(width: 12),
@@ -765,7 +765,7 @@ final class _NotificationIconBadge extends StatelessWidget {
   const _NotificationIconBadge({
     required this.palette,
     required this.fillOpacity,
-    this.size = 32,
+    this.size = 28,
     this.iconSize = 18,
   });
 
@@ -776,13 +776,7 @@ final class _NotificationIconBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: palette.accentColor.withValues(alpha: fillOpacity),
-        border: Border.all(color: palette.borderColor),
-      ),
-      child: SizedBox(
+    return SizedBox(
         width: size,
         height: size,
         child: Icon(
@@ -790,8 +784,7 @@ final class _NotificationIconBadge extends StatelessWidget {
           color: palette.accentColor,
           size: iconSize,
         ),
-      ),
-    );
+      );
   }
 }
 
